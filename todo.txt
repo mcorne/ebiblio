@@ -1,0 +1,34 @@
+
+https://help.overdrive.com/customer/portal/articles/1690729-how-to-deauthorize-a-supported-ereader
+
+https://blog.xot.nl/2012/04/12/analysing-adept-adobe-digital-experience-protection-technology/
+
+https://accounts.adobe.com/
+Adobe ID = ...
+
+qsdqsdqsdaaaaaa@gmail.com tf1
+
+increase filename size, what is description
+add password change
+add account or delete
+
+
+https://docs.ovh.com/fr/fr/web/hosting/mutualise-htaccess-comment-proteger-lacces-a-un-repertoire-par-une-authentification/
+https://www.ovh.com/fr/support/outils/crypt_password.pl
+
+$_SERVER['REMOTE_USER']
+<a = href='actions/change_filename.php'>&#9986;</a> <a = href='actions/delete_file.php'>&#9998;</a>
+
+Sélectionner une action
+ajouter un livre
+remplacer un livre
+renommer un livre
+retirer un livre
+remettre un livre
+
+Sélectionner un fichier à télécharger
+(pour ajout ou remplacement)
+
+-- Choisir un livre --
+
+fichier à charger

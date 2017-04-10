@@ -1,0 +1,19 @@
+# MUST BE saved as ANSI or use ASCII for AuthName directive
+
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# AuthUserFile /home/micmap/www/ebiblio/.htpasswd
+AuthUserFile D:\Data\netbeans\ebiblio\.htpasswd
+AuthGroupFile /dev/null
+AuthName "Acces restreint !"
+AuthType Basic
+require valid-user
+
+HeaderName /ebiblio/include/header.html
+Options +Indexes
+IndexOptions Charset=UTF-8 FancyIndexing HTMLTable IgnoreCase NameWidth=* SuppressDescription SuppressIcon
+IndexIgnore .. *.php *.html actions nbproject flags include
+
+ServerSignature Off
