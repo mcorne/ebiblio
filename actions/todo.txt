@@ -32,3 +32,14 @@ Sélectionner un fichier à télécharger
 -- Choisir un livre --
 
 fichier à charger
+
+
+http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
+*.opf
+metadata
+title
+creator
+language RFC 3066
+date YYYY[-MM[-DD]]
+rights
+http://www.idpf.org/epub/31/spec/epub-overview-20170105.html
