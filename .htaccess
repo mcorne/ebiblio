@@ -10,9 +10,4 @@ AuthName "Acces restreint !"
 AuthType Basic
 require valid-user
 
-HeaderName /ebiblio/include/header.html
-Options +Indexes
-IndexOptions Charset=UTF-8 FancyIndexing HTMLTable IgnoreCase NameWidth=* SuppressDescription SuppressIcon
-IndexIgnore .. *.php *.html actions nbproject flags include
-
 ServerSignature Off

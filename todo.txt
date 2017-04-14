@@ -19,13 +19,6 @@ https://www.ovh.com/fr/support/outils/crypt_password.pl
 $_SERVER['REMOTE_USER']
 <a = href='actions/change_filename.php'>&#9986;</a> <a = href='actions/delete_file.php'>&#9998;</a>
 
-Sélectionner une action
-ajouter un livre
-remplacer un livre
-renommer un livre
-retirer un livre
-remettre un livre
-
 Sélectionner un fichier à télécharger
 (pour ajout ou remplacement)
 
@@ -43,3 +36,9 @@ language RFC 3066
 date YYYY[-MM[-DD]]
 rights
 http://www.idpf.org/epub/31/spec/epub-overview-20170105.html
+
+<p>
+    Installer <a href="http://calibre-ebook.com/">Calibre</a> pour lire un eBook sur PC,
+    <a href="https://addons.mozilla.org/fr/firefox/addon/epubreader/">EpubReader</a> pour Firefox,
+    <a href="https://play.google.com/store/apps/details?id=com.kobobooks.android">Kobo eBooks</a> pour Android.
+</p>
