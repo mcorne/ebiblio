@@ -1,0 +1,9 @@
+# AuthUserFile /home/micmap/www/ebiblio/restricted/.htpasswd
+AuthUserFile d:\Data\netbeans\ebiblio\restricted\.htpasswd
+AuthGroupFile /dev/null
+# MUST BE saved as ANSI or use ASCII for AuthName directive
+AuthName "Acces restreint !"
+AuthType Basic
+require valid-user
+
+ServerSignature Off

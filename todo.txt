@@ -42,3 +42,23 @@ http://www.idpf.org/epub/31/spec/epub-overview-20170105.html
     <a href="https://addons.mozilla.org/fr/firefox/addon/epubreader/">EpubReader</a> pour Firefox,
     <a href="https://play.google.com/store/apps/details?id=com.kobobooks.android">Kobo eBooks</a> pour Android.
 </p>
+
+<p>
+    <a href="restricted/add_book.php">Ajouter un livre</a>
+    <br>
+    <a href="restricted/replace_book.php">Remplacer un livre</a>
+    <br>
+    <a href="restricted/rename_book.php">Renommer un livre</a>
+    <br>
+    <a href="restricted/delete_book.php">Suprimer un livre</a>
+    <br>
+    <a href="restricted/undelete_book.php">Annuler la suppression d'un livre</a>
+</p>
+
+<p>
+    <a href="restricted/manage_account.php">Changer mon email et mot de passe</a>
+    <br>
+    <a href="restricted/reset_password.php">Réinitialiser le mot de passe d'un lecteur</a>
+    <br>
+    <a href="common/signout.php">Se déconnecter</a>
+</p>

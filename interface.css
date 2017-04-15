@@ -1,0 +1,50 @@
+body
+{
+    font-family: arial;
+    font-size: 1em;
+    margin: 1.3em 1.3em 0 1em;
+}
+
+a
+{
+    color: blue;
+    text-decoration: none;
+}
+
+a:hover
+{
+    color: darkorange;
+}
+
+button
+{
+    background-color: blue;
+    border-color: darkblue;
+    color: white;
+    font-size: 1.1em;
+    font-weight: bold;
+    height: 1.6em;
+}
+
+button:hover
+{
+    background-color: orange;
+    border-color: darkorange;
+}
+
+table
+{
+    border-collapse: collapse;
+}
+
+td
+{
+    border: 1px solid lightgray;
+    padding: .2em;
+    vertical-align: middle;
+}
+
+.icon
+{
+    font-size: 1.2em;
+}
