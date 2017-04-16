@@ -1,16 +1,10 @@
-body {
-    font-family: arial;
-    font-size: 16px;
-    margin: 1.3em 1.3em 0 1em;
-}
-
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 600px) { /* mobile */
    body {
        font-size: 20px;
    }
 }
 
-@media only screen and (max-width: 1299px) and (min-width: 599px) {
+@media only screen and (max-width: 1200px) and (min-width: 601px) { /* tablet */
    body {
        font-size: 18px;
    }
@@ -25,46 +19,15 @@ a:hover {
     color: #3e8e41;
 }
 
-button {
-    background-color: #4CAF50;
-    border-radius: 4px;
-    border: none;
-    color: white;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-}
-
-button:hover {
-    background-color: #3e8e41;
-}
-
-table {
-    border-collapse: collapse;
-}
-
-td {
-    border: 1px solid lightgray;
-    padding: .2em;
-    vertical-align: middle;
-}
-
 th {
      white-space: nowrap;
 }
 
-.fa {
-    padding: .2em;
-}
-
 .icon {
     font-size: 1.2em;
+    padding-right: .5em;
 }
 
-.w3-select {
+.w3-container {
    max-width: 1000px;
 }
