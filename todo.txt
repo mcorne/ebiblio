@@ -1,4 +1,3 @@
-
 https://help.overdrive.com/customer/portal/articles/1690729-how-to-deauthorize-a-supported-ereader
 
 https://blog.xot.nl/2012/04/12/analysing-adept-adobe-digital-experience-protection-technology/
@@ -6,26 +5,8 @@ https://blog.xot.nl/2012/04/12/analysing-adept-adobe-digital-experience-protecti
 https://accounts.adobe.com/
 Adobe ID = ...
 
-qsdqsdqsdaaaaaa@gmail.com tf1
-
-increase filename size, what is description
-add password change
-add account or delete
-
-
 https://docs.ovh.com/fr/fr/web/hosting/mutualise-htaccess-comment-proteger-lacces-a-un-repertoire-par-une-authentification/
 https://www.ovh.com/fr/support/outils/crypt_password.pl
-
-$_SERVER['REMOTE_USER']
-<a = href='actions/change_filename.php'>&#9986;</a> <a = href='actions/delete_file.php'>&#9998;</a>
-
-Sélectionner un fichier à télécharger
-(pour ajout ou remplacement)
-
--- Choisir un livre --
-
-fichier à charger
-
 
 http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
 *.opf
@@ -43,22 +24,9 @@ http://www.idpf.org/epub/31/spec/epub-overview-20170105.html
     <a href="https://play.google.com/store/apps/details?id=com.kobobooks.android">Kobo eBooks</a> pour Android.
 </p>
 
-<p>
-    <a href="restricted/add_book.php">Ajouter un livre</a>
-    <br>
-    <a href="restricted/replace_book.php">Remplacer un livre</a>
-    <br>
-    <a href="restricted/rename_book.php">Renommer un livre</a>
-    <br>
-    <a href="restricted/delete_book.php">Suprimer un livre</a>
-    <br>
-    <a href="restricted/undelete_book.php">Annuler la suppression d'un livre</a>
-</p>
+increase filename size, what is description
 
-<p>
-    <a href="restricted/manage_account.php">Changer mon email et mot de passe</a>
-    <br>
-    <a href="restricted/reset_password.php">Réinitialiser le mot de passe d'un lecteur</a>
-    <br>
-    <a href="common/signout.php">Se déconnecter</a>
-</p>
+add password change
+add account or delete
+
+manage duplicate title + author with instance number, eg " - 2"
