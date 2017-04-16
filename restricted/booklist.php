@@ -48,9 +48,12 @@ $booklist = get_booklist($sorting);
 <p>
     <a href="/ebiblio/restricted/add_book.php"><i class="fa fa-plus" aria-hidden="true"></i></a>
     Ajouter un livre
-    <br>
-    <a href="/ebiblio/restricted/undelete_book.php"><i class="fa fa-undo" aria-hidden="true"></i></a>
-    Annuler la suppression d'un livre de la liste
+
+    <?php if (get_deleted_booknames()): ?>
+        <br>
+        <a href="/ebiblio/restricted/undelete_book.php"><i class="fa fa-undo" aria-hidden="true"></i></a>
+        Annuler la suppression d'un livre de la liste
+    <?php endif; ?>
 </p>
 
 <?php require '../common/footer.php'; ?>

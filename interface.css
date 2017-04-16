@@ -5,11 +5,15 @@ body {
 }
 
 @media only screen and (max-width: 600px) {
-   body { font-size: 20px; }
+   body {
+       font-size: 20px;
+   }
 }
 
-@media only screen and (max-width: 1300px) and (min-width: 599px) {
-   body { font-size: 18px; }
+@media only screen and (max-width: 1299px) and (min-width: 599px) {
+   body {
+       font-size: 18px;
+   }
 }
 
 a {
@@ -59,4 +63,8 @@ th {
 
 .icon {
     font-size: 1.2em;
+}
+
+.w3-select {
+   max-width: 1000px;
 }

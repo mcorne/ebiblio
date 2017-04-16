@@ -1,8 +1,7 @@
 <?php require '../common/header.php'; ?>
 
 <?php
-$filenames = glob('../*.epub');
-$filenames = array_map('basename', $filenames);
+$booknames = get_deleted_booknames();
 ?>
 
 <?php
@@ -17,23 +16,19 @@ if (is_post()) {
 
 <h1>Annuler la suppression d'un livre de la liste</h1>
 
-<select>
-    <option value="">-- Choisir un fichier --</option>
 
-    <?php foreach ($filenames as $filename): ?>
-        <option><?= $filename; ?></option>
-    <?php endforeach; ?>
-</select>
+<form class="w3-container" action="" method="post">
+    <select class="w3-select w3-border" name="bookname">
+        <option value="" disabled selected>Choisir un livre</option>
 
-<form action="" method="post">
-    <input name="bookname" type="hidden" value="<?= $_GET['bookname']; ?>"/>
-    <button type="submit" value="submit">Supprimer</button>
+        <?php foreach ($booknames as $bookname): ?>
+        <option value="<?= urlencode($bookname); ?>"><?= $bookname; ?></option>
+        <?php endforeach; ?>
+    </select>
+
+    <p>
+        <button type="submit" value="submit">Annuler la suppression</button>
+    </p>
 </form>
-
-<p>
-    Noter qu'un livre n'est jamais supprimé définitivement.
-    <br>
-    Pour annuler la suppression d'un livre, cliquer sur le lien correspondant dans la liste des livres.
-</p>
 
 <?php require '../common/footer.php'; ?>

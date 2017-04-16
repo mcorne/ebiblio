@@ -85,34 +85,36 @@ function get_booklist($sorting)
  *
  * @return array
  */
-function get_deleted_books()
+function get_deleted_booknames()
 {
     $filenames = glob('books/*.epub.DEL');
-    $books     = array_map('basename', '.epub.DEL');
+    $booknames = [];
 
-    return $books;
+    foreach ($filenames as $filename) {
+        $booknames[] = basename($filename, '.epub.DEL');
+    }
+
+    return $booknames;
 }
 
 /**
  *
  * @param string $bookname
- * @param bool $is_deleted
  * @return string
  */
 function get_filename($bookname, $is_deleted = false)
 {
     $bookname = urldecode($bookname);
-    $basename = "$bookname.epub";
 
-    if ($is_deleted) {
-        $basename .= '.DEL';
+    $filename = dirname(__FILE__) . "/../restricted/books/$bookname.epub";
+
+    $suffix = $is_deleted ? '.DEL' : null;
+
+    if (! file_exists($filename . $suffix)) {
+        return;
     }
 
-    $filename = dirname(__FILE__) . "/../restricted/books/$basename";
-
-    if (file_exists($filename)) {
-        return $filename;
-    }
+    return $filename;
 }
 
 /**
