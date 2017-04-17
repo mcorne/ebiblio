@@ -9,6 +9,7 @@ https://docs.ovh.com/fr/fr/web/hosting/mutualise-htaccess-comment-proteger-lacce
 https://www.ovh.com/fr/support/outils/crypt_password.pl
 
 http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
+http://www.idpf.org/epub/31/spec/epub-overview-20170105.html
 *.opf
 metadata
 title
@@ -16,7 +17,10 @@ creator
 language RFC 3066
 date YYYY[-MM[-DD]]
 rights
-http://www.idpf.org/epub/31/spec/epub-overview-20170105.html
+
+epub3
+<manifest>
+    <item id="cover" href="./images/cover.svg" properties="cover-image" media-type="image/svg+xml"/>
 
 <p>
     Installer <a href="http://calibre-ebook.com/">Calibre</a> pour lire un eBook sur PC,

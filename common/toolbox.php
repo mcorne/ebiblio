@@ -2,6 +2,7 @@
 class toolbox
 {
     const BOOKNAME_SEPARATOR = '_';
+    const MAX_FILE_SIZE      = 5242880; // 5 Mo
 
     /**
      *
@@ -28,7 +29,7 @@ class toolbox
      * @param string $string
      * @return string
      */
-    function convert_string_to_ascii($string)
+    public function convert_string_to_ascii($string)
     {
         static $search, $replace;
 
@@ -77,7 +78,7 @@ class toolbox
         $displayed = $book['title'];
 
         if ($book['number']) {
-            $displayed .= sprintf(' (n° %s)', $book['number']);
+            $displayed .= sprintf(' (n°&nbsp;%s)', $book['number']);
         }
 
         if (! $exclude_author and $book['author']) {
@@ -97,9 +98,9 @@ class toolbox
     public function encrypt_password($password)
     {
         $salt = substr(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), 0, 8);
-        $len = strlen($password);
+        $len  = strlen($password);
         $text = $password . '$apr1$' . $salt;
-        $bin = pack("H32", md5($password . $salt . $password));
+        $bin  = pack("H32", md5($password . $salt . $password));
 
         for($i = $len; $i > 0; $i -= 16) {
             $text .= substr($bin, 0, min(16, $i));
@@ -235,9 +236,8 @@ class toolbox
      */
     public function rename_book($old_filename, $title, $author)
     {
-        $pathinfo = pathinfo($old_filename);
-
-        $bookname = $this->assemble_bookname($title, $author, $pathinfo['extension']);
+        $pathinfo     = pathinfo($old_filename);
+        $bookname     = $this->assemble_bookname($title, $author, $pathinfo['extension']);
         $new_filename = $pathinfo['dirname'] . '/' . $bookname;
 
         rename($old_filename, $new_filename); // TODO: fix to manage duplicates !!!
@@ -254,7 +254,7 @@ class toolbox
 
         $parts = explode(toolbox::BOOKNAME_SEPARATOR, $basename);
 
-        $title = current($parts);
+        $title  = current($parts);
         $author = next($parts) ?: null;
         $number = next($parts) ?: null;
 
@@ -275,5 +275,40 @@ class toolbox
         $new_filename = str_replace('.DEL', '', $old_filename);
 
         rename($old_filename, $new_filename);
+    }
+
+    /**
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function unzip_book($filename)
+    {
+        $zip = new ZipArchive;
+
+        $directory = 'unzip/' . basename($filename);
+
+        if ($zip->open($filename) and
+            $zip->extractTo($directory) and
+            $zip->close()
+        ) {
+            return $directory;
+        }
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function upload_book()
+    {
+        $filename = 'tmp/' . basename($_FILES['filename']['name']);
+
+        if (pathinfo($target_file, PATHINFO_EXTENSION) == 'epub' and
+            $_FILES['filename']['size'] <= toolbox::MAX_FILE_SIZE and
+            move_uploaded_file($_FILES['filename']['tmp_name'], $filename)
+        ) {
+            return $filename;
+        }
     }
 }

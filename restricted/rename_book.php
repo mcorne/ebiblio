@@ -33,7 +33,7 @@ $book = $toolbox->split_bookname($bookname);
 
         <p>
             <label>
-                Titre
+                Titre (obligatoire)
                 <br>
                 <span class="w3-text-grey">Ex. La Comédie humaine - Volume 01, Eye of the Needle</span>
             </label>
@@ -42,7 +42,7 @@ $book = $toolbox->split_bookname($bookname);
 
         <p>
             <label>
-                Auteur principal
+                Auteur principal (obligatoire)
                 <br>
                 <span class="w3-text-grey">Ex. Honoré de Blazac, Ken Follett, Collectif, Anonyme</span>
             </label>
@@ -62,11 +62,6 @@ $book = $toolbox->split_bookname($bookname);
     <ul class="w3-ul">
 
         <li class=" w3-border-0">
-            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-            Le titre et l'auteur sont obligatoires.
-        </li>
-
-        <li class=" w3-border-0">
             <i class="fa fa-info-circle" aria-hidden="true"></i>
             Noter que les accents seront supprimés, et que les caractères de ponctuation, excepté les tirets, seront remplacés par des espaces.
         </li>
@@ -76,4 +71,3 @@ $book = $toolbox->split_bookname($bookname);
 </div>
 
 <?php require '../common/footer.php'; ?>
-
