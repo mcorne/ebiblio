@@ -10,11 +10,46 @@ class toolbox
      * @param string $extension
      * @return array
      */
-    public function assemble_bookname($title, $author, $extension) // TODO: convert to ascii !!!
+    public function assemble_bookname($title, $author, $extension)
     {
+        $title  = $this->convert_string_to_ascii($title)  ?: '--sans titre--';
+        $author = $this->convert_string_to_ascii($author) ?: '--sans auteur--';
+
         $bookname = $title . toolbox::BOOKNAME_SEPARATOR . $author . '.' . $extension;
 
         return $bookname;
+    }
+
+    /**
+     *
+     * Note that iconv() is not used as it produces different results across PHP versions,
+     * eg $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $string);
+     *
+     * @param string $string
+     * @return string
+     */
+    function convert_string_to_ascii($string)
+    {
+        static $search, $replace;
+
+        if (! isset($search)) {
+            $from = 'áàâãäåāăąÀÁÂÃÄÅĀĂĄćčçĆČÇĐÐèéêёëēĕėęěÈÊËЁĒĔĖĘĚğĞıìíîïìĩīĭÌÍÎÏЇÌĨĪĬłŁńňñŃŇÑòóôõöōŏőøÒÓÔÕÖŌŎŐØřŘšşșŚŠŞȘŢùúûüũūŭůÙÚÛÜŨŪŬŮýÿÝŸžżźŽŻŹ';
+            $to   = 'aaaaaaaaaAAAAAAAAAcccCCCDDeeeeeeeeeeEEEEEEEEEgGiiiiiiiiiIIIIIIIIILLnnnNNNoooooooooOOOOOOOOOrRsssSSSSTuuuuuuuuUUUUUUUUyyYYzzzZZZ';
+
+            preg_match_all('~\pL~u', $from, $matches);
+            $search = current($matches);
+
+            $replace = str_split($to);
+
+            $search  = array_merge($search,  array('æ', 'Æ', 'œ', 'Œ', 'ß' ));
+            $replace = array_merge($replace, array('ae', 'ae', 'oe', 'OE', 'ss'));
+        }
+
+        $ascii = str_replace($search, $replace, $string);
+        $ascii = preg_replace("~[^a-z0-9 -]+~i", ' ', $ascii);
+        $ascii = trim($ascii);
+
+        return $ascii;
     }
 
     /**
@@ -205,7 +240,7 @@ class toolbox
         $bookname = $this->assemble_bookname($title, $author, $pathinfo['extension']);
         $new_filename = $pathinfo['dirname'] . '/' . $bookname;
 
-        rename($old_filename, $new_filename);
+        rename($old_filename, $new_filename); // TODO: fix to manage duplicates !!!
     }
 
     /**
