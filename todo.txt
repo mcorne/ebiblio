@@ -8,6 +8,7 @@ Adobe ID = ...
 https://docs.ovh.com/fr/fr/web/hosting/mutualise-htaccess-comment-proteger-lacces-a-un-repertoire-par-une-authentification/
 https://www.ovh.com/fr/support/outils/crypt_password.pl
 
+# title and author
 http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
 http://www.idpf.org/epub/31/spec/epub-overview-20170105.html
 *.opf
@@ -18,6 +19,10 @@ language RFC 3066
 date YYYY[-MM[-DD]]
 rights
 
+# cover
+http://stackoverflow.com/questions/34545838/fetch-cover-image-from-epub-in-ios/34685183#34685183
+epub2
+<item media-type="image/jpeg" href="html/docimages/cover.jpg" id="cover-image1"></item>
 epub3
 <manifest>
     <item id="cover" href="./images/cover.svg" properties="cover-image" media-type="image/svg+xml"/>
