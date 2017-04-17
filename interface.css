@@ -28,6 +28,11 @@ th {
     padding-right: .5em;
 }
 
+.ul-panel {
+   margin-bottom: 16px;
+   margin-top: 16px;
+}
+
 .w3-container {
    max-width: 1000px;
 }

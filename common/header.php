@@ -1,4 +1,7 @@
-<?php require 'functions.php'; ?>
+<?php
+require 'toolbox.php';
+$toolbox = new toolbox();
+?>
 
 <!DOCTYPE html>
 <html>
