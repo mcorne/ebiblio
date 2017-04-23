@@ -29,11 +29,17 @@ try {
 
         <table class="w3-table w3-striped w3-bordered">
             <tr>
-                <th><a href="?sorting=name"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Titre</a></th>
-                <th><a href="?sorting=author"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Auteur</a></th>
+                <th>
+                    <a href="?sorting=name"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Titre</a>
+                </th>
+
+                <th>
+                    <a href="?sorting=author"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Auteur</a>
+                </th>
+
                 <th>
                     <a onclick="document.getElementById('id01').style.display='block'">
-                        <i class="fa fa-question-circle fa-lg" aria-hidden="true"></i>
+                        <i class="fa fa-question fa-lg" aria-hidden="true"></i>
                     </a>
                 </th>
             </tr>
@@ -51,10 +57,10 @@ try {
                 <td><?= $bookinfo['author']; ?></td>
 
                 <td class="nowrap">
-                    <a href="/ebiblio/restricted/book_info.php?bookname=<?= $id; ?>">
+                    <a href="/ebiblio/restricted/book_info.php?id=<?= $id; ?>">
                         <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
                     </a>
-                    <a href="/ebiblio/restricted/delete_book.php?bookname=<?= $id; ?>">
+                    <a href="/ebiblio/restricted/delete_book.php?id=<?= $id; ?>">
                         <i class="fa fa-trash fa-lg icon" aria-hidden="true"></i>
                     </a>
                 </td>
