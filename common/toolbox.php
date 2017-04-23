@@ -1,40 +1,8 @@
 <?php
 class toolbox
 {
-    const BOOKLIST_FILENAME  = 'data/booklist.php';
-    const BOOKNAME_SEPARATOR = '_';
-    const MAX_FILE_SIZE      = 5242880; // 5 Mo
-
-    public function add_book() // TODO: finish !!!
-    {
-        $filename = $this->upload_book();
-        $directory = $this->unzip_book($filename);
-        $bookinfo = $this->extract_book_info($directory);
-        $bookname = $this->add_book_in_booklist($bookinfo);
-    }
-
-    /**
-     *
-     * @param array $bookinfo
-     * @return string
-     */
-    public function add_book_in_booklist($bookinfo)
-    {
-        $booklist = $this->read_booklist();
-
-        end($booklist);
-        $book_id = key($bookinfo) ?: 0;
-
-        $bookinfo['name']  = $this->create_bookname($bookinfo, $book_id);
-        $bookinfo['added'] = date('Y-m-d H:i:s');
-
-        ksort($bookinfo);
-        $booklist[] = $bookinfo;
-
-        $this->write_booklist($booklist);
-
-        return $bookinfo['name'];
-    }
+    const BOOKLIST      = 'data/booklist.php';
+    const MAX_FILE_SIZE = 5242880; // 5 Mo
 
     /**
      *
@@ -48,7 +16,7 @@ class toolbox
         $title  = $this->convert_string_to_ascii($title)  ?: '--sans titre--';
         $author = $this->convert_string_to_ascii($author) ?: '--sans auteur--';
 
-        $bookname = $title . toolbox::BOOKNAME_SEPARATOR . $author . '.' . $extension;
+        $bookname = $title . '_' . $author . '.' . $extension;
 
         return $bookname;
     }
@@ -66,16 +34,16 @@ class toolbox
         static $search, $replace;
 
         if (! isset($search)) {
-            $from = 'áàâãäåāăąÀÁÂÃÄÅĀĂĄćčçĆČÇĐÐèéêёëēĕėęěÈÊËЁĒĔĖĘĚğĞıìíîïìĩīĭÌÍÎÏЇÌĨĪĬłŁńňñŃŇÑòóôõöōŏőøÒÓÔÕÖŌŎŐØřŘšşșŚŠŞȘŢùúûüũūŭůÙÚÛÜŨŪŬŮýÿÝŸžżźŽŻŹ';
-            $to   = 'aaaaaaaaaAAAAAAAAAcccCCCDDeeeeeeeeeeEEEEEEEEEgGiiiiiiiiiIIIIIIIIILLnnnNNNoooooooooOOOOOOOOOrRsssSSSSTuuuuuuuuUUUUUUUUyyYYzzzZZZ';
+            $from = 'áàâãäåāăąÀÁÂÃÄÅĀĂĄćčçĆČÇĐÐèéêёëēĕėęěÈÊËЁĒĔĖĘĚğĞıìíîïìĩīĭÌÍÎÏЇÌĨĪĬłŁńňñŃŇÑòóôõöōŏőøÒÓÔÕÖŌŎŐØřŘšşșŚŠŞȘŢùúûüũūŭůÙÚÛÜŨŪŬŮýÿÝŸžżźŽŻŹ/';
+            $to   = 'aaaaaaaaaAAAAAAAAAcccCCCDDeeeeeeeeeeEEEEEEEEEgGiiiiiiiiiIIIIIIIIILLnnnNNNoooooooooOOOOOOOOOrRsssSSSSTuuuuuuuuUUUUUUUUyyYYzzzZZZ-';
 
             preg_match_all('~\pL~u', $from, $matches);
             $search = current($matches);
 
             $replace = str_split($to);
 
-            $search  = array_merge($search,  array('æ', 'Æ', 'œ', 'Œ', 'ß' ));
-            $replace = array_merge($replace, array('ae', 'ae', 'oe', 'OE', 'ss'));
+            $search  = array_merge($search,  ['æ' , 'Æ' , 'œ' , 'Œ' , 'ß' ]);
+            $replace = array_merge($replace, ['ae', 'ae', 'oe', 'OE', 'ss']);
         }
 
         $ascii = str_replace($search, $replace, $string);
@@ -87,18 +55,50 @@ class toolbox
 
     /**
      *
-     * @param array $bookinfo
-     * @param int $book_id
+     * @param string $bookname
      * @return string
      */
-    public function create_bookname($bookinfo, $book_id)
+    public function create_book_filename($bookname)
     {
-        $title  = $this->convert_string_to_ascii($bookinfo['info']);
-        $author = $this->convert_string_to_ascii($bookinfo['author']);
+        $filename = sprintf('books/%s.epub', $bookname);
 
-        $bookname = sprintf('%s_%s_%d', $title, $author, $book_id);
+        return $filename;
+    }
+
+    /**
+     *
+     * @param array $bookinfo
+     * @return string
+     */
+    public function create_bookname($bookinfo)
+    {
+        $title    = $this->convert_string_to_ascii($bookinfo['title']);
+        $author   = $this->convert_string_to_ascii($bookinfo['author']);
+        $bookname = sprintf('%s_%s', $title, $author);
+
+        // defaults to "ebiblio" if both the title and author could not be converted to ascii
+        $bookname = trim($bookname, '_') ?: 'ebiblio';
+
+        // truncates the filename due to the 256 bytes max file name length
+        $bookname = substr($bookname, 0, 200);
+
+        // concatenates the book number to differenciate possible title/author duplicates in different editions
+        $bookname .= '_' . $bookinfo['number'];
 
         return $bookname;
+    }
+
+    /**
+     *
+     * @param string $bookname
+     * @param string $extension
+     * @return string
+     */
+    public function create_cover_filename($bookname, $extension)
+    {
+        $filename = sprintf('covers/%s.%s', $bookname, $extension);
+
+        return $filename;
     }
 
     /**
@@ -110,6 +110,25 @@ class toolbox
         $new_filename = $old_filename . '.DEL';
 
         rename($old_filename, $new_filename);
+    }
+
+    /**
+     *
+     * @param string $dirname
+     */
+    public function delete_dir($dirname)
+    {
+        if ($filenames = glob("$dirname/*")) {
+            foreach ($filenames as $filename) {
+                if (is_dir($filename)) {
+                    $this->delete_dir($filename);
+                } else {
+                    @unlink($filename);
+                }
+            }
+        }
+
+        @rmdir($dirname);
     }
 
     /**
@@ -190,15 +209,15 @@ class toolbox
 
     /**
      *
-     * @param string $directory
+     * @param string $tmp_book_dirname
      * @return string
      */
-    public function extract_book_cover($directory)
+    public function extract_book_cover($tmp_book_dirname)
     {
         $file_pattern = '*cover*.{bmp,gif,jpg,jpeg,png,tif,tiff,svg}';
 
-        if ($filenames = glob("$directory/*/$file_pattern", GLOB_BRACE) or
-            $filenames = glob("$directory/*/*/$file_pattern", GLOB_BRACE)
+        if ($filenames = glob("$tmp_book_dirname/*/$file_pattern", GLOB_BRACE) or
+            $filenames = glob("$tmp_book_dirname/*/*/$file_pattern", GLOB_BRACE)
         ) {
             return current($filenames);
         }
@@ -206,16 +225,16 @@ class toolbox
 
     /**
      *
-     * @param string $directory
+     * @param string $tmp_book_dirname
      * @return array
      * @throws Exception
      * @see http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm#Section2.2
      * @see http://www.idpf.org/epub/31/spec/epub-packages.html#sec-metadata-elem
      * @see https://github.com/IDPF/epub3-samples
      */
-    public function extract_book_info($directory)
+    public function extract_book_info($tmp_book_dirname)
     {
-        if (! $filenames = glob("$directory/*/*.opf")) {
+        if (! $filenames = glob("$tmp_book_dirname/*/*.opf")) {
             throw new Exception("Impossible d'extraire le fichier OPF");
         }
 
@@ -234,7 +253,6 @@ class toolbox
         }
 
         $bookinfo['author']      = $this->extract_xml_tag_data('creator', $metadata);
-        $bookinfo['cover']       = $this->extract_book_cover($directory);
         $bookinfo['date']        = $this->extract_xml_tag_data('date', $metadata);
         $bookinfo['deleted']     = null;
         $bookinfo['description'] = $this->extract_xml_tag_data('description', $metadata);
@@ -340,7 +358,7 @@ class toolbox
      */
     private function get_upload_error_message()
     {
-        switch ($_FILES['file']['error']) {
+        switch ($_FILES['filename']['error']) {
             case UPLOAD_ERR_INI_SIZE:
                 $message = "The uploaded file exceeds the upload_max_filesize directive in php.ini";
                 break;
@@ -390,14 +408,103 @@ class toolbox
 
     /**
      *
+     * @param string $tmp_book_filename
+     * @param array $bookinfo
+     * @param array $previous_bookinfo
+     */
+    public function move_book($tmp_book_filename, $bookinfo, $previous_bookinfo)
+    {
+        if ($previous_bookinfo) {
+            $filename = $this->create_book_filename($previous_bookinfo['name']);
+            @unlink($filename);
+        }
+
+        $filename = $this->create_book_filename($bookinfo['name']);
+        @rename($tmp_book_filename, $filename);
+    }
+
+    /**
+     *
+     * @param string $cover_filename
+     * @param array $bookinfo
+     * @param array $previous_bookinfo
+     */
+    public function move_cover($cover_filename, $bookinfo, $previous_bookinfo)
+    {
+        if ($previous_bookinfo and $previous_bookinfo['cover_ext']) {
+            $filename = $this->create_cover_filename($previous_bookinfo['name'], $previous_bookinfo['cover_ext']);
+            @unlink($filename);
+        }
+
+        if ($cover_filename) {
+            $filename = $this->create_cover_filename($bookinfo['name'], $bookinfo['cover_ext']);
+            @rename($cover_filename, $filename);
+        }
+    }
+
+    public function put_book() // TODO: detect if file encrypted !!!
+    {
+        $tmp_book_filename = $this->upload_book();
+        $tmp_book_dirname  = $this->unzip_book($tmp_book_filename);
+        $bookinfo          = $this->extract_book_info($tmp_book_dirname);
+        $cover_filename    = $this->extract_book_cover($tmp_book_dirname);
+
+        list($bookinfo, $previous_bookinfo) = $this->put_book_in_booklist($bookinfo, $tmp_book_filename, $cover_filename);
+
+        $this->move_book($tmp_book_filename, $bookinfo, $previous_bookinfo);
+        $this->move_cover($cover_filename, $bookinfo, $previous_bookinfo);
+        $this->delete_dir($tmp_book_dirname);
+    }
+
+    /**
+     *
+     * @param array $bookinfo
+     * @param string $tmp_book_filename
+     * @param string $cover_filename
+     * @return string
+     */
+    public function put_book_in_booklist($bookinfo, $tmp_book_filename, $cover_filename)
+    {
+        $book_id  = md5_file($tmp_book_filename);
+        $booklist = $this->read_booklist();
+
+        date_default_timezone_set('UTC');
+        
+        if (isset($booklist[$book_id])) {
+            $bookinfo['updated'] = date('Y-m-d H:i:s');
+            $previous_bookinfo   = $booklist[$book_id];
+            $bookinfo += $previous_bookinfo;
+        } else {
+            $bookinfo['created'] = date('Y-m-d H:i:s');
+            $bookinfo['deleted'] = false;
+            $bookinfo['number']  = count($booklist) + 1;
+            $bookinfo['updated'] = null;
+            $previous_bookinfo   = null;
+        }
+
+        $bookinfo['cover_ext'] = pathinfo($cover_filename, PATHINFO_EXTENSION);
+        $bookinfo['name']      = $this->create_bookname($bookinfo);
+        $bookinfo['source']    = empty($_FILES['filename']['name']) ? null : $_FILES['filename']['name'];
+
+        ksort($bookinfo);
+
+        $booklist[$book_id] = $bookinfo;
+
+        $this->write_booklist($booklist);
+
+        return [$bookinfo, $previous_bookinfo];
+    }
+
+    /**
+     *
      * @return array
      */
     public function read_booklist()
     {
-        if (file_exists(toolbox::BOOKLIST_FILENAME)) {
-            $books = include toolbox::BOOKLIST_FILENAME;
+        if (file_exists(toolbox::BOOKLIST)) {
+            $books = include toolbox::BOOKLIST;
         } else {
-            $books = array();
+            $books = [];
         }
 
         return $books;
@@ -405,46 +512,8 @@ class toolbox
 
     public function redirect_to_booklist()
     {
-        header('Location: /ebiblio/restricted/booklist.php');
+        header('Location: /ebiblio/restricted/get_booklist.php');
         exit;
-    }
-
-    /**
-     *
-     * @param string $old_filename
-     * @param string $title
-     * @param string $author
-     */
-    public function rename_book($old_filename, $title, $author)
-    {
-        $pathinfo     = pathinfo($old_filename);
-        $bookname     = $this->assemble_bookname($title, $author, $pathinfo['extension']);
-        $new_filename = $pathinfo['dirname'] . '/' . $bookname;
-
-        rename($old_filename, $new_filename); // TODO: fix to manage duplicates !!!
-    }
-
-    /**
-     *
-     * @param array $bookinfo
-     * @param int $book_id
-     * @param int
-     */
-    public function replace_book_in_booklist($bookinfo, $book_id)
-    {
-        $booklist = $this->read_booklist();
-
-        $old_bookname = $bookinfo['name'];
-
-        $bookinfo['name']  = $this->create_bookname($bookinfo, $book_id);
-        $bookinfo['updated'] = date('Y-m-d H:i:s');
-        ksort($bookinfo);
-
-        $booklist[$book_id] = $bookinfo;
-
-        $this->write_booklist($booklist);
-
-        return $old_bookname;
     }
 
     /**
@@ -456,7 +525,7 @@ class toolbox
     {
         list($basename) = explode('.', $bookname);
 
-        $parts = explode(toolbox::BOOKNAME_SEPARATOR, $basename);
+        $parts = explode('_', $basename);
 
         $title  = current($parts);
         $author = next($parts) ?: null;
@@ -483,26 +552,49 @@ class toolbox
 
     /**
      *
-     * @param string $filename
+     * @return array
+     * @see https://localhost/ebiblio/restricted/test.php?method=create_bookname&args[]={"title":"aaa","author":"bbb","number":"1"}
+     * @see https://localhost/ebiblio/restricted/test.php?method=extract_book_info&args[]=unzip/pg41211-images.epub
+     * @see https://localhost/ebiblio/restricted/test.php?method=put_book_in_booklist&args[]={"title":"qqq","author":"sss","name":"zzz"}&args[]=tmp/pg41211-images.epub&args[]=aaa.jpg
+     * @see https://localhost/ebiblio/restricted/test.php?method=unzip_book&args[]=Eye of the Needle_Ken Follett.epub
+     */
+    public function unit_test()
+    {
+        $args = $_GET['args'];
+
+        foreach ($args as &$arg) {
+            if ($decoded = json_decode($arg, true)) {
+                $arg = $decoded;
+            }
+        }
+
+        $result = call_user_func_array([$this, $_GET['method']], $args);
+
+        return $result;
+    }
+
+    /**
+     *
+     * @param string $tmp_book_filename
      * @return string
      */
-    public function unzip_book($filename)
+    public function unzip_book($tmp_book_filename)
     {
         $zip = new ZipArchive;
 
-        $directory = 'unzip/' . basename($filename);
+        $tmp_book_dirname = 'unzip/' . basename($tmp_book_filename);
 
-        if (! $zip->open($filename)) {
+        if (! $zip->open($tmp_book_filename)) {
             throw new Exception("Impossible d'ouvrir le fichier");
         }
 
-        if (! $zip->extractTo($directory)) {
+        if (! $zip->extractTo($tmp_book_dirname)) {
             throw new Exception('Impossible de décompresser le fichier');
         }
 
         $zip->close();
 
-        return $directory;
+        return $tmp_book_dirname;
     }
 
     /**
@@ -511,9 +603,9 @@ class toolbox
      */
     public function upload_book()
     {
-        $destination = 'tmp/' . md5(basename($_FILES['filename']['name']));
+        $tmp_book_filename = 'tmp/' . md5(basename($_FILES['filename']['name']));
 
-        if (pathinfo($target_file, PATHINFO_EXTENSION) != 'epub') {
+        if (pathinfo($_FILES['filename']['name'], PATHINFO_EXTENSION) != 'epub') {
             throw new Exception('Extension de fichier non valide');
         }
 
@@ -521,15 +613,15 @@ class toolbox
             throw new Exception('Fichier trop volumineux');
         }
 
-        if ($_FILES['file']['error'] != UPLOAD_ERR_OK) {
+        if ($_FILES['filename']['error'] != UPLOAD_ERR_OK) {
             throw new Exception($this->get_upload_error_message());
         }
 
-        if (! move_uploaded_file($_FILES['filename']['tmp_name'], $destination)) {
+        if (! move_uploaded_file($_FILES['filename']['tmp_name'], $tmp_book_filename)) {
             throw new Exception('Impossible de déplacer le fichier');
         }
 
-        return $destination;
+        return $tmp_book_filename;
     }
 
     /**
@@ -540,9 +632,9 @@ class toolbox
     public function write_booklist($booklist)
     {
         $exported = var_export($booklist, true);
-        $content  = "<?php\n$exported;\n";
+        $content  = "<?php\nreturn $exported;\n";
 
-        if (! file_put_contents(toolbox::BOOKLIST_FILENAME, $content)) {
+        if (! file_put_contents(toolbox::BOOKLIST, $content)) {
             throw new Exception('Impossible de lire la liste des livres');
         }
     }

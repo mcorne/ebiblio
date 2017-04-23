@@ -1,10 +1,12 @@
 <?php
 require_once '../common/toolbox.php';
 
-// TODO: comment or remove on production system !!!
+// used for unit testing only
+// MUST BE uncommented in production mode !!!
+exit;
 
-// ex: https://localhost/ebiblio/common/test_method?method=unzip_book&args[]=Eye of the Needle_Ken Follett.epub
-$result = call_user_func_array(array(new toolbox(), $_GET['method']), $_GET['args']);
+$toolbox = new toolbox();
+$result = $toolbox->unit_test();
 
 echo '<pre>';
 print_r($result);

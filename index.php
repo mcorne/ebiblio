@@ -11,12 +11,12 @@
     <ul class="w3-ul">
 
         <li class=" w3-border-0">
-            <a href="/ebiblio/restricted/booklist.php"><i class="fa fa-list" aria-hidden="true"></i></a>
+            <a href="/ebiblio/restricted/get_booklist.php"><i class="fa fa-list" aria-hidden="true"></i></a>
             Liste des livres
         </li>
 
         <li class=" w3-border-0">
-            <a href="/ebiblio/restricted/add_book.php"><i class="fa fa-list" aria-hidden="true"></i></a>
+            <a href=""><i class="fa fa-list" aria-hidden="true"></i></a>
             Me renvoyer un mot de passe
         </li>
 

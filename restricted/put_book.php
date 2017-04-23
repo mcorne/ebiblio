@@ -1,12 +1,21 @@
 <?php
 require '../common/header.php';
 
-/* @var $toolbox toolbox */
+
+if ($toolbox->is_post()) {
+    try {
+        /* @var $toolbox toolbox */
+        $toolbox->put_book();
+        $toolbox->redirect_to_booklist();
+    } catch (Exception $exception) {
+        $error = $exception->getMessage(); // TODO: display error message !!!
+    }
+}
 ?>
 
 <div class="w3-container">
 
-    <h1>Ajouter un livre</h1>
+    <h1>Ajouter ou recharger un livre</h1>
 
     <form enctype="multipart/form-data" method="post">
 

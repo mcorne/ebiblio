@@ -65,8 +65,8 @@ $books = $toolbox->get_booklist($sorting);
     <ul class="w3-ul">
 
         <li class=" w3-border-0">
-            <a href="/ebiblio/restricted/add_book.php"><i class="fa fa-plus" aria-hidden="true"></i></a>
-            Ajouter un livre
+            <a href="/ebiblio/restricted/put_book.php"><i class="fa fa-plus" aria-hidden="true"></i></a>
+            Ajouter ou recharger un livre
         </li>
 
         <?php if ($toolbox->get_deleted_booknames()): ?>
