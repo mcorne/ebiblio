@@ -6,23 +6,6 @@ class toolbox
 
     /**
      *
-     * @param string $title
-     * @param string $author
-     * @param string $extension
-     * @return array
-     */
-    public function assemble_bookname($title, $author, $extension)
-    {
-        $title  = $this->convert_string_to_ascii($title)  ?: '--sans titre--';
-        $author = $this->convert_string_to_ascii($author) ?: '--sans auteur--';
-
-        $bookname = $title . '_' . $author . '.' . $extension;
-
-        return $bookname;
-    }
-
-    /**
-     *
      * Note that iconv() is not used as it produces different results across PHP versions,
      * eg $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $string);
      *
@@ -60,7 +43,7 @@ class toolbox
      */
     public function create_book_filename($bookname)
     {
-        $filename = sprintf('books/%s.epub', $bookname);
+        $filename = sprintf('books/%s', $bookname);
 
         return $filename;
     }
@@ -74,16 +57,23 @@ class toolbox
     {
         $title    = $this->convert_string_to_ascii($bookinfo['title']);
         $author   = $this->convert_string_to_ascii($bookinfo['author']);
-        $bookname = sprintf('%s_%s', $title, $author);
 
-        // defaults to "ebiblio" if both the title and author could not be converted to ascii
-        $bookname = trim($bookname, '_') ?: 'ebiblio';
+        $bookname = sprintf('%s_%s', $title, $author);
+        $bookname = preg_replace('~\s+~', ' ', $bookname);
+        $bookname = trim($bookname, '_ ');
+
+        if (! $bookname) {
+            // defaults to "ebiblio" if both the title and author could not be converted to ascii
+            $bookname = 'ebiblio';
+        }
 
         // truncates the filename due to the 256 bytes max file name length
         $bookname = substr($bookname, 0, 200);
 
         // concatenates the book number to differenciate possible title/author duplicates in different editions
         $bookname .= '_' . $bookinfo['number'];
+
+        $bookname .= '.epub';
 
         return $bookname;
     }
@@ -96,6 +86,7 @@ class toolbox
      */
     public function create_cover_filename($bookname, $extension)
     {
+        $bookname = pathinfo($bookname, PATHINFO_FILENAME);
         $filename = sprintf('covers/%s.%s', $bookname, $extension);
 
         return $filename;
@@ -129,30 +120,6 @@ class toolbox
         }
 
         @rmdir($dirname);
-    }
-
-    /**
-     *
-     * @param mixed $book
-     * @return string
-     */
-    public function display_bookname($book, $exclude_author = false)
-    {
-        if (is_string($book)) {
-            $book = $this->split_bookname($book);
-        }
-
-        $displayed = $book['title'];
-
-        if ($book['number']) {
-            $displayed .= sprintf(' (n°&nbsp;%s)', $book['number']);
-        }
-
-        if (! $exclude_author and $book['author']) {
-            $displayed .= sprintf(', %s', $book['author']);
-        }
-
-        return $displayed;
     }
 
     /**
@@ -260,6 +227,7 @@ class toolbox
         $bookinfo['language']    = $this->extract_xml_tag_data('language', $metadata);
         $bookinfo['publisher']   = $this->extract_xml_tag_data('publisher', $metadata);
         $bookinfo['rights']      = $this->extract_xml_tag_data('rights', $metadata);
+        $bookinfo['source']      = $this->extract_xml_tag_data('subject', $metadata);
         $bookinfo['subject']     = $this->extract_xml_tag_data('subject', $metadata);
 
         return $bookinfo;
@@ -287,24 +255,17 @@ class toolbox
      */
     public function get_booklist($sorting)
     {
-        $filenames   = glob('books/*.epub');
-        $books       = [];
-        $sort_column = [];
+        $booklist = $this->read_booklist();
 
-        foreach ($filenames as $filename) {
-            $bookname = basename($filename);
+        foreach ($booklist as &$bookinfo) {
+            $bookinfo['uri'] = '/ebiblio/restricted/books/' . $bookinfo['name'];
 
-            $book = ['filename' => $filename];
-            $book += $this->split_bookname($bookname);
-
-            $books[]  = $book;
-
-            $sort_column[] = $sorting == 'title' ? $book['title'] : $book['author'];
+            $sort_column[] = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
         }
 
-        array_multisort($sort_column, SORT_ASC, $books);
+        array_multisort($sort_column, SORT_ASC, $booklist);
 
-        return $books;
+        return $booklist;
     }
 
     /**
@@ -317,24 +278,6 @@ class toolbox
         $booknames = array_map('basename', $filenames);
 
         return $booknames;
-    }
-
-    /**
-     *
-     * @param string $bookname
-     * @return string
-     */
-    public function get_filename($bookname)
-    {
-        $bookname = urldecode($bookname);
-
-        $filename = dirname(__FILE__) . "/../restricted/books/$bookname";
-
-        if (! file_exists($filename)) {
-            return;
-        }
-
-        return $filename;
     }
 
     /**
@@ -469,7 +412,7 @@ class toolbox
         $booklist = $this->read_booklist();
 
         date_default_timezone_set('UTC');
-        
+
         if (isset($booklist[$book_id])) {
             $bookinfo['updated'] = date('Y-m-d H:i:s');
             $previous_bookinfo   = $booklist[$book_id];
@@ -514,29 +457,6 @@ class toolbox
     {
         header('Location: /ebiblio/restricted/get_booklist.php');
         exit;
-    }
-
-    /**
-     *
-     * @param string $bookname
-     * @return array
-     */
-    public function split_bookname($bookname)
-    {
-        list($basename) = explode('.', $bookname);
-
-        $parts = explode('_', $basename);
-
-        $title  = current($parts);
-        $author = next($parts) ?: null;
-        $number = next($parts) ?: null;
-
-        return [
-            'author'   => $author,
-            'bookname' => $bookname,
-            'number'   => $number,
-            'title'    => $title,
-        ];
     }
 
     /**

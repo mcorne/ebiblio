@@ -23,9 +23,12 @@ th {
      white-space: nowrap;
 }
 
-.icon {
+.icon, .left-icon {
     font-size: 1.2em;
-    padding-right: .5em;
+}
+
+.nowrap {
+    white-space: nowrap;
 }
 
 .ul-panel {
