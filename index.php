@@ -2,25 +2,21 @@
 
 <div class="w3-container">
 
-    <h1>eBiblio pour partager des livres</h1>
+    <header class="w3-container w3-green w3-margin-bottom">
+        <h1>La bibliothèque familiale eBiblio</h1>
+    </header>
 
-</div>
-
-<div class="ul-panel">
-
-    <ul class="w3-ul">
-
-        <li class=" w3-border-0">
-            <a href="/ebiblio/restricted/get_booklist.php"><i class="fa fa-list" aria-hidden="true"></i></a>
+    <p>
+        <a href="/ebiblio/restricted/get_booklist.php"><i class="fa fa-list" aria-hidden="true"></i>
             Liste des livres
-        </li>
+        </a>
+    </p>
 
-        <li class=" w3-border-0">
-            <a href=""><i class="fa fa-list" aria-hidden="true"></i></a>
+    <p>
+        <a href=""><i class="fa fa-list" aria-hidden="true"></i>
             Me renvoyer un mot de passe
-        </li>
-
-    </ul>
+        </a>
+    </p>
 
 </div>
 

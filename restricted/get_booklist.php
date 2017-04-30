@@ -3,14 +3,13 @@ require '../common/header.php';
 
 /* @var $toolbox toolbox */
 
-if (! $sorting = $toolbox->get_input('sorting') or
-    ! in_array($sorting, ['author', 'title'])
-) {
-    $sorting = 'title';
-}
 
 try {
-    $booklist = $toolbox->get_booklist($sorting);
+    if (! $sorting = $toolbox->get_input('sorting') or ! in_array($sorting, ['author', 'title'])) {
+        $sorting = 'title';
+    }
+
+    $booklist = $toolbox->get_not_deleted_books($sorting);
 } catch (Exception $exception) {
     $error = $exception->getMessage();
 }
@@ -18,17 +17,16 @@ try {
 
 <div class="w3-container">
 
-    <h1>Liste des livres</h1>
+    <header class="w3-container w3-green w3-margin-bottom">
+        <h1>Liste des livres de eBiblio</h1>
+    </header>
 
     <?php if (! empty($error)): ?>
-        <div class="w3-container w3-red">
-            <h3>Erreur !</h3>
-            <p><?= $error; ?></p>
-        </div>
+        <?php require '../common/error.php'; ?>
     <?php else: ?>
 
         <table class="w3-table w3-striped w3-bordered">
-            <tr>
+            <tr class="w3-pale-green">
                 <th>
                     <a href="?sorting=name"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Titre</a>
                 </th>
@@ -39,25 +37,27 @@ try {
 
                 <th>
                     <a onclick="document.getElementById('id01').style.display='block'">
-                        <i class="fa fa-question fa-lg" aria-hidden="true"></i>
+                        <i class="fa fa-question-circle-o fa-lg" aria-hidden="true"></i>
                     </a>
                 </th>
             </tr>
 
-            <?php foreach ($booklist as $id => $bookinfo): ?>
+            <?php foreach ($booklist as $id => $bookinfo):
+                if ($bookinfo['deleted']) { continue; }
+            ?>
             <tr>
 
                 <td>
                     <a href="<?= $bookinfo['uri']; ?>" title="Télécharger le livre sur l'appareil">
                         <i class="fa fa-download fa-lg" aria-hidden="true"></i>
-                        <?= $bookinfo['title']; ?>
+                        <?= htmlspecialchars($bookinfo['title']); ?>
                     </a>
                 </td>
 
-                <td><?= $bookinfo['author']; ?></td>
+                <td><?= htmlspecialchars($bookinfo['author']); ?></td>
 
                 <td class="nowrap">
-                    <a href="/ebiblio/restricted/book_info.php?id=<?= $id; ?>">
+                    <a href="/ebiblio/restricted/get_book_info.php?id=<?= $id; ?>">
                         <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
                     </a>
                     <a href="/ebiblio/restricted/delete_book.php?id=<?= $id; ?>">
@@ -77,6 +77,11 @@ try {
                     <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-display-topright">
                         &times;
                     </span>
+
+                    <p>
+                        <i class="fa fa-download fa-lg w3-margin-right icon" aria-hidden="true"></i>
+                        Télécharger le livre sur l'appareil, ou cliquer sur le titre.
+                    </p>
 
                     <p>
                         <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
@@ -107,7 +112,7 @@ try {
             </a>
         </li>
 
-        <?php if ($toolbox->get_deleted_booknames()): ?>
+        <?php if ($toolbox->get_deleted_books()): ?>
             <li class=" w3-border-0">
                 <a href="/ebiblio/restricted/undelete_book.php"><i class="fa fa-undo" aria-hidden="true"></i>
                     Annuler la suppression d'un livre de la liste

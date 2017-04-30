@@ -6,6 +6,17 @@ class toolbox
 
     /**
      *
+     * @var array
+     */
+    public $booklist;
+
+    public function __construct()
+    {
+        date_default_timezone_set('UTC');
+    }
+
+    /**
+     *
      * Note that iconv() is not used as it produces different results across PHP versions,
      * eg $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $string);
      *
@@ -14,6 +25,7 @@ class toolbox
      */
     public function convert_string_to_ascii($string)
     {
+
         static $search, $replace;
 
         if (! isset($search)) {
@@ -67,7 +79,7 @@ class toolbox
             $bookname = 'ebiblio';
         }
 
-        // truncates the filename due to the 256 bytes max file name length
+        // truncates the filename due to the 256 bytes file name max length
         $bookname = substr($bookname, 0, 200);
 
         // concatenates the book number to differenciate possible title/author duplicates in different editions
@@ -94,13 +106,13 @@ class toolbox
 
     /**
      *
-     * @param string $old_filename
+     * @param string $book_id
      */
-    public function delete_book($old_filename)
+    public function delete_book($book_id)
     {
-        $new_filename = $old_filename . '.DEL';
-
-        rename($old_filename, $new_filename);
+        $booklist = $this->read_booklist();
+        $booklist[$book_id]['deleted'] = $this->get_date();
+        $this->write_booklist($booklist);
     }
 
     /**
@@ -120,6 +132,20 @@ class toolbox
         }
 
         @rmdir($dirname);
+    }
+
+    /**
+     *
+     * @param array $book_info
+     * @return string
+     */
+    public function display_bookname($book_info)
+    {
+        $bookname = sprintf('%s, %s', $book_info['title'], $book_info['author']);
+        $bookname = trim($bookname, ', ');
+        $bookname = htmlspecialchars($bookname);
+
+        return $bookname;
     }
 
     /**
@@ -221,7 +247,6 @@ class toolbox
 
         $bookinfo['author']      = $this->extract_xml_tag_data('creator', $metadata);
         $bookinfo['date']        = $this->extract_xml_tag_data('date', $metadata);
-        $bookinfo['deleted']     = null;
         $bookinfo['description'] = $this->extract_xml_tag_data('description', $metadata);
         $bookinfo['identifier']  = $this->extract_xml_tag_data('identifier', $metadata);
         $bookinfo['language']    = $this->extract_xml_tag_data('language', $metadata);
@@ -250,34 +275,50 @@ class toolbox
 
     /**
      *
-     * @param string $sorting
+     * @param string $book_id
      * @return array
      */
-    public function get_booklist($sorting)
+    public function get_book_info($book_id)
     {
         $booklist = $this->read_booklist();
 
-        foreach ($booklist as &$bookinfo) {
-            $bookinfo['uri'] = '/ebiblio/restricted/books/' . $bookinfo['name'];
-
-            $sort_column[] = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
+        if (isset($booklist[$book_id])) {
+            return $booklist[$book_id];
         }
+    }
 
-        array_multisort($sort_column, SORT_ASC, $booklist);
+    /**
+     *
+     * @return string
+     */
+    public function get_date()
+    {
+        $date = date('Y-m-d H:i:s');
 
-        return $booklist;
+        return $date;
     }
 
     /**
      *
      * @return array
      */
-    public function get_deleted_booknames()
+    public function get_deleted_books()
     {
-        $filenames = glob('books/*.epub.DEL');
-        $booknames = array_map('basename', $filenames);
+        $booklist = $this->read_booklist();
+        $deleted  = [];
 
-        return $booknames;
+        foreach ($booklist as $book_id => $bookinfo) {
+            if ($bookinfo['deleted']) {
+                $sort_column[]     = $bookinfo['title'];
+                $deleted[$book_id] = $bookinfo;
+            }
+        }
+
+        if ($deleted) {
+            array_multisort($sort_column, SORT_ASC, $deleted);
+        }
+
+        return $deleted;
     }
 
     /**
@@ -292,6 +333,31 @@ class toolbox
         if (array_key_exists($key, $input)) {
             return trim($input[$key]);
         }
+    }
+
+    /**
+     *
+     * @param string $sorting
+     * @return array
+     */
+    public function get_not_deleted_books($sorting)
+    {
+        $booklist    = $this->read_booklist();
+        $not_deleted = [];
+
+        foreach ($booklist as $book_id => $bookinfo) {
+            if (! $bookinfo['deleted']) {
+                $bookinfo['uri']       = '/ebiblio/restricted/books/' . $bookinfo['name'];
+                $sort_column[]         = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
+                $not_deleted[$book_id] = $bookinfo;
+            }
+        }
+
+        if ($not_deleted) {
+            array_multisort($sort_column, SORT_ASC, $not_deleted);
+        }
+
+        return $not_deleted;
     }
 
     /**
@@ -411,15 +477,13 @@ class toolbox
         $book_id  = md5_file($tmp_book_filename);
         $booklist = $this->read_booklist();
 
-        date_default_timezone_set('UTC');
-
         if (isset($booklist[$book_id])) {
-            $bookinfo['updated'] = date('Y-m-d H:i:s');
+            $bookinfo['updated'] = $this->get_date();
             $previous_bookinfo   = $booklist[$book_id];
-            $bookinfo += $previous_bookinfo;
+            $bookinfo            += $previous_bookinfo;
         } else {
-            $bookinfo['created'] = date('Y-m-d H:i:s');
-            $bookinfo['deleted'] = false;
+            $bookinfo['created'] = $this->get_date();
+            $bookinfo['deleted'] = null;
             $bookinfo['number']  = count($booklist) + 1;
             $bookinfo['updated'] = null;
             $previous_bookinfo   = null;
@@ -444,13 +508,11 @@ class toolbox
      */
     public function read_booklist()
     {
-        if (file_exists(toolbox::BOOKLIST)) {
-            $books = include toolbox::BOOKLIST;
-        } else {
-            $books = [];
+        if (is_null($this->booklist)) {
+            $this->booklist = file_exists(toolbox::BOOKLIST) ? include toolbox::BOOKLIST : [];
         }
 
-        return $books;
+        return $this->booklist;
     }
 
     public function redirect_to_booklist()
@@ -461,13 +523,13 @@ class toolbox
 
     /**
      *
-     * @param string $old_filename
+     * @param string $book_id
      */
-    public function undelete_book($old_filename)
+    public function undelete_book($book_id)
     {
-        $new_filename = str_replace('.DEL', '', $old_filename);
-
-        rename($old_filename, $new_filename);
+        $booklist = $this->read_booklist();
+        $booklist[$book_id]['deleted'] = null;
+        $this->write_booklist($booklist);
     }
 
     /**
@@ -551,6 +613,8 @@ class toolbox
      */
     public function write_booklist($booklist)
     {
+        $this->booklist = $booklist;
+
         $exported = var_export($booklist, true);
         $content  = "<?php\nreturn $exported;\n";
 
