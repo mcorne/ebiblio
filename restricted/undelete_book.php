@@ -21,7 +21,9 @@ try {
 
 <div class="w3-container">
 
-    <h1>Annuler la suppression d'un livre de eBiblio</h1>
+    <header class="w3-container w3-green w3-margin-bottom">
+        <h1>Annuler la suppression d'un livre de eBiblio</h1>
+    </header>
 
     <?php if (! empty($error)): ?>
         <?php require '../common/error.php'; ?>
@@ -29,7 +31,7 @@ try {
 
     <form method="post">
 
-        <select class="w3-select w3-border" name="id">
+        <select class="w3-select w3-border w3-pale-green" name="id">
 
             <option value="" disabled selected>Choisir un livre</option>
 
