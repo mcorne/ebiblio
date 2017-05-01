@@ -1,6 +1,13 @@
 <?php
+if (! $data_dir = realpath(__DIR__ . '/../restricted/data')) {
+    echo 'Invalid data directory';
+    exit;
+}
+
+define('DATA_DIR', $data_dir);
+
 require 'toolbox.php';
-$toolbox = new toolbox();
+$toolbox = new toolbox(DATA_DIR);
 ?>
 
 <!DOCTYPE html>

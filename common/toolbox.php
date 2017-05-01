@@ -1,7 +1,6 @@
 <?php
 class toolbox
 {
-    const BOOKLIST      = 'data/booklist.php';
     const MAX_FILE_SIZE = 10 * 1024 *1024; // 10 Mo
 
     /**
@@ -10,8 +9,28 @@ class toolbox
      */
     public $booklist;
 
-    public function __construct()
+    /**
+     *
+     * @var string
+     */
+    public $booklist_filename;
+
+    /**
+     *
+     * @var string
+     */
+    public $data_dir;
+
+    /**
+     *
+     * @param string $data_dir
+     */
+    public function __construct($data_dir)
     {
+        $this->data_dir = $data_dir;
+
+        $this->booklist_filename = sprintf('%s/booklist.php', $data_dir);
+
         date_default_timezone_set('UTC');
     }
 
@@ -55,7 +74,7 @@ class toolbox
      */
     public function create_book_filename($bookname)
     {
-        $filename = sprintf('books/%s', $bookname);
+        $filename = sprintf('%s/books/%s', $this->data_dir, $bookname);
 
         return $filename;
     }
@@ -99,7 +118,7 @@ class toolbox
     public function create_cover_filename($bookname, $extension)
     {
         $bookname = pathinfo($bookname, PATHINFO_FILENAME);
-        $filename = sprintf('covers/%s.%s', $bookname, $extension);
+        $filename = sprintf('%s/covers/%s.%s', $this->data_dir, $bookname, $extension);
 
         return $filename;
     }
@@ -494,7 +513,7 @@ class toolbox
     public function read_booklist()
     {
         if (is_null($this->booklist)) {
-            $this->booklist = file_exists(toolbox::BOOKLIST) ? include toolbox::BOOKLIST : [];
+            $this->booklist = file_exists($this->booklist_filename) ? include $this->booklist_filename : [];
         }
 
         return $this->booklist;
@@ -559,7 +578,7 @@ class toolbox
     {
         $zip = new ZipArchive;
 
-        $tmp_book_dirname = 'unzip/' . basename($tmp_book_filename);
+        $tmp_book_dirname = sprintf('%s/unzip/%s', $this->data_dir, basename($tmp_book_filename));
 
         if (! $zip->open($tmp_book_filename)) {
             throw new Exception("Impossible d'ouvrir le fichier");
@@ -580,7 +599,7 @@ class toolbox
      */
     public function upload_book()
     {
-        $tmp_book_filename = 'tmp/' . md5(basename($_FILES['filename']['name']));
+        $tmp_book_filename = sprintf('%s/tmp/%s', $this->data_dir, md5(basename($_FILES['filename']['name'])));
 
         if (pathinfo($_FILES['filename']['name'], PATHINFO_EXTENSION) != 'epub') {
             throw new Exception('Extension de fichier non valide');
@@ -613,7 +632,7 @@ class toolbox
         $exported = var_export($booklist, true);
         $content  = "<?php\nreturn $exported;\n";
 
-        if (! file_put_contents(toolbox::BOOKLIST, $content)) {
+        if (! file_put_contents($this->booklist_filename, $content)) {
             throw new Exception('Impossible de lire la liste des livres');
         }
     }
