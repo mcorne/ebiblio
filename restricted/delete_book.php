@@ -20,7 +20,7 @@ try {
 }
 ?>
 
-<h3>Supprimer un livre</h3>
+<h3 class="w3-container">Supprimer un livre</h3>
 
 <?php if (empty($booklist)) : ?>
 
@@ -30,7 +30,7 @@ try {
 
 <?php else: ?>
 
-    <form method="post">
+<form class="w3-container" method="post">
 
         <select class="w3-select w3-border w3-pale-green" name="id">
 

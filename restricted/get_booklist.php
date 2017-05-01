@@ -17,7 +17,10 @@ try {
 }
 ?>
 
-<h3>Liste des livres</h3>
+<h3 class="w3-container">
+    <a class="w3-text-black" href="">Liste des livres</a>
+    <a href=""><i class="fa fa-refresh" aria-hidden="true" style="font-size: 70%"></i></a>
+</h3>
 
 <?php if (empty($booklist)) : ?>
 

@@ -1,5 +1,3 @@
-        </div>
-
         <script>
             function w3_close()
             {

@@ -27,7 +27,7 @@ $book = $toolbox->split_bookname($bookname);
 
     <h1>Changer le nom du livre</h1>
 
-    <h3><?= $toolbox->display_bookname($bookname); ?></h3>
+    <h3 class="w3-container"><?= $toolbox->display_bookname($bookname); ?></h3>
 
     <form method="post">
 

@@ -109,7 +109,7 @@ try {
 
             <?php if (isset($bookinfo['number'])): ?>
                 <li>
-                    <span>Numéro d'entrée</span><br>
+                    <span>Numéro d'entrée dans la base</span><br>
                     <span class="w3-large"><?= $bookinfo['number']; ?></span>
                 </li>
             <?php endif; ?>
