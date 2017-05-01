@@ -2,7 +2,7 @@
 class toolbox
 {
     const BOOKLIST      = 'data/booklist.php';
-    const MAX_FILE_SIZE = 5242880; // 5 Mo
+    const MAX_FILE_SIZE = 10 * 1024 *1024; // 10 Mo
 
     /**
      *
@@ -289,6 +289,32 @@ class toolbox
 
     /**
      *
+     * @param bool $deleted
+     * @param string $sorting
+     * @return array
+     */
+    public function get_booklist($deleted, $sorting = 'title')
+    {
+        $booklist = $this->read_booklist();
+        $books    = [];
+
+        foreach ($booklist as $book_id => $bookinfo) {
+            if (! $deleted and ! $bookinfo['deleted'] or $deleted and $bookinfo['deleted']) {
+                $bookinfo['uri']       = '/ebiblio/restricted/books/' . $bookinfo['name'];
+                $sort_column[]         = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
+                $books[$book_id] = $bookinfo;
+            }
+        }
+
+        if ($books) {
+            array_multisort($sort_column, SORT_ASC, $books);
+        }
+
+        return $books;
+    }
+
+    /**
+     *
      * @return string
      */
     public function get_date()
@@ -296,29 +322,6 @@ class toolbox
         $date = date('Y-m-d H:i:s');
 
         return $date;
-    }
-
-    /**
-     *
-     * @return array
-     */
-    public function get_deleted_books()
-    {
-        $booklist = $this->read_booklist();
-        $deleted  = [];
-
-        foreach ($booklist as $book_id => $bookinfo) {
-            if ($bookinfo['deleted']) {
-                $sort_column[]     = $bookinfo['title'];
-                $deleted[$book_id] = $bookinfo;
-            }
-        }
-
-        if ($deleted) {
-            array_multisort($sort_column, SORT_ASC, $deleted);
-        }
-
-        return $deleted;
     }
 
     /**
@@ -333,31 +336,6 @@ class toolbox
         if (array_key_exists($key, $input)) {
             return trim($input[$key]);
         }
-    }
-
-    /**
-     *
-     * @param string $sorting
-     * @return array
-     */
-    public function get_not_deleted_books($sorting)
-    {
-        $booklist    = $this->read_booklist();
-        $not_deleted = [];
-
-        foreach ($booklist as $book_id => $bookinfo) {
-            if (! $bookinfo['deleted']) {
-                $bookinfo['uri']       = '/ebiblio/restricted/books/' . $bookinfo['name'];
-                $sort_column[]         = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
-                $not_deleted[$book_id] = $bookinfo;
-            }
-        }
-
-        if ($not_deleted) {
-            array_multisort($sort_column, SORT_ASC, $not_deleted);
-        }
-
-        return $not_deleted;
     }
 
     /**
@@ -451,6 +429,10 @@ class toolbox
         }
     }
 
+    /**
+     *
+     * @return string
+     */
     public function put_book() // TODO: detect if file encrypted !!!
     {
         $tmp_book_filename = $this->upload_book();
@@ -458,11 +440,13 @@ class toolbox
         $bookinfo          = $this->extract_book_info($tmp_book_dirname);
         $cover_filename    = $this->extract_book_cover($tmp_book_dirname);
 
-        list($bookinfo, $previous_bookinfo) = $this->put_book_in_booklist($bookinfo, $tmp_book_filename, $cover_filename);
+        list($book_id, $bookinfo, $previous_bookinfo) = $this->put_book_in_booklist($bookinfo, $tmp_book_filename, $cover_filename);
 
         $this->move_book($tmp_book_filename, $bookinfo, $previous_bookinfo);
         $this->move_cover($cover_filename, $bookinfo, $previous_bookinfo);
         $this->delete_dir($tmp_book_dirname);
+
+        return $book_id;
     }
 
     /**
@@ -490,6 +474,7 @@ class toolbox
         }
 
         $bookinfo['cover_ext'] = pathinfo($cover_filename, PATHINFO_EXTENSION);
+        $bookinfo['deleted']   = null;
         $bookinfo['name']      = $this->create_bookname($bookinfo);
         $bookinfo['source']    = empty($_FILES['filename']['name']) ? null : $_FILES['filename']['name'];
 
@@ -499,7 +484,7 @@ class toolbox
 
         $this->write_booklist($booklist);
 
-        return [$bookinfo, $previous_bookinfo];
+        return [$book_id, $bookinfo, $previous_bookinfo];
     }
 
     /**
@@ -515,9 +500,19 @@ class toolbox
         return $this->booklist;
     }
 
-    public function redirect_to_booklist()
+    /**
+     *
+     * @param string $id
+     */
+    public function redirect_to_booklist($id = null)
     {
-        header('Location: /ebiblio/restricted/get_booklist.php');
+        $uri = '/ebiblio/restricted/get_booklist.php';
+
+        if ($id) {
+            $uri .= "?id=$id";
+        }
+
+        header("Location: $uri");
         exit;
     }
 

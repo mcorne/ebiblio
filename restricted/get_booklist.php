@@ -3,125 +3,71 @@ require '../common/header.php';
 
 /* @var $toolbox toolbox */
 
-
 try {
     if (! $sorting = $toolbox->get_input('sorting') or ! in_array($sorting, ['author', 'title'])) {
         $sorting = 'title';
     }
 
-    $booklist = $toolbox->get_not_deleted_books($sorting);
+    $selected_book_id = $toolbox->get_input('id');
+
+    $booklist = $toolbox->get_booklist(false, $sorting);
 } catch (Exception $exception) {
     $error = $exception->getMessage();
+    require '../common/error.php';
 }
 ?>
 
-<div class="w3-container">
+<h3>Liste des livres</h3>
 
-    <header class="w3-container w3-green w3-margin-bottom">
-        <h1>Liste des livres de eBiblio</h1>
-    </header>
+<?php if (empty($booklist)) : ?>
 
-    <?php if (! empty($error)): ?>
-        <?php require '../common/error.php'; ?>
-    <?php else: ?>
+    <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
+        <p>La bibliothèque est vide.</p>
+    </div>
 
-        <table class="w3-table w3-striped w3-bordered">
-            <tr class="w3-pale-green">
-                <th>
-                    <a href="?sorting=name"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Titre</a>
-                </th>
+<?php else: ?>
 
-                <th>
-                    <a href="?sorting=author"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Auteur</a>
-                </th>
+    <table class="w3-table w3-striped w3-bordered">
+        <tr>
 
-                <th>
-                    <a onclick="document.getElementById('id01').style.display='block'">
-                        <i class="fa fa-question-circle-o fa-lg" aria-hidden="true"></i>
-                    </a>
-                </th>
-            </tr>
+            <th></th>
 
-            <?php foreach ($booklist as $id => $bookinfo):
-                if ($bookinfo['deleted']) { continue; }
-            ?>
-            <tr>
+            <th>
+                <a href="?sorting=name"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Titre</a>
+            </th>
 
-                <td>
-                    <a href="<?= $bookinfo['uri']; ?>" title="Télécharger le livre sur l'appareil">
-                        <i class="fa fa-download fa-lg" aria-hidden="true"></i>
-                        <?= htmlspecialchars($bookinfo['title']); ?>
-                    </a>
-                </td>
+            <th>
+                <a href="?sorting=author"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Auteur</a>
+            </th>
 
-                <td><?= htmlspecialchars($bookinfo['author']); ?></td>
+            <th></th>
 
-                <td class="nowrap">
-                    <a href="/ebiblio/restricted/get_book_info.php?id=<?= $id; ?>">
-                        <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
-                    </a>
-                    <a href="/ebiblio/restricted/delete_book.php?id=<?= $id; ?>">
-                        <i class="fa fa-trash fa-lg icon" aria-hidden="true"></i>
-                    </a>
-                </td>
+        </tr>
 
-            </tr>
-            <?php endforeach; ?>
+        <?php foreach ($booklist as $book_id => $bookinfo): ?>
+        <tr <?php if ($book_id == $selected_book_id) : ?>class="w3-pale-red"<?php endif; ?> >
 
-        </table>
+            <td>
+                <a href="<?= $bookinfo['uri']; ?>"><i class="fa fa-download fa-lg" aria-hidden="true"></i></a>
+            </td>
 
-        <div id="id01" class="w3-modal">
-            <div class="w3-modal-content w3-card-4">
-                <div class="w3-container">
+            <td>
+                <a href="<?= $bookinfo['uri']; ?>"><?= htmlspecialchars($bookinfo['title']); ?></a>
+            </td>
 
-                    <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-display-topright">
-                        &times;
-                    </span>
+            <td><?= htmlspecialchars($bookinfo['author']); ?></td>
 
-                    <p>
-                        <i class="fa fa-download fa-lg w3-margin-right icon" aria-hidden="true"></i>
-                        Télécharger le livre sur l'appareil, ou cliquer sur le titre.
-                    </p>
-
-                    <p>
-                        <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
-                        Afficher les infos sur le livre avec la couverture si disponible.
-                    </p>
-
-                    <p>
-                        <i class="fa fa-trash fa-lg w3-margin-right icon" aria-hidden="true"></i>
-                        Supprimer le livre de la liste.
-                        Noter qu'une confirmation sera demandée, et que le suppression peut être annulée ensuite en cas d'erreur.
-                    </p>
-
-                </div>
-            </div>
-        </div>
-
-    <?php endif; ?>
-
-</div>
-
-<div class="w3-panel">
-
-    <ul class="w3-ul">
-
-        <li class=" w3-border-0">
-            <a href="/ebiblio/restricted/put_book.php"><i class="fa fa-plus" aria-hidden="true"></i>
-                Ajouter ou recharger un livre
-            </a>
-        </li>
-
-        <?php if ($toolbox->get_deleted_books()): ?>
-            <li class=" w3-border-0">
-                <a href="/ebiblio/restricted/undelete_book.php"><i class="fa fa-undo" aria-hidden="true"></i>
-                    Annuler la suppression d'un livre de la liste
+            <td>
+                <a href="/ebiblio/restricted/get_book_info.php?id=<?= $book_id; ?>">
+                    <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
                 </a>
-            </li>
-        <?php endif; ?>
+            </td>
 
-    </ul>
+        </tr>
+        <?php endforeach; ?>
 
-</div>
+    </table>
+
+<?php endif; ?>
 
 <?php require '../common/footer.php'; ?>

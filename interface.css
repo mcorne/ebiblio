@@ -16,21 +16,20 @@ a {
 }
 
 a:hover {
-    color: #3e8e41;
+    color: black;
 }
 
 th {
-     white-space: nowrap;
-}
-
-.icon, .left-icon {
-    font-size: 1.2em;
-}
-
-.nowrap {
     white-space: nowrap;
 }
 
 .w3-container {
    max-width: 1000px;
+}
+
+#mySidebar {
+    max-height: 300px;
+    max-width: 500px;
+    width: 80%;
+    z-index: 5;
 }

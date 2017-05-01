@@ -9,25 +9,26 @@ try {
             $toolbox->undelete_book($book_id);
         }
 
-        $toolbox->redirect_to_booklist();
+        $toolbox->redirect_to_booklist($book_id);
     }
 
-    $booklist = $toolbox->get_deleted_books();
+    $booklist = $toolbox->get_booklist(true);
 
 } catch (Exception $exception) {
     $error = $exception->getMessage();
+    require '../common/error.php';
 }
 ?>
 
-<div class="w3-container">
+<h3>Annuler la suppression d'un livre</h3>
 
-    <header class="w3-container w3-green w3-margin-bottom">
-        <h1>Annuler la suppression d'un livre de eBiblio</h1>
-    </header>
+<?php if (empty($booklist)) : ?>
 
-    <?php if (! empty($error)): ?>
-        <?php require '../common/error.php'; ?>
-    <?php endif; ?>
+    <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
+        <p>Aucun livre n'a encore été supprimé.</p>
+    </div>
+
+<?php else: ?>
 
     <form method="post">
 
@@ -47,12 +48,10 @@ try {
 
     </form>
 
-</div>
+    <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
+        <p>La suppression d'un livre ne doit être effectuée que si le livre a été supprimé par erreur.</p>
+    </div>
 
-<div class="w3-panel">
-    <a href="/ebiblio/restricted/get_booklist.php"><i class="fa fa-list" aria-hidden="true"></i>
-        Liste des livres
-    </a>
-</div>
+<?php endif; ?>
 
 <?php require '../common/footer.php'; ?>

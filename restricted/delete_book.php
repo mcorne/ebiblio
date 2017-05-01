@@ -4,52 +4,62 @@ require '../common/header.php';
 /* @var $toolbox toolbox */
 
 try {
-    if (! $book_id = $toolbox->get_input('id') or ! $book_info = $toolbox->get_book_info($book_id)) {
+    if ($toolbox->is_post()) {
+        if ($book_id = $toolbox->get_input('id')) {
+            $toolbox->delete_book($book_id);
+        }
+
         $toolbox->redirect_to_booklist();
     }
 
-    if ($toolbox->is_post()) {
-        $toolbox->delete_book($book_id);
-        $toolbox->redirect_to_booklist();
-    }
+    $booklist = $toolbox->get_booklist(false);
+
 } catch (Exception $exception) {
     $error = $exception->getMessage();
+    require '../common/error.php';
 }
 ?>
 
-<div class="w3-container">
+<h3>Supprimer un livre</h3>
 
-    <header class="w3-container w3-green w3-margin-bottom">
-        <h1>Supprimer le livre de eBiblio</h1>
-    </header>
-
-    <?php if (! empty($error)): ?>
-        <?php require '../common/error.php'; ?>
-    <?php endif; ?>
+<?php if (empty($booklist)) : ?>
 
     <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
-        <h3><?= $toolbox->display_bookname($book_info); ?></h3>
+        <p>La bibliothèque est vide.</p>
     </div>
+
+<?php else: ?>
 
     <form method="post">
 
-        <input name="id" type="hidden" value="<?= $book_id; ?>"/>
+        <select class="w3-select w3-border w3-pale-green" name="id">
 
-        <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Supprimer</button>
+            <option value="" disabled selected>Choisir un livre</option>
+
+            <?php foreach ($booklist as $book_id => $book_info): ?>
+                <option value="<?= $book_id; ?>"><?= $toolbox->display_bookname($book_info); ?></option>
+            <?php endforeach; ?>
+
+        </select>
+
+        <p>
+            <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Supprimer</button>
+        </p>
 
     </form>
 
-    <div class="w3-panel w3-pale-green w3-leftbar w3-border-green">
-        <p>Noter qu'un livre n'est jamais supprimé définitivement, il disparait seulement de la liste des livres.</p>
-        <p>Pour annuler la suppression d'un livre, cliquer sur le lien correspondant dans la liste des livres <i class="fa fa-undo" aria-hidden="true"></i>.</p>
+    <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
+        <p>Un livre ne doit être supprimé qu'exceptionnellement, par exemple s'il s'avère illisible sur une liseuse.</p>
     </div>
 
-</div>
+    <div class="w3-panel w3-pale-green w3-leftbar w3-border-green">
+        <p>Noter qu'un livre n'est jamais supprimé définitivement, il est simplement retiré de la liste des livres.</p>
+        <p>
+            Pour annuler la suppression d'un livre, aller dans le menu <i class="fa fa-bars" aria-hidden="true"></i>,
+            et cliquer sur le lien correspondant <i class="fa fa-undo" aria-hidden="true"></i>.
+        </p>
+    </div>
 
-<div class="w3-panel">
-    <a href="/ebiblio/restricted/get_booklist.php"><i class="fa fa-list" aria-hidden="true"></i>
-        Liste des livres
-    </a>
-</div>
+<?php endif; ?>
 
 <?php require '../common/footer.php'; ?>
