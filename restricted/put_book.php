@@ -10,6 +10,7 @@ try {
     }
 } catch (Exception $exception) {
     $error = $exception->getMessage();
+    require '../common/error.php';
 }
 ?>
 

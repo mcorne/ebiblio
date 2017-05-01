@@ -155,12 +155,12 @@ class toolbox
 
     /**
      *
-     * @param array $book_info
+     * @param array $bookinfo
      * @return string
      */
-    public function display_bookname($book_info)
+    public function display_bookname($bookinfo)
     {
-        $bookname = sprintf('%s, %s', $book_info['title'], $book_info['author']);
+        $bookname = sprintf('%s, %s', $bookinfo['title'], $bookinfo['author']);
         $bookname = trim($bookname, ', ');
         $bookname = htmlspecialchars($bookname);
 
@@ -244,7 +244,7 @@ class toolbox
      * @see http://www.idpf.org/epub/31/spec/epub-packages.html#sec-metadata-elem
      * @see https://github.com/IDPF/epub3-samples
      */
-    public function extract_book_info($tmp_book_dirname)
+    public function extract_bookinfo($tmp_book_dirname)
     {
         if (! $filenames = glob("$tmp_book_dirname/*/*.opf")) {
             throw new Exception("Impossible d'extraire le fichier OPF");
@@ -297,7 +297,7 @@ class toolbox
      * @param string $book_id
      * @return array
      */
-    public function get_book_info($book_id)
+    public function get_bookinfo($book_id)
     {
         $booklist = $this->read_booklist();
 
@@ -319,7 +319,7 @@ class toolbox
 
         foreach ($booklist as $book_id => $bookinfo) {
             if (! $deleted and ! $bookinfo['deleted'] or $deleted and $bookinfo['deleted']) {
-                $bookinfo['uri']       = '/ebiblio/restricted/books/' . $bookinfo['name'];
+                $bookinfo['uri']       = '/ebiblio/restricted/data/books/' . $bookinfo['name'];
                 $sort_column[]         = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
                 $books[$book_id] = $bookinfo;
             }
@@ -330,6 +330,22 @@ class toolbox
         }
 
         return $books;
+    }
+
+    /**
+     *
+     * @param string $bookname
+     * @param string $extension
+     * @return type
+     */
+    public function get_cover_image_source($bookname, $extension)
+    {
+        if ($extension) {
+            $bookname = pathinfo($bookname, PATHINFO_FILENAME);
+            $image_source = sprintf('/ebiblio/restricted/data/covers/%s.%s', $bookname, $extension);
+
+            return $image_source;
+        }
     }
 
     /**
@@ -355,6 +371,36 @@ class toolbox
         if (array_key_exists($key, $input)) {
             return trim($input[$key]);
         }
+    }
+
+    /**
+     *
+     * @param string $language_code
+     * @return string
+     */
+    public function get_language($language_code)
+    {
+        list($language_code) = preg_split('~[_-]~', $language_code);
+
+        if (! $language_code = strtolower($language_code)) {
+            return;
+        }
+
+        switch ($language_code) {
+            case 'en':
+                $language = 'Anglais';
+                break;
+
+            case 'fr':
+                $language = 'Français';
+                break;
+
+            default:
+                $language = sprintf('Autre (%s)', $language_code);
+                break;
+        }
+
+        return $language;
     }
 
     /**
@@ -456,7 +502,7 @@ class toolbox
     {
         $tmp_book_filename = $this->upload_book();
         $tmp_book_dirname  = $this->unzip_book($tmp_book_filename);
-        $bookinfo          = $this->extract_book_info($tmp_book_dirname);
+        $bookinfo          = $this->extract_bookinfo($tmp_book_dirname);
         $cover_filename    = $this->extract_book_cover($tmp_book_dirname);
 
         list($book_id, $bookinfo, $previous_bookinfo) = $this->put_book_in_booklist($bookinfo, $tmp_book_filename, $cover_filename);
@@ -550,7 +596,7 @@ class toolbox
      *
      * @return array
      * @see https://localhost/ebiblio/restricted/test.php?method=create_bookname&args[]={"title":"aaa","author":"bbb","number":"1"}
-     * @see https://localhost/ebiblio/restricted/test.php?method=extract_book_info&args[]=unzip/pg41211-images.epub
+     * @see https://localhost/ebiblio/restricted/test.php?method=extract_bookinfo&args[]=unzip/pg41211-images.epub
      * @see https://localhost/ebiblio/restricted/test.php?method=put_book_in_booklist&args[]={"title":"qqq","author":"sss","name":"zzz"}&args[]=tmp/pg41211-images.epub&args[]=aaa.jpg
      * @see https://localhost/ebiblio/restricted/test.php?method=unzip_book&args[]=Eye of the Needle_Ken Follett.epub
      */

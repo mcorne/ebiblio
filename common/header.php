@@ -21,7 +21,7 @@ $toolbox = new toolbox(DATA_DIR);
         <title>eBiblio</title>
     </head>
 
-    <body>
+    <body class="w3-content">
 
         <div class="w3-container">
 

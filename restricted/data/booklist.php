@@ -6,7 +6,7 @@ return array (
     'cover_ext' => 'jpg',
     'created' => '2017-04-23 14:18:59',
     'date' => '2015-05-28',
-    'deleted' => '2017-05-01 14:24:22',
+    'deleted' => NULL,
     'description' => NULL,
     'identifier' => 'urn:uuid:5f67a883-7a53-4771-bd59-c019733411e1',
     'language' => 'en-US',

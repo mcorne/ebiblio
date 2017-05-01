@@ -58,7 +58,7 @@ try {
             <td><?= htmlspecialchars($bookinfo['author']); ?></td>
 
             <td>
-                <a href="/ebiblio/restricted/get_book_info.php?id=<?= $book_id; ?>">
+                <a href="/ebiblio/restricted/get_bookinfo.php?id=<?= $book_id; ?>">
                     <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
                 </a>
             </td>
