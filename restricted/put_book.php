@@ -5,8 +5,8 @@ require '../common/header.php';
 
 try {
     if ($toolbox->is_post()) {
-        $book_id = $toolbox->put_book();
-        $toolbox->redirect_to_booklist($book_id);
+        list($book_id, $bookinfo) = $toolbox->put_book();
+        $toolbox->redirect_to_booklist('put', $book_id, $bookinfo);
     }
 } catch (Exception $exception) {
     $error = $exception->getMessage();

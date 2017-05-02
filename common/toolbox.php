@@ -125,6 +125,21 @@ class toolbox
 
     /**
      *
+     * @param string $encoded
+     * @return array
+     */
+    public function decode_bookinfo($encoded)
+    {
+        if ($url_decoded = urldecode($encoded) and
+            $json = base64_decode($url_decoded, true) and
+            $bookinfo = json_decode($json, true)
+        ) {
+            return $bookinfo;
+        }
+    }
+
+    /**
+     *
      * @param string $book_id
      */
     public function delete_book($book_id)
@@ -165,6 +180,18 @@ class toolbox
         $bookname = htmlspecialchars($bookname);
 
         return $bookname;
+    }
+
+    /**
+     *
+     * @param array $bookinfo
+     * @return string
+     */
+    public function encode_bookinfo($bookinfo)
+    {
+        if ($json = json_encode($bookinfo) and $encoded = base64_encode($json)) {
+            return $encoded;
+        }
     }
 
     /**
@@ -295,6 +322,39 @@ class toolbox
 
     /**
      *
+     * @param array $booklist
+     * @param string $action
+     * @param string $book_id
+     * @param string $encoded_bookinfo
+     * @return array
+     */
+    public function fix_booklist($booklist, $action, $book_id, $encoded_bookinfo)
+    {
+        switch ($action) {
+            case 'delete':
+                unset($booklist[$book_id]);
+                break;
+
+            case 'put':
+                if ($bookinfo = $this->decode_bookinfo($encoded_bookinfo)) {
+                    $booklist[$book_id] = $bookinfo;
+                }
+                break;
+
+            case 'undelete':
+                var_dump($booklist[$book_id]); // TODO: remove !!!
+                if (isset($booklist[$book_id])) {
+                    $booklist[$book_id]['delete'] = null;
+                    var_dump($booklist[$book_id]); // TODO: remove !!!
+                }
+                break;
+        }
+
+        return $booklist;
+    }
+
+    /**
+     *
      * @param string $book_id
      * @return array
      */
@@ -311,15 +371,24 @@ class toolbox
      *
      * @param bool $deleted
      * @param string $sorting
+     * @param string $action
+     * @param string $selected_book_id
+     * @param array $encoded_bookinfo
      * @return array
      */
-    public function get_booklist($deleted, $sorting = 'title')
+    public function get_booklist($deleted, $sorting = 'title', $action = null, $selected_book_id = null, $encoded_bookinfo = null)
     {
         $booklist = $this->read_booklist();
         $books    = [];
 
+        if ($selected_book_id) {
+            $booklist = $this->fix_booklist($booklist, $action, $selected_book_id, $encoded_bookinfo);
+        }
+
         foreach ($booklist as $book_id => $bookinfo) {
-            if (! $deleted and ! $bookinfo['deleted'] or $deleted and $bookinfo['deleted']) {
+            if (! $deleted and ! $bookinfo['deleted'] or
+                  $deleted and   $bookinfo['deleted']
+            ) {
                 $bookinfo['uri']       = '/ebiblio/restricted/data/books/' . $bookinfo['name'];
                 $sort_column[]         = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
                 $books[$book_id] = $bookinfo;
@@ -497,7 +566,7 @@ class toolbox
 
     /**
      *
-     * @return string
+     * @return array
      */
     public function put_book() // TODO: detect if file encrypted !!!
     {
@@ -512,7 +581,7 @@ class toolbox
         $this->move_cover($cover_filename, $bookinfo, $previous_bookinfo);
         $this->delete_dir($tmp_book_dirname);
 
-        return $book_id;
+        return [$book_id, $bookinfo];
     }
 
     /**
@@ -568,14 +637,30 @@ class toolbox
 
     /**
      *
-     * @param string $id
+     * @param string $action
+     * @param string $book_id
+     * @param array $bookinfo
      */
-    public function redirect_to_booklist($id = null)
+    public function redirect_to_booklist($action = null, $book_id = null, $bookinfo = null)
     {
         $uri = '/ebiblio/restricted/get_booklist.php';
 
-        if ($id) {
-            $uri .= "?id=$id";
+        $params = [];
+
+        if ($action) {
+            $params['action'] = $action;
+        }
+
+        if ($book_id) {
+            $params['id'] = $book_id;
+        }
+
+        if ($bookinfo) {
+            $params['info'] = $this->encode_bookinfo($bookinfo);
+        }
+
+        if ($params) {
+            $uri .= '?' . http_build_query($params);
         }
 
         header("Location: $uri");
@@ -597,6 +682,8 @@ class toolbox
      *
      * @return array
      * @see https://localhost/ebiblio/restricted/test.php?method=create_bookname&args[]={"title":"aaa","author":"bbb","number":"1"}
+     * @see https://localhost/ebiblio/restricted/test.php?method=decode_bookinfo&args[]=eyJ0aXRsZSI6ImFhYSIsImF1dGhvciI6ImJiYiIsIm51bWJlciI6IjEifQ==
+     * @see https://localhost/ebiblio/restricted/test.php?method=encode_bookinfo&args[]={%22title%22:%22aaa%22,%22author%22:%22bbb%22,%22number%22:%221%22}
      * @see https://localhost/ebiblio/restricted/test.php?method=extract_bookinfo&args[]=unzip/pg41211-images.epub
      * @see https://localhost/ebiblio/restricted/test.php?method=put_book_in_booklist&args[]={"title":"qqq","author":"sss","name":"zzz"}&args[]=tmp/pg41211-images.epub&args[]=aaa.jpg
      * @see https://localhost/ebiblio/restricted/test.php?method=unzip_book&args[]=Eye of the Needle_Ken Follett.epub

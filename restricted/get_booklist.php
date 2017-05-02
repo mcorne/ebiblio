@@ -8,9 +8,11 @@ try {
         $sorting = 'title';
     }
 
+    $action           = $toolbox->get_input('action');
+    $encoded_bookinfo = $toolbox->get_input('info');
     $selected_book_id = $toolbox->get_input('id');
 
-    $booklist = $toolbox->get_booklist(false, $sorting);
+    $booklist = $toolbox->get_booklist(false, $sorting, $action, $selected_book_id, $encoded_bookinfo);
 } catch (Exception $exception) {
     $error = $exception->getMessage();
     require '../common/error.php';

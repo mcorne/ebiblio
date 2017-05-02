@@ -9,7 +9,7 @@ try {
             $toolbox->undelete_book($book_id);
         }
 
-        $toolbox->redirect_to_booklist($book_id);
+        $toolbox->redirect_to_booklist('undelete', $book_id);
     }
 
     $booklist = $toolbox->get_booklist(true);

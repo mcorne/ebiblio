@@ -9,7 +9,7 @@ try {
             $toolbox->delete_book($book_id);
         }
 
-        $toolbox->redirect_to_booklist();
+        $toolbox->redirect_to_booklist('delete', $book_id);
     }
 
     $booklist = $toolbox->get_booklist(false);
