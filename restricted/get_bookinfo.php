@@ -24,17 +24,17 @@ try {
 
         <ul class="w3-ul w3-margin-right">
 
-            <?php if (isset($bookinfo['author'])): ?>
-                <li>
-                    <span>Auteur</span><br>
-                    <span class="w3-large"><?= $bookinfo['author']; ?></span>
-                </li>
-            <?php endif; ?>
-
             <?php if (isset($bookinfo['title'])): ?>
                 <li>
                     <span>Titre</span><br>
                     <span class="w3-large"><?= $bookinfo['title']; ?></span>
+                </li>
+            <?php endif; ?>
+
+            <?php if (isset($bookinfo['author'])): ?>
+                <li>
+                    <span>Auteur</span><br>
+                    <span class="w3-large"><?= $bookinfo['author']; ?></span>
                 </li>
             <?php endif; ?>
 

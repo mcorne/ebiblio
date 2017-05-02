@@ -229,7 +229,8 @@ class toolbox
         $file_pattern = '*cover*.{bmp,gif,jpg,jpeg,png,tif,tiff,svg}';
 
         if ($filenames = glob("$tmp_book_dirname/*/$file_pattern", GLOB_BRACE) or
-            $filenames = glob("$tmp_book_dirname/*/*/$file_pattern", GLOB_BRACE)
+            $filenames = glob("$tmp_book_dirname/*/*/$file_pattern", GLOB_BRACE) or
+            $filenames = glob("$tmp_book_dirname/*/*/*/$file_pattern", GLOB_BRACE)
         ) {
             return current($filenames);
         }

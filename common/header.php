@@ -24,8 +24,8 @@ $toolbox = new toolbox(DATA_DIR);
     <body class="w3-content">
 
         <header class="w3-green w3-margin-bottom">
-            <h1>
-                <button class="w3-button w3-xlarge" onclick="w3_open()" style="transform:rotate(180deg)">
+            <h1 class="">
+                <button class="w3-button" onclick="w3_open()" style="transform:rotate(180deg)">
                     <i class="fa fa-bars" aria-hidden="true"></i>
                 </button>
                 eBiblio
