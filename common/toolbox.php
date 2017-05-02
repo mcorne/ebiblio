@@ -321,6 +321,11 @@ class toolbox
     }
 
     /**
+     * Fixes the booklist
+     *
+     * Reading the booklist right after writing it will not reflect the changes due to disk caching latency (?).
+     * This happens on the production server but not on the development box.
+     * Any change to the booklist must then be passed back to the redirect URL to display the booklist!
      *
      * @param array $booklist
      * @param string $action
@@ -342,10 +347,8 @@ class toolbox
                 break;
 
             case 'undelete':
-                var_dump($booklist[$book_id]); // TODO: remove !!!
                 if (isset($booklist[$book_id])) {
-                    $booklist[$book_id]['delete'] = null;
-                    var_dump($booklist[$book_id]); // TODO: remove !!!
+                    $booklist[$book_id]['deleted'] = null;
                 }
                 break;
         }
