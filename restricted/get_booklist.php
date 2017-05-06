@@ -19,7 +19,7 @@ try {
 }
 ?>
 
-<h3 class="w3-container">
+<h3 class="w3-container w3-margin-bottom">
     <a class="w3-text-black" href="">Liste des livres</a>
     <a href=""><i class="fa fa-refresh" aria-hidden="true" style="font-size: 70%"></i></a>
 </h3>

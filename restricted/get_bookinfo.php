@@ -26,64 +26,64 @@ try {
 
             <?php if (isset($bookinfo['title'])): ?>
                 <li>
-                    <span>Titre</span><br>
-                    <span class="w3-large"><?= $bookinfo['title']; ?></span>
+                    <span class="w3-text-gray">Titre</span><br>
+                    <span><?= $bookinfo['title']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['author'])): ?>
                 <li>
-                    <span>Auteur</span><br>
-                    <span class="w3-large"><?= $bookinfo['author']; ?></span>
+                    <span class="w3-text-gray">Auteur</span><br>
+                    <span><?= $bookinfo['author']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($language)): ?>
                 <li>
-                    <span>Langue</span><br>
-                    <span class="w3-large"><?= $language; ?></span>
+                    <span class="w3-text-gray">Langue</span><br>
+                    <span><?= $language; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['date'])): ?>
                 <li>
-                    <span>Date</span><br>
-                    <span class="w3-large"><?= $bookinfo['date']; ?></span>
+                    <span class="w3-text-gray">Date</span><br>
+                    <span><?= $bookinfo['date']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['subject'])): ?>
                 <li>
-                    <span>Sujet</span><br>
-                    <span class="w3-large"><?= $bookinfo['subject']; ?></span>
+                    <span class="w3-text-gray">Sujet</span><br>
+                    <span><?= $bookinfo['subject']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['description'])): ?>
                 <li>
-                    <span>Description</span><br>
-                    <span class="w3-large"><?= $bookinfo['description']; ?></span>
+                    <span class="w3-text-gray">Description</span><br>
+                    <span><?= $bookinfo['description']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['publisher'])): ?>
                 <li>
-                    <span>Éditeur</span><br>
-                    <span class="w3-large"><?= $bookinfo['publisher']; ?></span>
+                    <span class="w3-text-gray">Éditeur</span><br>
+                    <span><?= $bookinfo['publisher']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['rights'])): ?>
                 <li>
-                    <span>Droit d'auteur</span><br>
-                    <span class="w3-large"><?= $bookinfo['rights']; ?></span>
+                    <span class="w3-text-gray">Droit d'auteur</span><br>
+                    <span><?= $bookinfo['rights']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['identifier'])): ?>
                 <li>
-                    <span>Identifiant</span><br>
-                    <span class="w3-large"><?= $bookinfo['identifier']; ?></span>
+                    <span class="w3-text-gray">Identifiant</span><br>
+                    <span><?= $bookinfo['identifier']; ?></span>
                 </li>
             <?php endif; ?>
 
@@ -95,36 +95,36 @@ try {
 
             <?php if (isset($bookinfo['name'])): ?>
                 <li>
-                    <span>Nom du fichier actuel</span><br>
-                    <span class="w3-large"><?= $bookinfo['name']; ?></span>
+                    <span class="w3-text-gray">Nom du fichier actuel</span><br>
+                    <span><?= $bookinfo['name']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['source'])): ?>
                 <li>
-                    <span>Nom du fichier original</span><br>
-                    <span class="w3-large"><?= $bookinfo['source']; ?></span>
+                    <span class="w3-text-gray">Nom du fichier original</span><br>
+                    <span><?= $bookinfo['source']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['number'])): ?>
                 <li>
-                    <span>Numéro d'entrée dans la base</span><br>
-                    <span class="w3-large"><?= $bookinfo['number']; ?></span>
+                    <span class="w3-text-gray">Numéro d'entrée dans la base</span><br>
+                    <span><?= $bookinfo['number']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['created'])): ?>
                 <li>
-                    <span>Date d'entrée</span><br>
-                    <span class="w3-large"><?= $bookinfo['created']; ?></span>
+                    <span class="w3-text-gray">Date d'entrée</span><br>
+                    <span><?= $bookinfo['created']; ?></span>
                 </li>
             <?php endif; ?>
 
             <?php if (isset($bookinfo['updated'])): ?>
                 <li>
-                    <span>Date de mise à jour</span><br>
-                    <span class="w3-large"><?= $bookinfo['updated']; ?></span>
+                    <span class="w3-text-gray">Date de mise à jour</span><br>
+                    <span><?= $bookinfo['updated']; ?></span>
                 </li>
             <?php endif; ?>
 

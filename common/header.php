@@ -42,24 +42,67 @@ $toolbox = new toolbox(DATA_DIR);
             </a>
 
             <a class="w3-bar-item w3-button" href="/ebiblio/restricted/get_booklist.php">
-                <i class="fa fa-list-ol" aria-hidden="true"></i>
+                <i class="fa fa-list-alt" aria-hidden="true"></i>
                 Liste des livres
             </a>
 
-            <a class="w3-bar-item w3-button" href="/ebiblio/restricted/put_book.php">
-                <i class="fa fa-plus" aria-hidden="true"></i>
-                Ajouter un livre
+            <a class="w3-bar-item w3-button" href="/ebiblio/common/send_password.php">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+                Mot de passe oublié
             </a>
 
-            <a class="w3-bar-item w3-button" href="/ebiblio/restricted/delete_book.php">
-                <i class="fa fa-trash" aria-hidden="true"></i>
-                Supprimer un livre
-            </a>
+            <div class="w3-dropdown-hover">
 
-            <a class="w3-bar-item w3-button" href="/ebiblio/restricted/undelete_book.php">
-                <i class="fa fa-undo" aria-hidden="true"></i>
-                Annuler la suppression
-            </a>
+                <button class="w3-button">
+                    <i class="fa fa-cog" aria-hidden="true"></i>
+                    Gérer les livres
+                    <i class="fa fa-caret-down" aria-hidden="true"></i>
+                </button>
+
+                <div class="w3-dropdown-content w3-bar-block">
+
+                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/put_book.php">
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                        Ajouter un livre
+                    </a>
+
+                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/delete_book.php">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                        Supprimer un livre
+                    </a>
+
+                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/undelete_book.php">
+                        <i class="fa fa-undo" aria-hidden="true"></i>
+                        Annuler la suppression
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="w3-dropdown-hover">
+
+                <button class="w3-button">
+                    <i class="fa fa-user" aria-hidden="true"></i>
+                    Gérer mon compte
+                    <i class="fa fa-caret-down" aria-hidden="true"></i>
+                </button>
+
+                <div class="w3-dropdown-content w3-bar-block">
+
+                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/change_email.php">
+                        <i class="fa fa-at" aria-hidden="true"></i>
+                        Changer mon adresse
+                    </a>
+
+                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/change_password.php">
+                        <i class="fa fa-key" aria-hidden="true"></i>
+                        Changer mon mot de passe
+                    </a>
+
+                </div>
+
+            </div>
 
         </div>
 

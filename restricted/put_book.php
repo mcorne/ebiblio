@@ -14,7 +14,7 @@ try {
 }
 ?>
 
-<h3 class="w3-container">Ajouter ou recharger un livre</h3>
+<h3 class="w3-container w3-margin-bottom">Ajouter ou recharger un livre</h3>
 
 <form class="w3-container" enctype="multipart/form-data" method="post">
 

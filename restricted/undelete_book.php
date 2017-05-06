@@ -20,7 +20,7 @@ try {
 }
 ?>
 
-<h3 class="w3-container">Annuler la suppression d'un livre</h3>
+<h3 class="w3-container w3-margin-bottom">Annuler la suppression d'un livre</h3>
 
 <?php if (empty($booklist)) : ?>
 

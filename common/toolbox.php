@@ -5,6 +5,12 @@ class toolbox
 
     /**
      *
+     * @var string
+     */
+    public $account_filename;
+
+    /**
+     *
      * @var array
      */
     public $booklist;
@@ -29,6 +35,7 @@ class toolbox
     {
         $this->data_dir = $data_dir;
 
+        $this->account_filename  = sprintf('%s/.htpasswd', $data_dir);
         $this->booklist_filename = sprintf('%s/booklist.php', $data_dir);
 
         date_default_timezone_set('UTC');
@@ -533,6 +540,22 @@ class toolbox
 
     /**
      *
+     * @param string $email
+     * @return bool
+     */
+    public function is_registered_email($email)
+    {
+        $accounts = $this->read_accounts();
+
+        $pattern = preg_quote($email, '~');
+
+        $is_registered_email = preg_match("~^$pattern:~m", $accounts);
+
+        return $is_registered_email;
+    }
+
+    /**
+     *
      * @param string $tmp_book_filename
      * @param array $bookinfo
      * @param array $previous_bookinfo
@@ -627,6 +650,20 @@ class toolbox
 
     /**
      *
+     * @return string
+     * @throws Exception
+     */
+    public function read_accounts()
+    {
+        if (! file_exists($this->account_filename) or ! $accounts = file_get_contents($this->account_filename)) {
+            throw new Exception("Impossible de lire le fichier des comptes utilisateurs");
+        }
+
+        return $accounts;
+    }
+
+    /**
+     *
      * @return array
      */
     public function read_booklist()
@@ -636,6 +673,17 @@ class toolbox
         }
 
         return $this->booklist;
+    }
+
+    /**
+     *
+     * @param string $uri
+     */
+    public function redirect($uri = null)
+    {
+        header("Location: /ebiblio/$uri");
+        exit;
+
     }
 
     /**
@@ -666,8 +714,57 @@ class toolbox
             $uri .= '?' . http_build_query($params);
         }
 
-        header("Location: $uri");
-        exit;
+        $this->redirect($uri);
+    }
+
+    /**
+     *
+     * @param string $email
+     * @throws Exception
+     */
+    public function send_password($email)
+    {
+        if (! $this->is_registered_email($email)) {
+            return;
+        }
+
+        $subject = 'Votre nouveau mot de passe eBiblio';
+
+        $password = 'a'; // TODO: fix !!!
+
+        $url = sprintf('https://%s:%s@micmap/ebiblio/common/change_password.php', $email, $password);
+
+        $message = '
+<html>
+    <head>
+        <title>eBiblio</title>
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+        Bonjour,<br>
+        <br>
+        Vous recevez ce message car vous avez demandé un nouveau mot de passe.<br>
+        Veuillez cliquer sur le lien suivant pour vous connecter&nbsp;:<br>
+        <a href="%1$s">%1$s</a><br>
+        <br>
+        Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
+        <br>
+        Cordialement,<br>
+        eBiblio
+    </body>
+</html>';
+
+        $message = sprintf($message, $url);
+
+        $headers[] = "From: ebiblio@micmap.com";
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=UTF-8';
+        $headers   = implode("\r\n", $headers);
+
+        if (! mail($email, $subject, $message, $headers)) {
+            throw new Exception("Impossible d'envoyer le nouveau mot de passe");
+        }
     }
 
     /**
