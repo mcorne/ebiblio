@@ -11,6 +11,12 @@ class toolbox
 
     /**
      *
+     * @var string
+     */
+    public $accounts;
+
+    /**
+     *
      * @var array
      */
     public $booklist;
@@ -132,6 +138,25 @@ class toolbox
 
     /**
      *
+     * @return string
+     */
+    public function create_random_password()
+    {
+        $digits    = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._';
+        $max_index = strlen($digits) - 1;
+
+        $password = '';
+
+        for ($i = 0; $i < 8; $i++) {
+            $index     = random_int(0, $max_index);
+            $password .= $digits[$index];
+        }
+
+        return $password;
+    }
+
+    /**
+     *
      * @param string $encoded
      * @return array
      */
@@ -204,13 +229,21 @@ class toolbox
     /**
      * APR1-MD5 encryption method (windows compatible)
      *
+     * Note that the blowfish encryption, eg that password_hash('xyz', PASSWORD_BCRYPT),
+     * is not used because the basic authentication does not work with them on the production system.
+     *
      * @param string $password
+     * @param string $salt
      * @return string
      * @see https://www.virendrachandak.com/techtalk/using-php-create-passwords-for-htpasswd-file/
+     * @see http://httpd.apache.org/docs/current/en/misc/password_encryptions.html
      */
-    public function encrypt_password($password)
+    public function encrypt_password($password, $salt = null)
     {
-        $salt = substr(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), 0, 8);
+        if (! $salt) {
+            $salt = substr(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), 0, 8);
+        }
+
         $len  = strlen($password);
         $text = $password . '$apr1$' . $salt;
         $bin  = pack("H32", md5($password . $salt . $password));
@@ -541,17 +574,32 @@ class toolbox
     /**
      *
      * @param string $email
+     * @param string $password
      * @return bool
      */
-    public function is_registered_email($email)
+    public function is_registered_account($email, $password = null)
     {
         $accounts = $this->read_accounts();
 
-        $pattern = preg_quote($email, '~');
+        $email = preg_quote($email, '~');
 
-        $is_registered_email = preg_match("~^$pattern:~m", $accounts);
+        if (! preg_match("~^$email:(.+)$~m", $accounts, $match)) {
+            return false;;
+        }
 
-        return $is_registered_email;
+        if (! $password) {
+            return true;
+        }
+
+        $expected = $match[1];
+
+        list(,, $salt) = explode('$', $expected);
+
+        $encrypted = $this->encrypt_password($password, $salt);
+
+        $is_same_password = $encrypted == $expected;
+
+        return $is_same_password;
     }
 
     /**
@@ -655,11 +703,15 @@ class toolbox
      */
     public function read_accounts()
     {
-        if (! file_exists($this->account_filename) or ! $accounts = file_get_contents($this->account_filename)) {
+        if (! is_null($this->accounts)) {
+            return $this->accounts;
+        }
+
+        if (! file_exists($this->account_filename) or ! $this->accounts = file_get_contents($this->account_filename)) {
             throw new Exception("Impossible de lire le fichier des comptes utilisateurs");
         }
 
-        return $accounts;
+        return $this->accounts;
     }
 
     /**
@@ -719,18 +771,49 @@ class toolbox
 
     /**
      *
+     * @param string $old_email
+     * @param string $new_email
+     */
+    public function replace_account_email($old_email, $new_email)
+    {
+        $accounts = $this->read_accounts();
+
+        $old_email = preg_quote($old_email, '~');
+        $accounts  = preg_replace("~^$old_email:~m", "$new_email:", $accounts);
+
+        $this->write_accounts($accounts);
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param string $password
+     */
+    public function replace_account_password($email, $password)
+    {
+        $accounts = $this->read_accounts();
+
+        $fixed     = preg_quote($email, '~');
+        $encrypted = $this->encrypt_password($password);
+        $accounts  = preg_replace("~^$fixed:.+$~m", "$email:$encrypted", $accounts);
+
+        $this->write_accounts($accounts);
+    }
+
+    /**
+     *
      * @param string $email
      * @throws Exception
      */
     public function send_password($email)
     {
-        if (! $this->is_registered_email($email)) {
+        if (! $this->is_registered_account($email)) {
             return;
         }
 
         $subject = 'Votre nouveau mot de passe eBiblio';
-
-        $password = 'a'; // TODO: fix !!!
+        $password = $this->create_random_password();
+        $this->replace_account_password($email, $password);
 
         $url = sprintf('https://%s:%s@micmap/ebiblio/common/change_password.php', $email, $password);
 
@@ -790,7 +873,7 @@ class toolbox
      */
     public function unit_test()
     {
-        $args = $_GET['args'];
+        $args = $_GET['args'] ?? [];
 
         foreach ($args as &$arg) {
             if ($decoded = json_decode($arg, true)) {
@@ -852,6 +935,20 @@ class toolbox
         }
 
         return $tmp_book_filename;
+    }
+
+    /**
+     *
+     * @param string $accounts
+     * @throws Exception
+     */
+    public function write_accounts($accounts)
+    {
+        $this->accounts = $accounts;
+
+        if (!file_put_contents($this->account_filename, $accounts)) {
+            throw new Exception("Impossible d'écrire dans le fichier des comptes utilisateurs");
+        }
     }
 
     /**
