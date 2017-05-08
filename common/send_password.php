@@ -23,7 +23,7 @@ try {
 <form class="w3-container" method="post">
 
     <label>Votre adresse électronique</label>
-    <input class="w3-input" name="email" type="text">
+    <input class="w3-input w3-border w3-margin-bottom" name="email" type="text">
 
     <p>
         <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Envoyer</button>

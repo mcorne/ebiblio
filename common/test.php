@@ -15,5 +15,9 @@ if (strtolower($_SERVER['REQUEST_METHOD']) == 'post') {
 </form>
 
 <?php else: ?>
-    <?= $_SESSION['user']; ?> already signed in
+    <?php
+        header('Content-Type: application/epub+zip');
+        header('Content-Disposition: attachment; filename="test.epub"');
+        readfile('../restricted/data/books/Eye of the Needle_Ken Follett_2.epub');
+    ?>
 <?php endif; ?>

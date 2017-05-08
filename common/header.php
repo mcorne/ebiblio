@@ -92,12 +92,12 @@ $toolbox = new toolbox(DATA_DIR);
 
                     <a class="w3-bar-item w3-button" href="/ebiblio/restricted/change_email.php">
                         <i class="fa fa-at" aria-hidden="true"></i>
-                        Changer mon adresse
+                        Changer d'adresse électronique
                     </a>
 
                     <a class="w3-bar-item w3-button" href="/ebiblio/restricted/change_password.php">
                         <i class="fa fa-key" aria-hidden="true"></i>
-                        Changer mon mot de passe
+                        Changer de mot de passe
                     </a>
 
                 </div>
