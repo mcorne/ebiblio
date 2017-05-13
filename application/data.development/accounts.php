@@ -1,4 +1,4 @@
 <?php
 return array (
-  'mcorne@yahoo.com' => '$2y$10$/mZQlQJGtWMs5KwmcfReHOUZVRqEo1ElOzflYHEylY9PPwl71J076',
+  'mcorne@yahoo.com' => '$2y$10$oHBcMwHFOE70rGaOJ3.KQu.qlRZ.vUmMS9lQi6ZSgWWg/RIg4gaj2',
 );

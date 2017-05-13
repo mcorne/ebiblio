@@ -2,22 +2,20 @@
 /* @var $this toolbox */
 
 try {
-    if ($this->is_post()) { // TODO: fix !!!
+    if ($this->is_post()) {
         $email         = $this->get_input('email');
         $old_password  = $this->get_input('old_password');
         $new_password  = $this->get_input('new_password');
-        $new2_password = $this->get_input('new2_password');
 
-        if ($email and $old_password and $new_password and $new2_password) {
-            $this->change_password($email);
+        if ($email and $old_password and $new_password) {
+            $this->change_password($email, $old_password, $new_password);
         }
 
         $this->redirect();
     } else {
-        $email         = null;
-        $old_password  = null;
+        $email         = $this->get_input('email');
+        $old_password  = $this->get_input('password');
         $new_password  = null;
-        $new2_password = null;
     }
 
 } catch (Exception $exception) {
@@ -33,13 +31,10 @@ try {
     <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email; ?>">
 
     <label>Votre mot de passe actuel</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="text" value="<?= $old_password; ?>">
+    <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="password" value="<?= $old_password; ?>">
 
     <label>Votre nouveau mot de passe</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="new_password" type="password" value="<?= $new_password; ?>">
-
-    <label>Confirmation du nouveau mot de passe</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="new2_password" type="password" value="<?= $new_password; ?>">
+    <input class="w3-input w3-border w3-margin-bottom" name="new_password" type="password">
 
     <p>
         <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Changer</button>

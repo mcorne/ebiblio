@@ -1,7 +1,7 @@
 <?php
 class toolbox
 {
-    const MAX_FILE_SIZE = 10 * 1024 *1024; // 10 Mo
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 Mo
 
     /**
      *
@@ -43,13 +43,13 @@ class toolbox
      *
      * @var string
      */
-    public $environment;
+    public $data_dir;
 
     /**
      *
      * @var string
      */
-    public $data_dir;
+    public $environment;
 
     /**
      *
@@ -101,6 +101,19 @@ class toolbox
         $ascii = trim($ascii);
 
         return $ascii;
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param string $old_password
+     * @param string $new_password
+     */
+    public function change_password($email, $old_password, $new_password)
+    {
+        if ($this->is_registered_account($email, $old_password)) {
+            $this->replace_account_password($email, $new_password);
+        }
     }
 
     /**
