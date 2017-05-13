@@ -1,18 +1,15 @@
 <?php
-require '../common/header.php';
-
-/* @var $toolbox toolbox */
+/* @var $this toolbox */
 
 try {
-    if (! $book_id = $toolbox->get_input('id') or ! $bookinfo = $toolbox->get_bookinfo($book_id)) {
-        $toolbox->redirect_to_booklist();
+    if (! $book_id = $this->get_input('id') or ! $bookinfo = $this->get_bookinfo($book_id)) {
+        $this->redirect_to_booklist();
     }
 
-    $image_source = $toolbox->get_cover_image_source($bookinfo['name'], $bookinfo['cover_ext']);
-    $language     = $toolbox->get_language($bookinfo['language']);
+    $language = $this->get_language($bookinfo['language']);
+
 } catch (Exception $exception) {
-    $error = $exception->getMessage();
-    require '../common/error.php';
+    $this->display_exception($exception);
 }
 ?>
 
@@ -133,11 +130,9 @@ try {
     </div>
 
     <div class="w3-half w3-padding">
-        <?php if ($image_source): ?>
-            <img class="w3-image" src="<?= $image_source; ?>" >
+        <?php if ($bookinfo['cover_ext']): ?>
+            <img class="w3-image" src="<?= $this->create_url('display_cover', ['id' => $book_id]); ?>" >
         <?php endif; ?>
     </div>
 
 </div>
-
-<?php require '../common/footer.php'; ?>

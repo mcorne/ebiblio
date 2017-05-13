@@ -1,22 +1,19 @@
 <?php
-require '../common/header.php';
-
-/* @var $toolbox toolbox */
+/* @var $this toolbox */
 
 try {
-    if ($toolbox->is_post()) {
-        if ($book_id = $toolbox->get_input('id')) {
-            $toolbox->undelete_book($book_id);
+    if ($this->is_post()) {
+        if ($book_id = $this->get_input('id')) {
+            $this->undelete_book($book_id);
         }
 
-        $toolbox->redirect_to_booklist('undelete', $book_id);
+        $this->redirect_to_booklist('undelete', $book_id);
     }
 
-    $booklist = $toolbox->get_booklist(true);
-
+    $booklist = $this->get_booklist(true);
+    
 } catch (Exception $exception) {
-    $error = $exception->getMessage();
-    require '../common/error.php';
+    $this->display_exception($exception);
 }
 ?>
 
@@ -37,7 +34,7 @@ try {
             <option value="" disabled selected>Choisir un livre</option>
 
             <?php foreach ($booklist as $book_id => $bookinfo): ?>
-                <option value="<?= $book_id; ?>"><?= $toolbox->display_bookname($bookinfo); ?></option>
+                <option value="<?= $book_id; ?>"><?= $this->display_bookname($bookinfo); ?></option>
             <?php endforeach; ?>
 
         </select>
@@ -53,5 +50,3 @@ try {
     </div>
 
 <?php endif; ?>
-
-<?php require '../common/footer.php'; ?>

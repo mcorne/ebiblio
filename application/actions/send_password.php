@@ -1,20 +1,17 @@
 <?php
-require '../common/header.php';
-
-/* @var $toolbox toolbox */
+/* @var $this toolbox */
 
 try {
-    if ($toolbox->is_post()) {
-        if ($email = $toolbox->get_input('email')) {
-            $toolbox->send_password($email);
+    if ($this->is_post()) {
+        if ($email = $this->get_input('email')) {
+            $this->send_password($email);
         }
 
-        $toolbox->redirect();
+        $this->redirect();
     }
-
+    
 } catch (Exception $exception) {
-    $error = $exception->getMessage();
-    require '../common/error.php';
+    $this->display_exception($exception);
 }
 ?>
 
@@ -42,6 +39,3 @@ try {
         Vous allez être redirigé sur la page d'accueil.
     </p>
 </div>
-
-<?php require '../common/footer.php'; ?>
-

@@ -7,13 +7,25 @@ class toolbox
      *
      * @var string
      */
-    public $account_filename;
+    public $accounts;
 
     /**
      *
      * @var string
      */
-    public $accounts;
+    public $accounts_filename;
+
+    /**
+     *
+     * @var string
+     */
+    public $base_path;
+
+    /**
+     *
+     * @var string
+     */
+    public $base_url;
 
     /**
      *
@@ -31,18 +43,29 @@ class toolbox
      *
      * @var string
      */
+    public $environment;
+
+    /**
+     *
+     * @var string
+     */
     public $data_dir;
 
     /**
      *
-     * @param string $data_dir
+     * @param string $base_path
+     * @param string $base_url
+     * @param string $environment
      */
-    public function __construct($data_dir)
+    public function __construct($base_path, $base_url, $environment)
     {
-        $this->data_dir = $data_dir;
+        $this->base_path   = $base_path;
+        $this->base_url    = $base_url;
+        $this->environment = $environment;
+        $this->data_dir    = sprintf('%s/data.%s', $base_path, $environment);
 
-        $this->account_filename  = sprintf('%s/.htpasswd', $data_dir);
-        $this->booklist_filename = sprintf('%s/booklist.php', $data_dir);
+        $this->accounts_filename = sprintf('%s/accounts.php', $this->data_dir);
+        $this->booklist_filename = sprintf('%s/booklist.php', $this->data_dir);
 
         date_default_timezone_set('UTC');
     }
@@ -78,6 +101,18 @@ class toolbox
         $ascii = trim($ascii);
 
         return $ascii;
+    }
+
+    /**
+     *
+     * @param string $action
+     * @return string
+     */
+    public function create_action_filename($action)
+    {
+        $filename = sprintf('%s/actions/%s.php', $this->base_path, $action);
+
+        return $filename;
     }
 
     /**
@@ -157,6 +192,27 @@ class toolbox
 
     /**
      *
+     * @param string $uri
+     * @param array $params
+     * @return string
+     */
+    public function create_url($uri = null, $params = [])
+    {
+        $url = $this->base_url;
+
+        if ($uri) {
+            $url .= "/$uri";
+        }
+
+        if ($params) {
+            $url .= '?' . http_build_query($params);
+        }
+
+        return $url;
+    }
+
+    /**
+     *
      * @param string $encoded
      * @return array
      */
@@ -216,6 +272,16 @@ class toolbox
 
     /**
      *
+     * @param string $exception
+     */
+    public function display_exception($exception)
+    {
+        $message = $exception->getMessage();
+        require $this->base_path . '/common/exception.php';
+    }
+
+    /**
+     *
      * @param array $bookinfo
      * @return string
      */
@@ -224,66 +290,6 @@ class toolbox
         if ($json = json_encode($bookinfo) and $encoded = base64_encode($json)) {
             return $encoded;
         }
-    }
-
-    /**
-     * APR1-MD5 encryption method (windows compatible)
-     *
-     * Note that the blowfish encryption, eg that password_hash('xyz', PASSWORD_BCRYPT),
-     * is not used because the basic authentication does not work with them on the production system.
-     *
-     * @param string $password
-     * @param string $salt
-     * @return string
-     * @see https://www.virendrachandak.com/techtalk/using-php-create-passwords-for-htpasswd-file/
-     * @see http://httpd.apache.org/docs/current/en/misc/password_encryptions.html
-     */
-    public function encrypt_password($password, $salt = null)
-    {
-        if (! $salt) {
-            $salt = substr(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), 0, 8);
-        }
-
-        $len  = strlen($password);
-        $text = $password . '$apr1$' . $salt;
-        $bin  = pack("H32", md5($password . $salt . $password));
-
-        for($i = $len; $i > 0; $i -= 16) {
-            $text .= substr($bin, 0, min(16, $i));
-        }
-
-        for($i = $len; $i > 0; $i >>= 1) {
-            $text .= ($i & 1) ? chr(0) : $password{0};
-        }
-
-        $bin = pack("H32", md5($text));
-
-        for($i = 0; $i < 1000; $i++) {
-            $new = ($i & 1) ? $password : $bin;
-            if ($i % 3) $new .= $salt;
-            if ($i % 7) $new .= $password;
-            $new .= ($i & 1) ? $bin : $password;
-            $bin = pack("H32", md5($new));
-        }
-
-        $tmp = '';
-
-        for ($i = 0; $i < 5; $i++) {
-            $k = $i + 6;
-            $j = $i + 12;
-            if ($j == 16) $j = 5;
-            $tmp = $bin[$i] . $bin[$k] . $bin[$j] . $tmp;
-        }
-
-        $tmp = chr(0) . chr(0) . $bin[11] . $tmp;
-        $tmp = strtr(
-            strrev(substr(base64_encode($tmp), 2)),
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
-            "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
-
-        $encrypted = "$" . "apr1" . "$" . $salt . "$" . $tmp;
-
-        return $encrypted;
     }
 
     /**
@@ -398,6 +404,24 @@ class toolbox
 
     /**
      *
+     * @return string
+     */
+    public function get_action()
+    {
+        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $path = str_replace('/ebiblio', '', $path);
+
+        if (! $action = trim($path, '/') or
+            ! file_exists($this->create_action_filename($action))
+        ) {
+            $action = 'home';
+        }
+
+        return $action;
+    }
+
+    /**
+     *
      * @param string $book_id
      * @return array
      */
@@ -432,8 +456,7 @@ class toolbox
             if (! $deleted and ! $bookinfo['deleted'] or
                   $deleted and   $bookinfo['deleted']
             ) {
-                $bookinfo['uri']       = '/ebiblio/restricted/data/books/' . $bookinfo['name'];
-                $sort_column[]         = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
+                $sort_column[]   = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
                 $books[$book_id] = $bookinfo;
             }
         }
@@ -449,13 +472,13 @@ class toolbox
      *
      * @param string $bookname
      * @param string $extension
-     * @return type
+     * @return string
      */
     public function get_cover_image_source($bookname, $extension)
     {
         if ($extension) {
             $bookname = pathinfo($bookname, PATHINFO_FILENAME);
-            $image_source = sprintf('/ebiblio/restricted/data/covers/%s.%s', $bookname, $extension);
+            $image_source = "$bookname.$extension";
 
             return $image_source;
         }
@@ -581,9 +604,7 @@ class toolbox
     {
         $accounts = $this->read_accounts();
 
-        $email = preg_quote($email, '~');
-
-        if (! preg_match("~^$email:(.+)$~m", $accounts, $match)) {
+        if (! isset($accounts[$email])) {
             return false;;
         }
 
@@ -591,15 +612,9 @@ class toolbox
             return true;
         }
 
-        $expected = $match[1];
+        $is_password_ok = password_verify($password, $accounts[$email]);
 
-        list(,, $salt) = explode('$', $expected);
-
-        $encrypted = $this->encrypt_password($password, $salt);
-
-        $is_same_password = $encrypted == $expected;
-
-        return $is_same_password;
+        return $is_password_ok;
     }
 
     /**
@@ -707,9 +722,11 @@ class toolbox
             return $this->accounts;
         }
 
-        if (! file_exists($this->account_filename) or ! $this->accounts = file_get_contents($this->account_filename)) {
+        if (! file_exists($this->accounts_filename)) {
             throw new Exception("Impossible de lire le fichier des comptes utilisateurs");
         }
+
+        $this->accounts = include $this->accounts_filename;
 
         return $this->accounts;
     }
@@ -730,12 +747,13 @@ class toolbox
     /**
      *
      * @param string $uri
+     * @param array $params
      */
-    public function redirect($uri = null)
+    public function redirect($uri = null, $params = [])
     {
-        header("Location: /ebiblio/$uri");
+        $url = $this->create_url($uri, $params);
+        header("Location: $url");
         exit;
-
     }
 
     /**
@@ -746,7 +764,8 @@ class toolbox
      */
     public function redirect_to_booklist($action = null, $book_id = null, $bookinfo = null)
     {
-        $uri = '/ebiblio/restricted/get_booklist.php';
+        $uri = 'get_booklist';
+
 
         $params = [];
 
@@ -762,11 +781,7 @@ class toolbox
             $params['info'] = $this->encode_bookinfo($bookinfo);
         }
 
-        if ($params) {
-            $uri .= '?' . http_build_query($params);
-        }
-
-        $this->redirect($uri);
+        $this->redirect($uri, $params);
     }
 
     /**
@@ -778,8 +793,8 @@ class toolbox
     {
         $accounts = $this->read_accounts();
 
-        $old_email = preg_quote($old_email, '~');
-        $accounts  = preg_replace("~^$old_email:~m", "$new_email:", $accounts);
+        $accounts[$new_email] = $accounts[$old_email];
+        unset($accounts[$old_email]);
 
         $this->write_accounts($accounts);
     }
@@ -793,11 +808,23 @@ class toolbox
     {
         $accounts = $this->read_accounts();
 
-        $fixed     = preg_quote($email, '~');
-        $encrypted = $this->encrypt_password($password);
-        $accounts  = preg_replace("~^$fixed:.+$~m", "$email:$encrypted", $accounts);
+        $accounts[$email] = password_hash($password, PASSWORD_DEFAULT);
 
         $this->write_accounts($accounts);
+    }
+
+    public function run_application()
+    {
+        $action = $this->get_action();
+
+        if ($action == 'display_cover' or $action == 'download_book') {
+            require $this->create_action_filename($action);
+        } else {
+            require $this->base_path . '/common/header.php';
+            require $this->create_action_filename($action);
+            require $this->base_path . '/common/footer.php';
+        }
+
     }
 
     /**
@@ -815,7 +842,7 @@ class toolbox
         $password = $this->create_random_password();
         $this->replace_account_password($email, $password);
 
-        $url = sprintf('https://%s:%s@micmap/ebiblio/common/change_password.php', $email, $password);
+        $url = $this->create_url('change_password', ['email' => $email, 'password' => $password]);
 
         $message = '
 <html>
@@ -840,7 +867,7 @@ class toolbox
 
         $message = sprintf($message, $url);
 
-        $headers[] = "From: ebiblio@micmap.com";
+        $headers[] = "From: ebiblio@micmap.com"; // TODO: fix with real domain name
         $headers[] = 'MIME-Version: 1.0';
         $headers[] = 'Content-type: text/html; charset=UTF-8';
         $headers   = implode("\r\n", $headers);
@@ -946,8 +973,11 @@ class toolbox
     {
         $this->accounts = $accounts;
 
-        if (!file_put_contents($this->account_filename, $accounts)) {
-            throw new Exception("Impossible d'écrire dans le fichier des comptes utilisateurs");
+        $exported = var_export($accounts, true);
+        $content  = "<?php\nreturn $exported;\n";
+
+        if (! file_put_contents($this->accounts_filename, $content)) {
+            throw new Exception('Impossible de mettre à jour la liste des livres');
         }
     }
 
@@ -964,7 +994,7 @@ class toolbox
         $content  = "<?php\nreturn $exported;\n";
 
         if (! file_put_contents($this->booklist_filename, $content)) {
-            throw new Exception('Impossible de lire la liste des livres');
+            throw new Exception('Impossible de mettre à jour la liste des livres');
         }
     }
 }

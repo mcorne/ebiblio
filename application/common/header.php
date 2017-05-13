@@ -1,21 +1,12 @@
 <?php
-if (! $data_dir = realpath(__DIR__ . '/../restricted/data')) {
-    echo 'Invalid data directory';
-    exit;
-}
-
-define('DATA_DIR', $data_dir);
-
-require 'toolbox.php';
-$toolbox = new toolbox(DATA_DIR);
+/* @var $this toolbox */
 ?>
-
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="/ebiblio/w3css/4/w3.css" />
-        <link rel="stylesheet" type="text/css" href="/ebiblio/font-awesome-4.7.0/css/font-awesome.min.css">
-        <link rel="stylesheet" type="text/css" href="/ebiblio/interface.css" />
+        <link rel="stylesheet" type="text/css" href="<?= $this->create_url('w3css/4/w3.css'); ?>" />
+        <link rel="stylesheet" type="text/css" href="<?= $this->create_url('font-awesome-4.7.0/css/font-awesome.min.css'); ?>">
+        <link rel="stylesheet" type="text/css" href="<?= $this->create_url('interface.css'); ?>" />
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>eBiblio</title>
@@ -36,17 +27,17 @@ $toolbox = new toolbox(DATA_DIR);
 
             <button onclick="w3_close()" class="w3-bar-item w3-large"><i class="fa fa-window-close" aria-hidden="true"></i></button>
 
-            <a class="w3-bar-item w3-button" href="/ebiblio">
+            <a class="w3-bar-item w3-button" href="<?= $this->create_url(); ?>">
                 <i class="fa fa-home" aria-hidden="true"></i>
                 Accueil
             </a>
 
-            <a class="w3-bar-item w3-button" href="/ebiblio/restricted/get_booklist.php">
+            <a class="w3-bar-item w3-button" href="<?= $this->create_url('get_booklist'); ?>">
                 <i class="fa fa-list-alt" aria-hidden="true"></i>
                 Liste des livres
             </a>
 
-            <a class="w3-bar-item w3-button" href="/ebiblio/common/send_password.php">
+            <a class="w3-bar-item w3-button" href="<?= $this->create_url('send_password'); ?>">
                 <i class="fa fa-lock" aria-hidden="true"></i>
                 Mot de passe oublié
             </a>
@@ -61,17 +52,17 @@ $toolbox = new toolbox(DATA_DIR);
 
                 <div class="w3-dropdown-content w3-bar-block">
 
-                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/put_book.php">
+                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('put_book'); ?>">
                         <i class="fa fa-plus" aria-hidden="true"></i>
                         Ajouter un livre
                     </a>
 
-                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/delete_book.php">
+                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('delete_book'); ?>">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                         Supprimer un livre
                     </a>
 
-                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/undelete_book.php">
+                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('undelete_book'); ?>">
                         <i class="fa fa-undo" aria-hidden="true"></i>
                         Annuler la suppression
                     </a>
@@ -90,12 +81,12 @@ $toolbox = new toolbox(DATA_DIR);
 
                 <div class="w3-dropdown-content w3-bar-block">
 
-                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/change_email.php">
+                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_email'); ?>">
                         <i class="fa fa-at" aria-hidden="true"></i>
                         Changer d'adresse électronique
                     </a>
 
-                    <a class="w3-bar-item w3-button" href="/ebiblio/restricted/change_password.php">
+                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_password'); ?>">
                         <i class="fa fa-key" aria-hidden="true"></i>
                         Changer de mot de passe
                     </a>

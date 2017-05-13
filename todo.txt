@@ -1,3 +1,0 @@
-* add password reset via email
-* add account management
-* email uploaded file as backup

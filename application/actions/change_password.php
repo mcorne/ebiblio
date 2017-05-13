@@ -1,20 +1,18 @@
 <?php
-require '../common/header.php';
-
-/* @var $toolbox toolbox */
+/* @var $this toolbox */
 
 try {
-    if ($toolbox->is_post()) { // TODO: fix !!!
-        $email         = $toolbox->get_input('email');
-        $old_password  = $toolbox->get_input('old_password');
-        $new_password  = $toolbox->get_input('new_password');
-        $new2_password = $toolbox->get_input('new2_password');
+    if ($this->is_post()) { // TODO: fix !!!
+        $email         = $this->get_input('email');
+        $old_password  = $this->get_input('old_password');
+        $new_password  = $this->get_input('new_password');
+        $new2_password = $this->get_input('new2_password');
 
         if ($email and $old_password and $new_password and $new2_password) {
-            $toolbox->change_password($email);
+            $this->change_password($email);
         }
 
-        $toolbox->redirect();
+        $this->redirect();
     } else {
         $email         = null;
         $old_password  = null;
@@ -23,8 +21,7 @@ try {
     }
 
 } catch (Exception $exception) {
-    $error = $exception->getMessage();
-    require '../common/error.php';
+    $this->display_exception($exception);
 }
 ?>
 
@@ -55,6 +52,3 @@ try {
         Vous allez être redirigé sur la page d'accueil.
     </p>
 </div>
-
-<?php require '../common/footer.php'; ?>
-

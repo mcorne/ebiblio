@@ -1,21 +1,19 @@
 <?php
-require '../common/header.php';
-
-/* @var $toolbox toolbox */
+/* @var $this toolbox */
 
 try {
-    if (! $sorting = $toolbox->get_input('sorting') or ! in_array($sorting, ['author', 'title'])) {
+    if (! $sorting = $this->get_input('sorting') or ! in_array($sorting, ['author', 'title'])) {
         $sorting = 'title';
     }
 
-    $action           = $toolbox->get_input('action');
-    $encoded_bookinfo = $toolbox->get_input('info');
-    $selected_book_id = $toolbox->get_input('id');
+    $action           = $this->get_input('action');
+    $encoded_bookinfo = $this->get_input('info');
+    $selected_book_id = $this->get_input('id');
 
-    $booklist = $toolbox->get_booklist(false, $sorting, $action, $selected_book_id, $encoded_bookinfo);
+    $booklist = $this->get_booklist(false, $sorting, $action, $selected_book_id, $encoded_bookinfo);
+
 } catch (Exception $exception) {
-    $error = $exception->getMessage();
-    require '../common/error.php';
+    $this->display_exception($exception);
 }
 ?>
 
@@ -49,21 +47,23 @@ try {
 
         </tr>
 
-        <?php foreach ($booklist as $book_id => $bookinfo): ?>
+        <?php foreach ($booklist as $book_id => $bookinfo):
+                $download_url = $this->create_url('download_book', ['id' => $book_id]);
+        ?>
         <tr <?php if ($book_id == $selected_book_id) : ?>class="w3-pale-red"<?php endif; ?> >
 
             <td>
-                <a href="<?= $bookinfo['uri']; ?>"><i class="fa fa-download fa-lg" aria-hidden="true"></i></a>
+                <a href="<?= $download_url; ?>"><i class="fa fa-download fa-lg" aria-hidden="true"></i></a>
             </td>
 
             <td>
-                <a href="<?= $bookinfo['uri']; ?>"><?= htmlspecialchars($bookinfo['title']); ?></a>
+                <a href="<?= $download_url; ?>"><?= htmlspecialchars($bookinfo['title']); ?></a>
             </td>
 
             <td><?= htmlspecialchars($bookinfo['author']); ?></td>
 
             <td>
-                <a href="/ebiblio/restricted/get_bookinfo.php?id=<?= $book_id; ?>">
+                <a href="<?= $this->create_url('get_bookinfo', ['id' => $book_id]); ?>">
                     <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
                 </a>
             </td>
@@ -74,5 +74,3 @@ try {
     </table>
 
 <?php endif; ?>
-
-<?php require '../common/footer.php'; ?>

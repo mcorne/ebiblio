@@ -1,0 +1,18 @@
+# uncomment the proper environment setting, comment the other
+# note that this setting might be overruled by the php-fpm config if any
+# SetEnv ENVIRONMENT production
+SetEnv ENVIRONMENT development
+
+RewriteEngine On
+
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+
+# select the proper rule depending if ebiblio is run as a domain subpath, eg my.domain.com/ebiblio or not
+# RewriteRule ^.*$ /index.php [NC,L]
+RewriteRule ^.*$ /ebiblio/index.php [NC,L]

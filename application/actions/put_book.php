@@ -1,16 +1,14 @@
 <?php
-require '../common/header.php';
-
-/* @var $toolbox toolbox */
+/* @var $this toolbox */
 
 try {
-    if ($toolbox->is_post()) {
-        list($book_id, $bookinfo) = $toolbox->put_book();
-        $toolbox->redirect_to_booklist('put', $book_id, $bookinfo);
+    if ($this->is_post()) {
+        list($book_id, $bookinfo) = $this->put_book();
+        $this->redirect_to_booklist('put', $book_id, $bookinfo);
     }
+    
 } catch (Exception $exception) {
-    $error = $exception->getMessage();
-    require '../common/error.php';
+    $this->display_exception($exception);
 }
 ?>
 
@@ -41,5 +39,3 @@ try {
 <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
     <p>Le livre doit être au format EPUB sans DRM et d'une taille inférieure à 10 Mo.</p>
 </div>
-
-<?php require '../common/footer.php'; ?>

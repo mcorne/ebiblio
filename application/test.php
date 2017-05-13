@@ -1,6 +1,4 @@
 <?php
-require 'header.php';
-
 session_start([
     'cookie_lifetime' => 10,
 ]);
@@ -23,6 +21,3 @@ if (strtolower($_SERVER['REQUEST_METHOD']) == 'post') {
 
     </body>
 </html>
-
-<?php
-require 'footer.php';

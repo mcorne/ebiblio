@@ -1,9 +1,0 @@
-# AuthUserFile /home/micmap/www/ebiblio/restricted/data/.htpasswd
-AuthUserFile d:\Data\netbeans\ebiblio\restricted\data\.htpasswd
-AuthGroupFile /dev/null
-# MUST BE saved as ANSI or use ASCII for AuthName directive
-AuthName "eBiblio"
-AuthType Basic
-require valid-user
-
-ServerSignature Off
