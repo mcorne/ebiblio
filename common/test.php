@@ -1,10 +1,13 @@
 <?php
+require 'header.php';
+
 session_start([
-    'cookie_lifetime' => 15,
+    'cookie_lifetime' => 10,
 ]);
 
 if (strtolower($_SERVER['REQUEST_METHOD']) == 'post') {
     $_SESSION['user'] = 'toto';
+    header("Location: /ebiblio/common/test.php");
 }
 
 ?>
@@ -13,11 +16,13 @@ if (strtolower($_SERVER['REQUEST_METHOD']) == 'post') {
 <form method="post">
     <input type="submit" value="Signin">
 </form>
-
 <?php else: ?>
-    <?php
-        header('Content-Type: application/epub+zip');
-        header('Content-Disposition: attachment; filename="test.epub"');
-        readfile('../restricted/data/books/Eye of the Needle_Ken Follett_2.epub');
-    ?>
+    <a href="test2.php">indirect</a><br>
+    <a href="/ebiblio/restricted/data/books/Eye of the Needle_Ken Follett_2.epub">direct</a>
 <?php endif; ?>
+
+    </body>
+</html>
+
+<?php
+require 'footer.php';
