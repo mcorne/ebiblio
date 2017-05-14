@@ -83,7 +83,7 @@
 
                     <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_email'); ?>">
                         <i class="fa fa-at" aria-hidden="true"></i>
-                        Changer d'adresse électronique
+                        Changer d'adresse e-mail
                     </a>
 
                     <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_password'); ?>">

@@ -19,7 +19,7 @@ try {
 
 <form class="w3-container" method="post">
 
-    <label>Votre adresse électronique</label>
+    <label>Votre adresse e-mail</label>
     <input class="w3-input w3-border w3-margin-bottom" name="email" type="text">
 
     <p>
@@ -34,7 +34,7 @@ try {
 
 <div class="w3-panel w3-pale-green w3-leftbar w3-border-green">
     <p>
-        Un nouveau mot de passe va être envoyé à votre adresse électronique.<br>
+        Un nouveau mot de passe va être envoyé à votre adresse e-mail.<br>
         Veuillez consulter vos courriels, y compris les courriels indésirables, et suivez les instructions.<br>
         Vous allez être redirigé sur la page d'accueil.
     </p>

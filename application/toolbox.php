@@ -105,6 +105,19 @@ class toolbox
 
     /**
      *
+     * @param string $old_email
+     * @param string $password
+     * @param string $new_email
+     */
+    public function change_email($old_email, $password, $new_email)
+    {
+        if ($this->is_registered_account($old_email, $password)) {
+            $this->replace_account_email($old_email, $new_email);
+        }
+    }
+
+    /**
+     *
      * @param string $email
      * @param string $old_password
      * @param string $new_password
