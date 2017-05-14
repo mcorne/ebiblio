@@ -9,7 +9,7 @@ try {
 
         $this->redirect();
     }
-    
+
 } catch (Exception $exception) {
     $this->display_exception($exception);
 }
@@ -35,7 +35,6 @@ try {
 <div class="w3-panel w3-pale-green w3-leftbar w3-border-green">
     <p>
         Un nouveau mot de passe va être envoyé à votre adresse e-mail.<br>
-        Veuillez consulter vos courriels, y compris les courriels indésirables, et suivez les instructions.<br>
-        Vous allez être redirigé sur la page d'accueil.
+        Veuillez consulter vos courriels, y compris les courriels indésirables, et suivez les instructions.
     </p>
 </div>

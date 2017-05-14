@@ -11,5 +11,3 @@ if ($book_id = $this->get_input('id') and $bookinfo = $this->get_bookinfo($book_
     header('Content-Length: ' . filesize($filename));
     readfile($filename);
 }
-
-exit;

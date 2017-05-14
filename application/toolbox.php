@@ -1,7 +1,9 @@
 <?php
 class toolbox
 {
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 Mo
+    const MAX_FILE_SIZE     = 10 * 1024 * 1024;     // 10 Mo
+    const REPLY_TO_EMAIL    = 'ebiblio@micmap.com';
+    const SESSION_LIFE_TIME = 3600;                 // 1 hour
 
     /**
      *
@@ -111,9 +113,11 @@ class toolbox
      */
     public function change_email($old_email, $password, $new_email)
     {
-        if ($this->is_registered_account($old_email, $password)) {
-            $this->replace_account_email($old_email, $new_email);
+        if (! $this->is_registered_account($old_email, $password)) {
+            throw new Exception('E-mail ou mot de passe incorrect.');
         }
+
+        $this->replace_account_email($old_email, $new_email);
     }
 
     /**
@@ -124,9 +128,11 @@ class toolbox
      */
     public function change_password($email, $old_password, $new_password)
     {
-        if ($this->is_registered_account($email, $old_password)) {
-            $this->replace_account_password($email, $new_password);
+        if (! $this->is_registered_account($email, $old_password)) {
+            throw new Exception('E-mail ou mot de passe incorrect.');
         }
+
+        $this->replace_account_password($email, $new_password);
     }
 
     /**
@@ -254,6 +260,18 @@ class toolbox
 
     /**
      *
+     * @param string $encoded
+     * @return array
+     */
+    public function decode_uri($encoded)
+    {
+        if ($url_decoded = urldecode($encoded) and $uri = base64_decode($url_decoded, true)) {
+            return $uri;
+        }
+    }
+
+    /**
+     *
      * @param string $book_id
      */
     public function delete_book($book_id)
@@ -314,6 +332,20 @@ class toolbox
     public function encode_bookinfo($bookinfo)
     {
         if ($json = json_encode($bookinfo) and $encoded = base64_encode($json)) {
+            return $encoded;
+        }
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function encode_uri()
+    {
+        $uri = str_replace('/ebiblio', '', $_SERVER['REQUEST_URI']);
+
+        if ($uri = trim($uri, '/')) {
+            $encoded = base64_encode($uri);
             return $encoded;
         }
     }
@@ -437,9 +469,7 @@ class toolbox
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $path = str_replace('/ebiblio', '', $path);
 
-        if (! $action = trim($path, '/') or
-            ! file_exists($this->create_action_filename($action))
-        ) {
+        if (! $action = trim($path, '/') or ! file_exists($this->create_action_filename($action))) {
             $action = 'home';
         }
 
@@ -479,9 +509,7 @@ class toolbox
         }
 
         foreach ($booklist as $book_id => $bookinfo) {
-            if (! $deleted and ! $bookinfo['deleted'] or
-                  $deleted and   $bookinfo['deleted']
-            ) {
+            if (! $deleted and ! $bookinfo['deleted'] or $deleted and $bookinfo['deleted']) {
                 $sort_column[]   = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
                 $books[$book_id] = $bookinfo;
             }
@@ -631,16 +659,20 @@ class toolbox
         $accounts = $this->read_accounts();
 
         if (! isset($accounts[$email])) {
-            return false;;
+            $this->reset_session();
+            return false;
         }
 
         if (! $password) {
             return true;
         }
 
-        $is_password_ok = password_verify($password, $accounts[$email]);
+        if (! password_verify($password, $accounts[$email])) {
+            $this->reset_session();
+            return false;
+        }
 
-        return $is_password_ok;
+        return true;
     }
 
     /**
@@ -683,7 +715,7 @@ class toolbox
      *
      * @return array
      */
-    public function put_book() // TODO: detect if file encrypted !!!
+    public function put_book() // TODO: detect if file encrypted
     {
         $tmp_book_filename = $this->upload_book();
         $tmp_book_dirname  = $this->unzip_book($tmp_book_filename);
@@ -839,9 +871,20 @@ class toolbox
         $this->write_accounts($accounts);
     }
 
+    public function reset_session()
+    {
+        unset($_SESSION['email'], $_SESSION['password']);
+    }
+
     public function run_application()
     {
+        session_start(['cookie_lifetime' => toolbox::SESSION_LIFE_TIME]);
+
         $action = $this->get_action();
+
+        if ($action != 'signin' and $action != 'send_password' and $action != 'change_password') {
+            $this->verify_user_signed_in($action);
+        }
 
         if ($action == 'display_cover' or $action == 'download_book') {
             require $this->create_action_filename($action);
@@ -885,6 +928,7 @@ class toolbox
         <a href="%1$s">%1$s</a><br>
         <br>
         Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
+        Veuillez ne pas répondre à ce message.<br>
         <br>
         Cordialement,<br>
         eBiblio
@@ -893,14 +937,36 @@ class toolbox
 
         $message = sprintf($message, $url);
 
-        $headers[] = "From: ebiblio@micmap.com"; // TODO: fix with real domain name
-        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = sprintf('From: %s', toolbox::REPLY_TO_EMAIL);
         $headers[] = 'Content-type: text/html; charset=UTF-8';
         $headers   = implode("\r\n", $headers);
 
         if (! mail($email, $subject, $message, $headers)) {
             throw new Exception("Impossible d'envoyer le nouveau mot de passe");
         }
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param string $password
+     */
+    public function signin($email, $password)
+    {
+        if (! $this->is_registered_account($email, $password)) {
+            header('Location: ' . $_SERVER['REQUEST_URI']);
+            exit;
+        }
+
+        $_SESSION['email']    = $email;
+        $_SESSION['password'] = $password;
+
+        if ($encoded = $this->get_input('redirect') and $uri = $this->decode_uri($encoded)) {
+            $this->redirect($uri);
+        } else {
+            $this->redirect();
+        }
+
     }
 
     /**
@@ -988,6 +1054,29 @@ class toolbox
         }
 
         return $tmp_book_filename;
+    }
+
+    /**
+     *
+     * @param string $action
+     */
+    public function verify_user_signed_in($action)
+    {
+        if (isset($_SESSION['email']) and isset($_SESSION['password'])) {
+            return;
+        }
+
+        if ($action == 'download_book') {
+            // must redirect to the booklist instead of the sign-in page otherwise it gets back to the signin page in a loop (!)
+            $this->redirect('get_booklist');
+        }
+
+        if ($encoded = $this->encode_uri()) {
+            $params = ['redirect' => $encoded];
+            $this->redirect('signin', $params);
+        }
+
+        $this->redirect('signin');
     }
 
     /**

@@ -37,11 +37,6 @@
                 Liste des livres
             </a>
 
-            <a class="w3-bar-item w3-button" href="<?= $this->create_url('send_password'); ?>">
-                <i class="fa fa-lock" aria-hidden="true"></i>
-                Mot de passe oublié
-            </a>
-
             <div class="w3-dropdown-click">
 
                 <button class="w3-button" onclick="open_or_close_dropdown('manage_books')">
@@ -98,4 +93,3 @@
         </div>
 
         <div class="w3-overlay w3-animate-opacity" onclick="close_sidebar()" style="cursor:pointer" id="overlay"></div>
-
