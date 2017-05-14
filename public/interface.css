@@ -27,9 +27,13 @@ th {
     white-space: nowrap;
 }
 
-#mySidebar {
+#sidebar {
     max-height: 400px;
     max-width: 550px;
     width: 80%;
     z-index: 5;
+}
+
+.w3-dropdown-content {
+    padding-left: 16px;
 }

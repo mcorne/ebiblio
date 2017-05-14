@@ -16,16 +16,16 @@
 
         <header class="w3-green w3-margin-bottom">
             <h1 class="">
-                <button class="w3-button" onclick="w3_open()" style="transform:rotate(180deg)">
+                <button class="w3-button" onclick="open_sidebar()" style="transform:rotate(180deg)">
                     <i class="fa fa-bars" aria-hidden="true"></i>
                 </button>
                 eBiblio
             </h1>
         </header>
 
-        <div class="w3-sidebar w3-bar-block w3-border-right w3-text-green" style="display:none" id="mySidebar">
+        <div class="w3-sidebar w3-bar-block w3-border-right w3-text-green" style="display:none" id="sidebar">
 
-            <button onclick="w3_close()" class="w3-bar-item w3-large"><i class="fa fa-window-close" aria-hidden="true"></i></button>
+            <button onclick="close_sidebar()" class="w3-bar-item w3-large"><i class="fa fa-window-close" aria-hidden="true"></i></button>
 
             <a class="w3-bar-item w3-button" href="<?= $this->create_url(); ?>">
                 <i class="fa fa-home" aria-hidden="true"></i>
@@ -42,15 +42,15 @@
                 Mot de passe oublié
             </a>
 
-            <div class="w3-dropdown-hover">
+            <div class="w3-dropdown-click">
 
-                <button class="w3-button">
+                <button class="w3-button" onclick="open_or_close_dropdown('manage_books')">
                     <i class="fa fa-cog" aria-hidden="true"></i>
                     Gérer les livres
                     <i class="fa fa-caret-down" aria-hidden="true"></i>
                 </button>
 
-                <div class="w3-dropdown-content w3-bar-block">
+                <div class="w3-dropdown-content w3-bar-block" id="manage_books">
 
                     <a class="w3-bar-item w3-button" href="<?= $this->create_url('put_book'); ?>">
                         <i class="fa fa-plus" aria-hidden="true"></i>
@@ -71,15 +71,15 @@
 
             </div>
 
-            <div class="w3-dropdown-hover">
+            <div class="w3-dropdown-click">
 
-                <button class="w3-button">
+                <button class="w3-button" onclick="open_or_close_dropdown('my_account')">
                     <i class="fa fa-user" aria-hidden="true"></i>
                     Gérer mon compte
                     <i class="fa fa-caret-down" aria-hidden="true"></i>
                 </button>
 
-                <div class="w3-dropdown-content w3-bar-block">
+                <div class="w3-dropdown-content w3-bar-block" id="my_account">
 
                     <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_email'); ?>">
                         <i class="fa fa-at" aria-hidden="true"></i>
@@ -97,5 +97,5 @@
 
         </div>
 
-        <div class="w3-overlay w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" id="myOverlay"></div>
+        <div class="w3-overlay w3-animate-opacity" onclick="close_sidebar()" style="cursor:pointer" id="overlay"></div>
 
