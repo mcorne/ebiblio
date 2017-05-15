@@ -1,1 +1,2 @@
-This directory contains some of the files of the books unzipped.
+This directory contains unzipped books during the upload process.
+It should be empty most of the time.
