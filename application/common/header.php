@@ -14,13 +14,11 @@
 
     <body class="w3-content">
 
-        <header class="w3-green w3-margin-bottom">
-            <h1 class="">
-                <button class="w3-button" onclick="open_sidebar()" style="transform:rotate(180deg)">
-                    <i class="fa fa-bars" aria-hidden="true"></i>
-                </button>
-                eBiblio
-            </h1>
+        <header class="w3-green w3-xlarge">
+            <button class="w3-button" onclick="open_sidebar()" style="transform:rotate(180deg)">
+                <i class="fa fa-bars" aria-hidden="true"></i>
+            </button>
+            eBiblio
         </header>
 
         <div class="w3-sidebar w3-bar-block w3-border-right w3-text-green" style="display:none" id="sidebar">
