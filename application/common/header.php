@@ -14,21 +14,29 @@
 
     <body class="w3-content">
 
-        <header class="w3-green w3-xlarge">
-            <button class="w3-button" onclick="open_sidebar()" style="transform:rotate(180deg)">
-                <i class="fa fa-bars" aria-hidden="true"></i>
-            </button>
-            eBiblio
+        <header class="w3-display-container w3-green w3-xlarge w3-padding">
+
+            <a href="<?= $this->create_url(); ?>" class="w3-text-white w3-hover-grey">
+                eBiblio
+            </a>
+
+            <span class="w3-large w3-right">
+                <a href="<?= $this->create_url(); ?>" class="w3-text-white w3-hover-grey">
+                    <i class="fa fa-home" aria-hidden="true"></i>
+                </a>
+
+                <a href="<?= $this->create_url('signout'); ?>" class="w3-text-white w3-hover-grey">
+                    <i class="fa fa-sign-out" aria-hidden="true"></i>
+                </a>
+
+                <a href="javascript:open_sidebar()" class="w3-text-white w3-hover-grey">
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                </a>
+            </span>
+
         </header>
 
-        <div class="w3-sidebar w3-bar-block w3-border-right w3-text-green" style="display:none" id="sidebar">
-
-            <button onclick="close_sidebar()" class="w3-bar-item w3-large"><i class="fa fa-window-close" aria-hidden="true"></i></button>
-
-            <a class="w3-bar-item w3-button" href="<?= $this->create_url(); ?>">
-                <i class="fa fa-home" aria-hidden="true"></i>
-                Liste des livres
-            </a>
+        <div class="w3-sidebar w3-bar-block w3-border-right w3-text-green" id="sidebar">
 
             <button class="w3-button w3-block w3-left-align" onclick="accordion('manage_books')">
                 <i class="fa fa-cog" aria-hidden="true"></i>

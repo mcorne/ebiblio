@@ -1076,11 +1076,9 @@ class toolbox
      */
     public function verify_user_signed_in($action)
     {
-        if (isset($_SESSION['email'])) {
-            return;
-        }
-
-        if ($action == 'signin' or $action == 'send_password' or $action == 'change_password') {
+        if (isset($_SESSION['email']) or
+            in_array($action, ['change_password', 'send_password', 'signin', 'signout'])
+        ) {
             return;
         }
 
