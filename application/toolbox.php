@@ -113,8 +113,16 @@ class toolbox
      */
     public function change_email($old_email, $password, $new_email)
     {
+        if (! $old_email or ! $password or ! $new_email) {
+            throw new Exception('Tous les champs sont obligatoires.');
+        }
+
         if (! $this->is_registered_account($old_email, $password)) {
-            throw new Exception('E-mail ou mot de passe incorrect.');
+            throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
+        }
+
+        if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Nouvelle adresse e-mail incorrecte.');
         }
 
         $this->replace_account_email($old_email, $new_email);
@@ -128,8 +136,16 @@ class toolbox
      */
     public function change_password($email, $old_password, $new_password)
     {
+        if (! $email or ! $old_password or ! $new_password) {
+            throw new Exception('Tous les champs sont obligatoires.');
+        }
+
         if (! $this->is_registered_account($email, $old_password)) {
-            throw new Exception('E-mail ou mot de passe incorrect.');
+            throw new Exception('Adresse e-mail inconnue ou mot de passe actuel incorrect.');
+        }
+
+        if (strlen($new_password) < 8 or ! preg_match('~\d~', $new_password) or ! preg_match('~[a-z]~', $new_password)) {
+            throw new Exception('Le nouveau mot de passe doit contenir au moins 8 catactères avec des lettres et des chiffres.');
         }
 
         $this->replace_account_password($email, $new_password);
@@ -379,21 +395,21 @@ class toolbox
     public function extract_bookinfo($tmp_book_dirname)
     {
         if (! $filenames = glob("$tmp_book_dirname/*/*.opf")) {
-            throw new Exception("Impossible d'extraire le fichier OPF");
+            throw new Exception("Impossible d'extraire le fichier OPF.");
         }
 
         $opf_filename = current($filenames);
 
         if (! $content = file_get_contents($opf_filename)) {
-            throw new Exception("Impossible de lire le fichier OPF");
+            throw new Exception("Impossible de lire le fichier OPF.");
         }
 
         if (! $metadata = $this->extract_xml_tag_data('metadata', $content)) {
-            throw new Exception("Impossible d'extraire les metadonnées");
+            throw new Exception("Impossible d'extraire les metadonnées.");
         }
 
         if (! $bookinfo['title'] = $this->extract_xml_tag_data('title', $metadata)) {
-            throw new Exception("Impossible d'extraire le titre");
+            throw new Exception("Impossible d'extraire le titre.");
         }
 
         $bookinfo['author']      = $this->extract_xml_tag_data('creator', $metadata);
@@ -602,35 +618,35 @@ class toolbox
     {
         switch ($_FILES['filename']['error']) {
             case UPLOAD_ERR_INI_SIZE:
-                $message = "The uploaded file exceeds the upload_max_filesize directive in php.ini";
+                $message = "The uploaded file exceeds the upload_max_filesize directive in php.ini.";
                 break;
 
             case UPLOAD_ERR_FORM_SIZE:
-                $message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form";
+                $message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.";
                 break;
 
             case UPLOAD_ERR_PARTIAL:
-                $message = "The uploaded file was only partially uploaded";
+                $message = "The uploaded file was only partially uploaded.";
                 break;
 
             case UPLOAD_ERR_NO_FILE:
-                $message = "No file was uploaded";
+                $message = "No file was uploaded.";
                 break;
 
             case UPLOAD_ERR_NO_TMP_DIR:
-                $message = "Missing a temporary folder";
+                $message = "Missing a temporary folder.";
                 break;
 
             case UPLOAD_ERR_CANT_WRITE:
-                $message = "Failed to write file to disk";
+                $message = "Failed to write file to disk.";
                 break;
 
             case UPLOAD_ERR_EXTENSION:
-                $message = "File upload stopped by extension";
+                $message = "File upload stopped by extension.";
                 break;
 
             default:
-                $message = "Unknown upload error";
+                $message = "Unknown upload error.";
                 break;
         }
 
@@ -713,32 +729,12 @@ class toolbox
 
     /**
      *
-     * @return array
-     */
-    public function put_book() // TODO: detect if file encrypted
-    {
-        $tmp_book_filename = $this->upload_book();
-        $tmp_book_dirname  = $this->unzip_book($tmp_book_filename);
-        $bookinfo          = $this->extract_bookinfo($tmp_book_dirname);
-        $cover_filename    = $this->extract_book_cover($tmp_book_dirname);
-
-        list($book_id, $bookinfo, $previous_bookinfo) = $this->put_book_in_booklist($bookinfo, $tmp_book_filename, $cover_filename);
-
-        $this->move_book($tmp_book_filename, $bookinfo, $previous_bookinfo);
-        $this->move_cover($cover_filename, $bookinfo, $previous_bookinfo);
-        $this->delete_dir($tmp_book_dirname);
-
-        return [$book_id, $bookinfo];
-    }
-
-    /**
-     *
      * @param array $bookinfo
      * @param string $tmp_book_filename
      * @param string $cover_filename
      * @return string
      */
-    public function put_book_in_booklist($bookinfo, $tmp_book_filename, $cover_filename)
+    public function update_booklist($bookinfo, $tmp_book_filename, $cover_filename)
     {
         $book_id  = md5_file($tmp_book_filename);
         $booklist = $this->read_booklist();
@@ -781,7 +777,7 @@ class toolbox
         }
 
         if (! file_exists($this->accounts_filename)) {
-            throw new Exception("Impossible de lire le fichier des comptes utilisateurs");
+            throw new Exception("Impossible de lire le fichier des comptes utilisateurs.");
         }
 
         $this->accounts = include $this->accounts_filename;
@@ -876,15 +872,40 @@ class toolbox
         unset($_SESSION['email'], $_SESSION['password']);
     }
 
+    /**
+     *
+     * @return string
+     */
+    public function retrieve_book()
+    {
+        $tmp_book_filename = sprintf('%s/tmp/%s', $this->data_dir, md5(basename($_FILES['filename']['name'])));
+
+        if (pathinfo($_FILES['filename']['name'], PATHINFO_EXTENSION) != 'epub') {
+            throw new Exception('Extension de fichier non valide.');
+        }
+
+        if ($_FILES['filename']['size'] > toolbox::MAX_FILE_SIZE) {
+            throw new Exception('Fichier trop volumineux.');
+        }
+
+        if ($_FILES['filename']['error'] != UPLOAD_ERR_OK) {
+            throw new Exception($this->get_upload_error_message());
+        }
+
+        if (! move_uploaded_file($_FILES['filename']['tmp_name'], $tmp_book_filename)) {
+            throw new Exception('Impossible de déplacer le fichier.');
+        }
+
+        return $tmp_book_filename;
+    }
+
     public function run_application()
     {
         session_start(['cookie_lifetime' => toolbox::SESSION_LIFE_TIME]);
 
         $action = $this->get_action();
-
-        if ($action != 'signin' and $action != 'send_password' and $action != 'change_password') {
-            $this->verify_user_signed_in($action);
-        }
+        
+        $this->verify_user_signed_in($action);
 
         if ($action == 'display_cover' or $action == 'download_book') {
             require $this->create_action_filename($action);
@@ -942,7 +963,7 @@ class toolbox
         $headers   = implode("\r\n", $headers);
 
         if (! mail($email, $subject, $message, $headers)) {
-            throw new Exception("Impossible d'envoyer le nouveau mot de passe");
+            throw new Exception("Impossible d'envoyer le nouveau mot de passe.");
         }
     }
 
@@ -987,7 +1008,7 @@ class toolbox
      * @see https://localhost/ebiblio/restricted/test.php?method=decode_bookinfo&args[]=eyJ0aXRsZSI6ImFhYSIsImF1dGhvciI6ImJiYiIsIm51bWJlciI6IjEifQ==
      * @see https://localhost/ebiblio/restricted/test.php?method=encode_bookinfo&args[]={%22title%22:%22aaa%22,%22author%22:%22bbb%22,%22number%22:%221%22}
      * @see https://localhost/ebiblio/restricted/test.php?method=extract_bookinfo&args[]=unzip/pg41211-images.epub
-     * @see https://localhost/ebiblio/restricted/test.php?method=put_book_in_booklist&args[]={"title":"qqq","author":"sss","name":"zzz"}&args[]=tmp/pg41211-images.epub&args[]=aaa.jpg
+     * @see https://localhost/ebiblio/restricted/test.php?method=update_booklist&args[]={"title":"qqq","author":"sss","name":"zzz"}&args[]=tmp/pg41211-images.epub&args[]=aaa.jpg
      * @see https://localhost/ebiblio/restricted/test.php?method=unzip_book&args[]=Eye of the Needle_Ken Follett.epub
      */
     public function unit_test()
@@ -1017,11 +1038,11 @@ class toolbox
         $tmp_book_dirname = sprintf('%s/unzip/%s', $this->data_dir, basename($tmp_book_filename));
 
         if (! $zip->open($tmp_book_filename)) {
-            throw new Exception("Impossible d'ouvrir le fichier");
+            throw new Exception("Impossible d'ouvrir le fichier.");
         }
 
         if (! $zip->extractTo($tmp_book_dirname)) {
-            throw new Exception('Impossible de décompresser le fichier');
+            throw new Exception('Impossible de décompresser le fichier.');
         }
 
         $zip->close();
@@ -1031,29 +1052,22 @@ class toolbox
 
     /**
      *
-     * @return string
+     * @return array
      */
-    public function upload_book()
+    public function upload_book() // TODO: detect if file encrypted
     {
-        $tmp_book_filename = sprintf('%s/tmp/%s', $this->data_dir, md5(basename($_FILES['filename']['name'])));
+        $tmp_book_filename = $this->retrieve_book();
+        $tmp_book_dirname  = $this->unzip_book($tmp_book_filename);
+        $bookinfo          = $this->extract_bookinfo($tmp_book_dirname);
+        $cover_filename    = $this->extract_book_cover($tmp_book_dirname);
 
-        if (pathinfo($_FILES['filename']['name'], PATHINFO_EXTENSION) != 'epub') {
-            throw new Exception('Extension de fichier non valide');
-        }
+        list($book_id, $bookinfo, $previous_bookinfo) = $this->update_booklist($bookinfo, $tmp_book_filename, $cover_filename);
 
-        if ($_FILES['filename']['size'] > toolbox::MAX_FILE_SIZE) {
-            throw new Exception('Fichier trop volumineux');
-        }
+        $this->move_book($tmp_book_filename, $bookinfo, $previous_bookinfo);
+        $this->move_cover($cover_filename, $bookinfo, $previous_bookinfo);
+        $this->delete_dir($tmp_book_dirname);
 
-        if ($_FILES['filename']['error'] != UPLOAD_ERR_OK) {
-            throw new Exception($this->get_upload_error_message());
-        }
-
-        if (! move_uploaded_file($_FILES['filename']['tmp_name'], $tmp_book_filename)) {
-            throw new Exception('Impossible de déplacer le fichier');
-        }
-
-        return $tmp_book_filename;
+        return [$book_id, $bookinfo];
     }
 
     /**
@@ -1062,7 +1076,11 @@ class toolbox
      */
     public function verify_user_signed_in($action)
     {
-        if (isset($_SESSION['email']) and isset($_SESSION['password'])) {
+        if (isset($_SESSION['email'])) {
+            return;
+        }
+
+        if ($action == 'signin' or $action == 'send_password' or $action == 'change_password') {
             return;
         }
 
@@ -1092,7 +1110,7 @@ class toolbox
         $content  = "<?php\nreturn $exported;\n";
 
         if (! file_put_contents($this->accounts_filename, $content)) {
-            throw new Exception('Impossible de mettre à jour la liste des livres');
+            throw new Exception('Impossible de mettre à jour le fichier des comptes utilisateurs.');
         }
     }
 
@@ -1109,7 +1127,7 @@ class toolbox
         $content  = "<?php\nreturn $exported;\n";
 
         if (! file_put_contents($this->booklist_filename, $content)) {
-            throw new Exception('Impossible de mettre à jour la liste des livres');
+            throw new Exception('Impossible de mettre à jour la liste des livres.');
         }
     }
 }

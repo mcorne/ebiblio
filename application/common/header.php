@@ -6,7 +6,7 @@
     <head>
         <link rel="stylesheet" type="text/css" href="<?= $this->create_url('w3css/4/w3.css'); ?>" />
         <link rel="stylesheet" type="text/css" href="<?= $this->create_url('font-awesome-4.7.0/css/font-awesome.min.css'); ?>">
-        <link rel="stylesheet" type="text/css" href="<?= $this->create_url('interface.css'); ?>" />
+        <link rel="stylesheet" type="text/css" href="<?= $this->create_url('application.css'); ?>" />
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>eBiblio</title>
@@ -47,7 +47,7 @@
 
                 <div class="w3-dropdown-content w3-bar-block" id="manage_books">
 
-                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('put_book'); ?>">
+                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('upload_book'); ?>">
                         <i class="fa fa-plus" aria-hidden="true"></i>
                         Ajouter un livre
                     </a>

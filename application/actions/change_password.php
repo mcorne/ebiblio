@@ -7,15 +7,8 @@ try {
         $old_password  = $this->get_input('old_password');
         $new_password  = $this->get_input('new_password');
 
-        if ($email and $old_password and $new_password) {
-            $this->change_password($email, $old_password, $new_password);
-        }
-
+        $this->change_password($email, $old_password, $new_password);
         $this->redirect();
-    } else {
-        $email         = $this->get_input('email');
-        $old_password  = $this->get_input('password');
-        $new_password  = null;
     }
 
 } catch (Exception $exception) {
@@ -28,10 +21,10 @@ try {
 <form class="w3-container" method="post">
 
     <label>Votre adresse e-mail</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email; ?>">
+    <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email ?? null; ?>">
 
     <label>Votre mot de passe actuel</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="password" value="<?= $old_password; ?>">
+    <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="password">
 
     <label>Votre nouveau mot de passe</label>
     <input class="w3-input w3-border w3-margin-bottom" name="new_password" type="password">

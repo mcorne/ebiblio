@@ -3,10 +3,14 @@
 
 try {
     if ($this->is_post()) {
-        list($book_id, $bookinfo) = $this->put_book();
-        $this->redirect_to_booklist('put', $book_id, $bookinfo);
+        if (! empty($_FILES['filename']['name'])) {
+            list($book_id, $bookinfo) = $this->upload_book();
+            $this->redirect_to_booklist('put', $book_id, $bookinfo);
+        } else {
+            $this->redirect_to_booklist();
+        }
     }
-    
+
 } catch (Exception $exception) {
     $this->display_exception($exception);
 }

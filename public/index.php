@@ -13,7 +13,12 @@ if (strpos($_SERVER['REQUEST_URI'], '/ebiblio') === 0) {
     $base_url .= '/ebiblio';
 }
 
-require_once 'toolbox.php';
-
-$toolbox = new toolbox($base_path, $base_url, $environment);
-$toolbox->run_application();
+try {
+    require_once 'toolbox.php';
+    $toolbox = new toolbox($base_path, $base_url, $environment);
+    $toolbox->run_application();
+} catch (Exception $exception) {
+    echo 'There is a technical problem. Sorry for the inconvenience. Please contact the administrator.';
+    echo '<br>';
+    echo $exception->getMessage();
+}
