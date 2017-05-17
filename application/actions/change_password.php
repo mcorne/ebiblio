@@ -8,6 +8,7 @@ try {
         $new_password  = $this->get_input('new_password');
 
         $this->change_password($email, $old_password, $new_password);
+        $this->reset_session();
         $this->redirect();
     }
 
@@ -34,9 +35,3 @@ try {
     </p>
 
 </form>
-
-<div class="w3-panel w3-pale-green w3-leftbar w3-border-green">
-    <p>
-        Vous allez être redirigé sur la page d'accueil.
-    </p>
-</div>
