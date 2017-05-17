@@ -486,7 +486,7 @@ class toolbox
         $path = str_replace('/ebiblio', '', $path);
 
         if (! $action = trim($path, '/') or ! file_exists($this->create_action_filename($action))) {
-            $action = 'home';
+            $action = 'get_booklist';
         }
 
         return $action;
@@ -904,7 +904,7 @@ class toolbox
         session_start(['cookie_lifetime' => toolbox::SESSION_LIFE_TIME]);
 
         $action = $this->get_action();
-        
+
         $this->verify_user_signed_in($action);
 
         if ($action == 'display_cover' or $action == 'download_book') {

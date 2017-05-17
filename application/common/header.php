@@ -27,11 +27,6 @@
 
             <a class="w3-bar-item w3-button" href="<?= $this->create_url(); ?>">
                 <i class="fa fa-home" aria-hidden="true"></i>
-                Accueil
-            </a>
-
-            <a class="w3-bar-item w3-button" href="<?= $this->create_url('get_booklist'); ?>">
-                <i class="fa fa-list-alt" aria-hidden="true"></i>
                 Liste des livres
             </a>
 
