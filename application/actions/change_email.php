@@ -9,7 +9,7 @@ try {
 
         $this->change_email($old_email, $password, $new_email);
         $this->reset_session();
-        $this->redirect();
+        $this->redirect('signin');
     }
 
 } catch (Exception $exception) {

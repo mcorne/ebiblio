@@ -7,4 +7,4 @@ try {
 } catch (Exception $exception) {
 }
 
-$this->redirect();
+$this->redirect('signin');

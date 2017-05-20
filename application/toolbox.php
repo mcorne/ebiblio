@@ -148,7 +148,7 @@ class toolbox
             throw new Exception('Le nouveau mot de passe doit contenir au moins 8 catactères avec des lettres et des chiffres.');
         }
 
-        $this->replace_account_password($email, $new_password);
+        $this->replace_account_password($email, $new_password, false);
     }
 
     /**
@@ -293,7 +293,7 @@ class toolbox
     public function delete_book($book_id)
     {
         $booklist = $this->read_booklist();
-        $booklist[$book_id]['deleted'] = $this->get_date();
+        $booklist[$book_id]['deleted'] = $this->get_datetime();
         $this->write_booklist($booklist);
     }
 
@@ -556,13 +556,14 @@ class toolbox
 
     /**
      *
+     * @param int $timestamp
      * @return string
      */
-    public function get_date()
+    public function get_datetime($timestamp = null)
     {
-        $date = date('Y-m-d H:i:s');
+        $datetime = date('Y-m-d H:i:s', $timestamp ?: time());
 
-        return $date;
+        return $datetime;
     }
 
     /**
@@ -679,11 +680,24 @@ class toolbox
             return false;
         }
 
+        $account = $accounts[$email];
+
+        $current_datetime = $this->get_datetime();
+
+        if ($account['start_date'] > $current_datetime or
+            $account['end_date'] and $account['end_date'] < $current_datetime
+        ) {
+            $this->reset_session();
+            return false;
+        }
+
         if (! $password) {
             return true;
         }
 
-        if (! password_verify($password, $accounts[$email])) {
+        if ($account['password_end_date'] and $account['password_end_date'] < $current_datetime or
+            ! password_verify($password, $account['password'])
+        ) {
             $this->reset_session();
             return false;
         }
@@ -740,11 +754,11 @@ class toolbox
         $booklist = $this->read_booklist();
 
         if (isset($booklist[$book_id])) {
-            $bookinfo['updated'] = $this->get_date();
+            $bookinfo['updated'] = $this->get_datetime();
             $previous_bookinfo   = $booklist[$book_id];
             $bookinfo            += $previous_bookinfo;
         } else {
-            $bookinfo['created'] = $this->get_date();
+            $bookinfo['created'] = $this->get_datetime();
             $bookinfo['deleted'] = null;
             $bookinfo['number']  = count($booklist) + 1;
             $bookinfo['updated'] = null;
@@ -857,12 +871,19 @@ class toolbox
      *
      * @param string $email
      * @param string $password
+     * @param bool $is_temp_password
      */
-    public function replace_account_password($email, $password)
+    public function replace_account_password($email, $password, $is_temp_password)
     {
         $accounts = $this->read_accounts();
 
-        $accounts[$email] = password_hash($password, PASSWORD_DEFAULT);
+        $accounts[$email]['password'] = password_hash($password, PASSWORD_DEFAULT);
+
+        if ($is_temp_password) {
+            $accounts[$email]['password_end_date'] = $this->get_datetime(time() + 24 * 3600);
+        } else {
+            $accounts[$email]['password_end_date'] = null;
+        }
 
         $this->write_accounts($accounts);
     }
@@ -930,7 +951,8 @@ class toolbox
 
         $subject = 'Votre nouveau mot de passe eBiblio';
         $password = $this->create_random_password();
-        $this->replace_account_password($email, $password);
+        $this->replace_account_password($email, $password, true);
+        $this->reset_session();
 
         $url = $this->create_url('change_password', ['email' => $email, 'password' => $password]);
 

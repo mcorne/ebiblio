@@ -31,7 +31,7 @@ th {
     display: none;
     max-height: 350px;
     max-width: 400px;
-    right: 0;
+    /* right: 0; */
     width: 80%;
     z-index: 5;
 }

@@ -9,9 +9,11 @@ try {
 
         $this->change_password($email, $old_password, $new_password);
         $this->reset_session();
-        $this->redirect();
+        $this->redirect('signin');
+    } else {
+        $email     = $this->get_input('email');
+        $password  = $this->get_input('password');
     }
-
 } catch (Exception $exception) {
     $this->display_exception($exception);
 }
@@ -25,7 +27,7 @@ try {
     <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email ?? null; ?>">
 
     <label>Votre mot de passe actuel</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="password">
+    <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="password" value="<?= $password ?? null; ?>">
 
     <label>Votre nouveau mot de passe</label>
     <input class="w3-input w3-border w3-margin-bottom" name="new_password" type="password">
