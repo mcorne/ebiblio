@@ -130,6 +130,19 @@ class toolbox
 
     /**
      *
+     * @param string $new_book_notification
+     */
+    public function change_options($new_book_notification)
+    {
+        $accounts = $this->read_accounts();
+
+        $accounts[ $_SESSION['email'] ]['options']['new_book_notification'] = (bool) $new_book_notification;
+
+        $this->write_accounts($accounts);
+    }
+
+    /**
+     *
      * @param string $email
      * @param string $old_password
      * @param string $new_password
@@ -608,6 +621,17 @@ class toolbox
         }
 
         return $language;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function get_options()
+    {
+        $accounts = $this->read_accounts();
+
+        return $accounts[ $_SESSION['email'] ]['options'];
     }
 
     /**

@@ -4,8 +4,11 @@ return array (
   array (
     'administrator' => true,
     'end_date' => NULL,
-    'notification' => true,
-    'password' => '$2y$10$4X.pszEzabAjwLzwLDWs0eKjbOSkPAiF8Q3/Py5hfhWMj8wcx.Hfy',
+    'options' => 
+    array (
+      'new_book_notification' => true,
+    ),
+    'password' => '$2y$10$icbeqt28QNXI.Nf9pDUpruO2/o.zaFt4kgGH3fwzrjNPbSQh6VMRG',
     'password_end_date' => NULL,
     'start_date' => '2017-05-20 10:00:00',
   ),

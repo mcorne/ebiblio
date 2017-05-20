@@ -10,10 +10,11 @@ try {
         $this->change_password($email, $old_password, $new_password);
         $this->reset_session();
         $this->redirect('signin');
-    } else {
-        $email     = $this->get_input('email');
-        $password  = $this->get_input('password');
     }
+
+    $email    = $this->get_input('email');
+    $password = $this->get_input('password');
+
 } catch (Exception $exception) {
     $this->display_exception($exception);
 }

@@ -41,7 +41,7 @@
         <div class="w3-sidebar w3-bar-block w3-border-right w3-text-green" id="sidebar">
 
             <button class="w3-button w3-block w3-left-align" onclick="accordion('manage_books')">
-                <i class="fa fa-cog" aria-hidden="true"></i>
+                <i class="fa fa-book" aria-hidden="true"></i>
                 Gérer les livres
                 <i class="fa fa-caret-down" aria-hidden="true"></i>
             </button>
@@ -81,6 +81,11 @@
                 <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_password'); ?>">
                     <i class="fa fa-key" aria-hidden="true"></i>
                     Changer de mot de passe
+                </a>
+
+                <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_options'); ?>">
+                    <i class="fa fa-cog" aria-hidden="true"></i>
+                    Changer les options
                 </a>
 
             </div>
