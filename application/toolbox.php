@@ -1,8 +1,8 @@
 <?php
 class toolbox
 {
+    const EBIBLIO_EMAIL     = 'ebiblio@micmap.com';
     const MAX_FILE_SIZE     = 10 * 1024 * 1024;     // 10 Mo
-    const REPLY_TO_EMAIL    = 'ebiblio@micmap.com';
     const SESSION_LIFE_TIME = 3600;                 // 1 hour
 
     /**
@@ -126,6 +126,7 @@ class toolbox
         }
 
         $this->replace_account_email($old_email, $new_email);
+        $this->reset_session();
     }
 
     /**
@@ -162,6 +163,7 @@ class toolbox
         }
 
         $this->replace_account_password($email, $new_password, false);
+        $this->reset_session();
     }
 
     /**
@@ -569,12 +571,12 @@ class toolbox
 
     /**
      *
-     * @param int $timestamp
+     * @param int $offset
      * @return string
      */
-    public function get_datetime($timestamp = null)
+    public function get_datetime($offset = 0)
     {
-        $datetime = date('Y-m-d H:i:s', $timestamp ?: time());
+        $datetime = date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME'] + $offset);
 
         return $datetime;
     }
@@ -700,7 +702,6 @@ class toolbox
         $accounts = $this->read_accounts();
 
         if (! isset($accounts[$email])) {
-            $this->reset_session();
             return false;
         }
 
@@ -711,7 +712,6 @@ class toolbox
         if ($account['start_date'] > $current_datetime or
             $account['end_date'] and $account['end_date'] < $current_datetime
         ) {
-            $this->reset_session();
             return false;
         }
 
@@ -722,7 +722,6 @@ class toolbox
         if ($account['password_end_date'] and $account['password_end_date'] < $current_datetime or
             ! password_verify($password, $account['password'])
         ) {
-            $this->reset_session();
             return false;
         }
 
@@ -858,7 +857,6 @@ class toolbox
     {
         $uri = 'get_booklist';
 
-
         $params = [];
 
         if ($action) {
@@ -904,7 +902,7 @@ class toolbox
         $accounts[$email]['password'] = password_hash($password, PASSWORD_DEFAULT);
 
         if ($is_temp_password) {
-            $accounts[$email]['password_end_date'] = $this->get_datetime(time() + 24 * 3600);
+            $accounts[$email]['password_end_date'] = $this->get_datetime(24 * 3600);
         } else {
             $accounts[$email]['password_end_date'] = null;
         }
@@ -965,6 +963,84 @@ class toolbox
     /**
      *
      * @param string $email
+     * @param string $subject
+     * @param string $message
+     * @return type
+     */
+    public function send_email($email, $subject, $message)
+    {
+        $headers[] = sprintf('From: %s', toolbox::EBIBLIO_EMAIL);
+        $headers[] = 'Content-type: text/html; charset=UTF-8';
+        $headers   = implode("\r\n", $headers);
+
+        $success = mail($email, $subject, $message, $headers);
+
+        return $success;
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param string $book_id
+     * @param array $bookinfo
+     * @throws Exception
+     */
+    public function send_new_book_notification($email, $book_id, $bookinfo)
+    {
+        $subject = 'Nouveau livre dans eBiblio';
+
+        $message = '
+<html>
+    <head>
+        <title>eBiblio</title>
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+        Bonjour,<br>
+        <br>
+        Vous recevez ce message car un nouveau livre a été ajouté dans la bibliothèque&nbsp;:<br>
+        <a href="%s">%s, %s</a><br>
+        <br>
+        Si vous ne souhaitez plus recevoir de notification, veuillez cliquer sur le lien suivant pour changer vos options&nbsp;:<br>
+        <a href="%s">Changer les options</a><br>
+        <br>
+        Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
+        Veuillez ne pas répondre à ce message.<br>
+        <br>
+        Cordialement,<br>
+        eBiblio
+    </body>
+</html>';
+
+        $book_url    = $this->create_url('get_booklist', ['id' => $book_id]);
+        $options_url = $this->create_url('change_options');
+
+        $message = sprintf($message, $book_url, $bookinfo['title'], $bookinfo['author'], $options_url);
+
+        $this->send_email($email, $subject, $message);
+        // note that any error when sending the email is silently ignored
+    }
+
+    /**
+     *
+     * @param string $book_id
+     * @param array $bookinfo
+     */
+    public function send_new_book_notifications($book_id, $bookinfo)
+    {
+        $accounts = $this->read_accounts();
+
+        foreach ($accounts as $email => $account) {
+            if ($account['options']['new_book_notification'] and $this->is_registered_account($email)) {
+                $this->send_new_book_notification($email, $book_id, $bookinfo);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param string $email
      * @throws Exception
      */
     public function send_password($email)
@@ -973,12 +1049,11 @@ class toolbox
             return;
         }
 
-        $subject = 'Votre nouveau mot de passe eBiblio';
         $password = $this->create_random_password();
         $this->replace_account_password($email, $password, true);
         $this->reset_session();
 
-        $url = $this->create_url('change_password', ['email' => $email, 'password' => $password]);
+        $subject = 'Votre nouveau mot de passe eBiblio';
 
         $message = '
 <html>
@@ -1002,13 +1077,10 @@ class toolbox
     </body>
 </html>';
 
+        $url     = $this->create_url('change_password', ['email' => $email, 'password' => $password]);
         $message = sprintf($message, $url);
 
-        $headers[] = sprintf('From: %s', toolbox::REPLY_TO_EMAIL);
-        $headers[] = 'Content-type: text/html; charset=UTF-8';
-        $headers   = implode("\r\n", $headers);
-
-        if (! mail($email, $subject, $message, $headers)) {
+        if (! $this->send_email($email, $subject, $message)) {
             throw new Exception("Impossible d'envoyer le nouveau mot de passe.");
         }
     }
@@ -1021,6 +1093,7 @@ class toolbox
     public function signin($email, $password)
     {
         if (! $this->is_registered_account($email, $password)) {
+            $this->reset_session();
             header('Location: ' . $_SERVER['REQUEST_URI']);
             exit;
         }
@@ -1045,31 +1118,6 @@ class toolbox
         $booklist = $this->read_booklist();
         $booklist[$book_id]['deleted'] = null;
         $this->write_booklist($booklist);
-    }
-
-    /**
-     *
-     * @return array
-     * @see https://localhost/ebiblio/restricted/test.php?method=create_bookname&args[]={"title":"aaa","author":"bbb","number":"1"}
-     * @see https://localhost/ebiblio/restricted/test.php?method=decode_bookinfo&args[]=eyJ0aXRsZSI6ImFhYSIsImF1dGhvciI6ImJiYiIsIm51bWJlciI6IjEifQ==
-     * @see https://localhost/ebiblio/restricted/test.php?method=encode_bookinfo&args[]={%22title%22:%22aaa%22,%22author%22:%22bbb%22,%22number%22:%221%22}
-     * @see https://localhost/ebiblio/restricted/test.php?method=extract_bookinfo&args[]=unzip/pg41211-images.epub
-     * @see https://localhost/ebiblio/restricted/test.php?method=update_booklist&args[]={"title":"qqq","author":"sss","name":"zzz"}&args[]=tmp/pg41211-images.epub&args[]=aaa.jpg
-     * @see https://localhost/ebiblio/restricted/test.php?method=unzip_book&args[]=Eye of the Needle_Ken Follett.epub
-     */
-    public function unit_test()
-    {
-        $args = $_GET['args'] ?? [];
-
-        foreach ($args as &$arg) {
-            if ($decoded = json_decode($arg, true)) {
-                $arg = $decoded;
-            }
-        }
-
-        $result = call_user_func_array([$this, $_GET['method']], $args);
-
-        return $result;
     }
 
     /**
@@ -1112,6 +1160,10 @@ class toolbox
         $this->move_book($tmp_book_filename, $bookinfo, $previous_bookinfo);
         $this->move_cover($cover_filename, $bookinfo, $previous_bookinfo);
         $this->delete_dir($tmp_book_dirname);
+
+        if (! $previous_bookinfo) {
+            $this->send_new_book_notifications($book_id, $bookinfo);
+        }
 
         return [$book_id, $bookinfo];
     }

@@ -8,7 +8,6 @@ try {
         $new_password  = $this->get_input('new_password');
 
         $this->change_password($email, $old_password, $new_password);
-        $this->reset_session();
         $this->redirect('signin');
     }
 
