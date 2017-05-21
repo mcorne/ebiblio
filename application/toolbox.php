@@ -1139,9 +1139,7 @@ class toolbox
     public function signin($email, $password)
     {
         if (! $this->is_registered_account($email, $password)) {
-            $this->reset_session();
-            header('Location: ' . $_SERVER['REQUEST_URI']);
-            exit;
+            throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
         }
 
         $_SESSION['email']    = $email;

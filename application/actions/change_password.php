@@ -2,6 +2,9 @@
 /* @var $this toolbox */
 
 try {
+    // captures the password passed as url param if any, that is the new password sent by email
+    $password = $this->get_input('password');
+
     if ($this->is_post()) {
         $email         = $this->get_input('email');
         $old_password  = $this->get_input('old_password');
@@ -12,7 +15,6 @@ try {
     }
 
     $email    = $this->get_input('email');
-    $password = $this->get_input('password');
 
 } catch (Exception $exception) {
     $this->display_exception($exception);

@@ -12,14 +12,15 @@ try {
     }
 
 } catch (Exception $exception) {
-    $this->display_exception($exception);
 }
 ?>
 
 <div class="w3-modal w3-show">
     <div class="w3-modal-content w3-card-4 w3-animate-zoom w3-padding" style="max-width:600px">
 
-        <form class="w3-container" method="post">
+        <?php isset($exception) and $this->display_exception($exception); ?>
+
+        <form class="w3-container w3-margin-top" method="post">
 
             <label>Votre adresse e-mail</label>
             <input class="w3-input w3-border w3-margin-bottom" name="email" type="text">
