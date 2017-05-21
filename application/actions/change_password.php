@@ -11,7 +11,7 @@ try {
         $new_password  = $this->get_input('new_password');
 
         $this->change_password($email, $old_password, $new_password);
-        $this->redirect('signin');
+        $this->redirect('sign_in');
     }
 
     $email    = $this->get_input('email');

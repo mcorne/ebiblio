@@ -31,7 +31,7 @@
                     <i class="fa fa-home" aria-hidden="true"></i>
                 </a>
 
-                <a href="<?= $this->create_url('signout'); ?>" class="w3-text-white w3-hover-grey">
+                <a href="<?= $this->create_url('sign_out'); ?>" class="w3-text-white w3-hover-grey">
                     <i class="fa fa-sign-out" aria-hidden="true"></i>
                 </a>
             </span>

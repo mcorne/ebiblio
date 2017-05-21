@@ -72,6 +72,20 @@ class toolbox
         date_default_timezone_set('UTC');
     }
 
+    public function add_or_replace_account($email, $password)// TODO: finish !!!
+    {
+        $accounts = $this->read_accounts();
+
+        $account = [
+        ];
+
+        $accounts[$email]['password'] = password_hash($password, PASSWORD_DEFAULT);
+
+        $accounts[$email]['password_end_date'] = $this->get_datetime(24 * 3600);
+
+        $this->write_accounts($accounts);
+    }
+
     /**
      *
      * Note that iconv() is not used as it produces different results across PHP versions,
@@ -1113,7 +1127,7 @@ class toolbox
         <br>
         Vous recevez ce message car vous avez demandé un nouveau mot de passe.<br>
         Veuillez cliquer sur le lien suivant pour vous connecter&nbsp;:<br>
-        <a href="%1$s">%1$s</a><br>
+        <a href="%s">Se connecter</a><br>
         <br>
         Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
         Veuillez ne pas répondre à ce message.<br>
@@ -1136,7 +1150,7 @@ class toolbox
      * @param string $email
      * @param string $password
      */
-    public function signin($email, $password)
+    public function sign_in($email, $password)
     {
         if (! $this->is_registered_account($email, $password)) {
             throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
@@ -1150,7 +1164,52 @@ class toolbox
         } else {
             $this->redirect();
         }
+    }
 
+    /**
+     *
+     * @param string $email
+     * @throws Exception
+     */
+    public function sign_up($email) // TODO: finish !!!
+    {
+        if ($this->is_registered_account($email)) {
+            throw new Exception('Adresse e-mail déjà enregistrée.');
+        }
+
+        $this->add_or_replace_account($email);
+        $this->reset_session();
+
+        $subject = 'Inscription à eBiblio';
+
+        $message = '
+<html>
+    <head>
+        <title>eBiblio</title>
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+        Bonjour,<br>
+        <br>
+        Vous recevez ce message car vous avez fait une demande d\'incription à la bibliothèque.<br>
+        Veuillez cliquer sur le lien suivant pour confirmer votre adresse e-mail&nbsp;:<br>
+        <a href="%s">Confirmer mon adresse e-mail</a><br>
+        <br>
+        Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
+        Veuillez ne pas répondre à ce message.<br>
+        <br>
+        Cordialement,<br>
+        eBiblio
+    </body>
+</html>';
+
+        $url     = $this->create_url('confirm_email', ['email' => $email, 'password' => $password]);
+        $message = sprintf($message, $url);
+
+        if (! $this->send_email($email, $subject, $message)) {
+            throw new Exception("Impossible d'envoyer le message d'inscription.");
+        }
     }
 
     /**
@@ -1219,22 +1278,22 @@ class toolbox
     public function verify_user_signed_in($action)
     {
         if (isset($_SESSION['email']) or
-            in_array($action, ['change_password', 'send_password', 'signin', 'signout'])
+            in_array($action, ['change_password', 'send_password', 'sign_in', 'sign_out', 'sign_up'])
         ) {
             return;
         }
 
         if ($action == 'download_book') {
-            // must redirect to the booklist instead of the sign-in page otherwise it gets back to the signin page in a loop (!)
+            // must redirect to the booklist instead of the sign-in page otherwise it gets back to the sign_in page in a loop (!)
             $this->redirect('get_booklist');
         }
 
         if ($encoded = $this->encode_uri()) {
             $params = ['redirect' => $encoded];
-            $this->redirect('signin', $params);
+            $this->redirect('sign_in', $params);
         }
 
-        $this->redirect('signin');
+        $this->redirect('sign_in');
     }
 
     /**

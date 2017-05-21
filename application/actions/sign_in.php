@@ -7,7 +7,7 @@ try {
         $password = $this->get_input('password');
 
         if ($email and $password) {
-            $this->signin($email, $password);
+            $this->sign_in($email, $password);
         }
     }
 
@@ -34,10 +34,15 @@ try {
 
         </form>
 
-        <div class="w3-container">
-            <a href="<?= $this->create_url('send_password'); ?>">
+        <div class="w3-bar">
+            <a class="w3-bar-item w3-mobile" href="<?= $this->create_url('send_password'); ?>">
                 <i class="fa fa-lock" aria-hidden="true"></i>
                 Mot de passe oublié
+            </a>
+
+            <a class="w3-bar-item w3-mobile w3-right w3-text-gray" href="<?= $this->create_url('sign_up'); ?>">
+                <i class="fa fa-user-plus" aria-hidden="true"></i>
+                S'enregistrer
             </a>
         </div>
 

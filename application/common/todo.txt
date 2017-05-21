@@ -1,0 +1,19 @@
+add sign_up
+send email to requester for email validation
+send email to approver to confirm registration
+send new password for user already registered that signs up
+add captcha to sign-up
+
+begin with empty account file
+allow user to close their account, possibly obfuscate their name and email
+
+add user who created/updated book in booklist
+send book to email for backup
+
+add time limit to captcha
+
+log actions
+display logs
+
+add faq
+add about
