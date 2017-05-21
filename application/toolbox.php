@@ -222,6 +222,42 @@ class toolbox
 
     /**
      *
+     * @see https://www.fontsquirrel.com/ for free fonts
+     * @see https://wordpress.org/plugins/really-simple-captcha/ for captcha howto
+     */
+    public function create_captcha()
+    {
+        $word = $this->create_random_captcha();
+
+        $width  = 280;
+        $height = 100;
+        $image  = imagecreatetruecolor($width, $height);
+
+        $white_background = imagecolorallocate($image, 255, 255, 255);
+        imagefill($image, 0, 0, $white_background);
+
+        $x            = 0;
+        $letter_color = imagecolorallocate($image, 0x4C, 0xAF, 0x50);
+        $font         = $this->base_path . '/common/Flavors-Regular.ttf';
+
+        foreach (str_split($word) as $letter) {
+            $size  = mt_rand(20, 40);
+            $angle = mt_rand(-40, 40);
+            $x     += 35;
+            $y     = 60 + mt_rand(-20, 20);
+            imagettftext($image, $size, $angle, $x, $y, $letter_color, $font, $letter);
+        }
+
+        $filename = sprintf('%s/tmp/%s', $this->data_dir, 'temp.png');
+        imagepng($image, $filename);
+
+        imagedestroy($image);
+
+        return $filename;
+    }
+
+    /**
+     *
      * @param string $bookname
      * @param string $extension
      * @return string
@@ -238,14 +274,24 @@ class toolbox
      *
      * @return string
      */
-    public function create_random_password()
+    public function create_random_captcha()
     {
-        $digits    = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._';
+        return $this->create_random_password('23456789abcdefghijkmnpqrstuvwyzABCDEFGHIJKLMNPQRSTUVWYZ*%@#', 6);
+    }
+
+    /**
+     *
+     * @param string $digits
+     * @param int $length
+     * @return string
+     */
+    public function create_random_password($digits = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._', $length = 8)
+    {
         $max_index = strlen($digits) - 1;
 
         $password = '';
 
-        for ($i = 0; $i < 8; $i++) {
+        for ($i = 0; $i < $length; $i++) {
             $index     = random_int(0, $max_index);
             $password .= $digits[$index];
         }
@@ -950,7 +996,7 @@ class toolbox
 
         $this->verify_user_signed_in($action);
 
-        if ($action == 'display_cover' or $action == 'download_book') {
+        if (in_array($action, ['display_captcha', 'display_cover', 'download_book'])) {
             require $this->create_action_filename($action);
         } else {
             require $this->base_path . '/common/header.php';
