@@ -8,7 +8,7 @@ try {
         $new_email = $this->get_input('new_email');
 
         $this->change_email($old_email, $password, $new_email);
-        $this->redirect('sign_in');
+        $this->redirect();
     }
 
 } catch (Exception $exception) {

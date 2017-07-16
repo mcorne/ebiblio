@@ -72,20 +72,6 @@ class toolbox
         date_default_timezone_set('UTC');
     }
 
-    public function add_or_replace_account($email, $password)// TODO: finish !!!
-    {
-        $accounts = $this->read_accounts();
-
-        $account = [
-        ];
-
-        $accounts[$email]['password'] = password_hash($password, PASSWORD_DEFAULT);
-
-        $accounts[$email]['password_end_date'] = $this->get_datetime(24 * 3600);
-
-        $this->write_accounts($accounts);
-    }
-
     /**
      *
      * Note that iconv() is not used as it produces different results across PHP versions,
@@ -135,12 +121,16 @@ class toolbox
             throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
         }
 
-        if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
+        if ($new_email == $old_email) {
+            throw new Exception("Nouvelle adresse e-mail identique à l'adresse actuelle.");
+        }
+
+        if (! filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
             throw new Exception('Nouvelle adresse e-mail incorrecte.');
         }
 
         $this->replace_account_email($old_email, $new_email);
-        $this->reset_session();
+        $this->update_session($new_email, $password);
     }
 
     /**
@@ -177,7 +167,7 @@ class toolbox
         }
 
         $this->replace_account_password($email, $new_password, false);
-        $this->reset_session();
+        $this->update_session($email, $new_password);
     }
 
     /**
@@ -236,42 +226,6 @@ class toolbox
 
     /**
      *
-     * @see https://www.fontsquirrel.com/ for free fonts
-     * @see https://wordpress.org/plugins/really-simple-captcha/ for captcha howto
-     */
-    public function create_captcha()
-    {
-        $word = $this->create_random_captcha();
-
-        $width  = 280;
-        $height = 100;
-        $image  = imagecreatetruecolor($width, $height);
-
-        $white_background = imagecolorallocate($image, 255, 255, 255);
-        imagefill($image, 0, 0, $white_background);
-
-        $x            = 0;
-        $letter_color = imagecolorallocate($image, 0x4C, 0xAF, 0x50);
-        $font         = $this->base_path . '/common/Flavors-Regular.ttf';
-
-        foreach (str_split($word) as $letter) {
-            $size  = mt_rand(20, 40);
-            $angle = mt_rand(-40, 40);
-            $x     += 35;
-            $y     = 60 + mt_rand(-20, 20);
-            imagettftext($image, $size, $angle, $x, $y, $letter_color, $font, $letter);
-        }
-
-        $filename = sprintf('%s/tmp/%s', $this->data_dir, 'temp.png');
-        imagepng($image, $filename);
-
-        imagedestroy($image);
-
-        return $filename;
-    }
-
-    /**
-     *
      * @param string $bookname
      * @param string $extension
      * @return string
@@ -282,15 +236,6 @@ class toolbox
         $filename = sprintf('%s/covers/%s.%s', $this->data_dir, $bookname, $extension);
 
         return $filename;
-    }
-
-    /**
-     *
-     * @return string
-     */
-    public function create_random_captcha()
-    {
-        return $this->create_random_password('23456789abcdefghijkmnpqrstuvwyzABCDEFGHIJKLMNPQRSTUVWYZ*%@#', 6);
     }
 
     /**
@@ -850,6 +795,7 @@ class toolbox
 
         $bookinfo['cover_ext'] = pathinfo($cover_filename, PATHINFO_EXTENSION);
         $bookinfo['deleted']   = null;
+        $bookinfo['email']     = $_SESSION['email'];
         $bookinfo['name']      = $this->create_bookname($bookinfo);
         $bookinfo['source']    = empty($_FILES['filename']['name']) ? null : $_FILES['filename']['name'];
 
@@ -860,6 +806,17 @@ class toolbox
         $this->write_booklist($booklist);
 
         return [$book_id, $bookinfo, $previous_bookinfo];
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param string $password
+     */
+    public function update_session($email, $password)
+    {
+        $_SESSION['email']    = $email;
+        $_SESSION['password'] = $password;
     }
 
     /**
@@ -932,6 +889,35 @@ class toolbox
         }
 
         $this->redirect($uri, $params);
+    }
+
+    /**
+     *
+     * @param string $old_email
+     * @param string $password
+     * @param string $new_email
+     */
+    public function remove_account($email, $password)
+    {
+        if (! $email or ! $password) {
+            throw new Exception('Tous les champs sont obligatoires.');
+        }
+
+        if (! $this->is_registered_account($email, $password)) {
+            throw new Exception('Adresse e-mail inconnue ou mot de passe incorrect.');
+        }
+
+        $accounts = $this->read_accounts();
+
+        if ($email == key($accounts)) {
+            throw new Exception('Le compte administrateur principal ne peut pas être supprimé.');
+        }
+
+        $accounts[$email]['end_date'] = $this->get_datetime();
+
+        $this->write_accounts($accounts);
+
+        $this->reset_session();
     }
 
     /**
@@ -1010,7 +996,7 @@ class toolbox
 
         $this->verify_user_signed_in($action);
 
-        if (in_array($action, ['display_captcha', 'display_cover', 'download_book'])) {
+        if (in_array($action, ['display_cover', 'download_book'])) {
             require $this->create_action_filename($action);
         } else {
             require $this->base_path . '/common/header.php';
@@ -1156,59 +1142,12 @@ class toolbox
             throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
         }
 
-        $_SESSION['email']    = $email;
-        $_SESSION['password'] = $password;
+        $this->update_session($email, $password);
 
         if ($encoded = $this->get_input('redirect') and $uri = $this->decode_uri($encoded)) {
             $this->redirect($uri);
         } else {
             $this->redirect();
-        }
-    }
-
-    /**
-     *
-     * @param string $email
-     * @throws Exception
-     */
-    public function sign_up($email) // TODO: finish !!!
-    {
-        if ($this->is_registered_account($email)) {
-            throw new Exception('Adresse e-mail déjà enregistrée.');
-        }
-
-        $this->add_or_replace_account($email);
-        $this->reset_session();
-
-        $subject = 'Inscription à eBiblio';
-
-        $message = '
-<html>
-    <head>
-        <title>eBiblio</title>
-        <meta charset="UTF-8">
-    </head>
-
-    <body>
-        Bonjour,<br>
-        <br>
-        Vous recevez ce message car vous avez fait une demande d\'incription à la bibliothèque.<br>
-        Veuillez cliquer sur le lien suivant pour confirmer votre adresse e-mail&nbsp;:<br>
-        <a href="%s">Confirmer mon adresse e-mail</a><br>
-        <br>
-        Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
-        Veuillez ne pas répondre à ce message.<br>
-        <br>
-        Cordialement,<br>
-        eBiblio
-    </body>
-</html>';
-
-        $url     = $this->create_url('confirm_email', ['email' => $email, 'password' => $password]);
-        $message = sprintf($message, $url);
-
-        if (! $this->send_email($email, $subject, $message)) {
-            throw new Exception("Impossible d'envoyer le message d'inscription.");
         }
     }
 
@@ -1278,7 +1217,7 @@ class toolbox
     public function verify_user_signed_in($action)
     {
         if (isset($_SESSION['email']) or
-            in_array($action, ['change_password', 'send_password', 'sign_in', 'sign_out', 'sign_up'])
+            in_array($action, ['change_password', 'send_password', 'sign_in', 'sign_out'])
         ) {
             return;
         }

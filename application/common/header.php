@@ -17,9 +17,7 @@
         <header class="w3-display-container w3-green w3-xlarge w3-padding">
 
             <span class="w3-large">
-                <a href="javascript:open_sidebar()" class="w3-text-white w3-hover-grey">
-                    <i class="fa fa-bars" aria-hidden="true"></i>
-                </a>
+                <a href="javascript:open_sidebar()" class="w3-text-white w3-hover-grey"><i class="fa fa-bars" aria-hidden="true"></i></a>
             </span>
 
             <a href="<?= $this->create_url(); ?>" class="w3-text-white w3-hover-grey">
@@ -27,13 +25,9 @@
             </a>
 
             <span class="w3-large w3-right">
-                <a href="<?= $this->create_url(); ?>" class="w3-text-white w3-hover-grey">
-                    <i class="fa fa-home" aria-hidden="true"></i>
-                </a>
+                <a href="<?= $this->create_url(); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-home" aria-hidden="true"></i></a>
 
-                <a href="<?= $this->create_url('sign_out'); ?>" class="w3-text-white w3-hover-grey">
-                    <i class="fa fa-sign-out" aria-hidden="true"></i>
-                </a>
+                <a href="<?= $this->create_url('sign_out'); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
             </span>
 
         </header>
@@ -86,6 +80,11 @@
                 <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_options'); ?>">
                     <i class="fa fa-cog" aria-hidden="true"></i>
                     Changer les options
+                </a>
+
+                <a class="w3-bar-item w3-button" href="<?= $this->create_url('remove_account'); ?>">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    Supprimer le compte
                 </a>
 
             </div>

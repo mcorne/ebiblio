@@ -125,6 +125,13 @@ try {
                 </li>
             <?php endif; ?>
 
+            <?php if (isset($bookinfo['email'])): ?>
+                <li>
+                    <span class="w3-text-gray">Ajouté par</span><br>
+                    <span><?= $bookinfo['email']; ?></span>
+                </li>
+            <?php endif; ?>
+
         </ul>
 
     </div>
