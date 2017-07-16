@@ -9,18 +9,6 @@ class toolbox
      *
      * @var string
      */
-    public $accounts;
-
-    /**
-     *
-     * @var string
-     */
-    public $accounts_filename;
-
-    /**
-     *
-     * @var string
-     */
     public $base_path;
 
     /**
@@ -55,6 +43,18 @@ class toolbox
 
     /**
      *
+     * @var string
+     */
+    public $users;
+
+    /**
+     *
+     * @var string
+     */
+    public $users_filename;
+
+    /**
+     *
      * @param string $base_path
      * @param string $base_url
      * @param string $environment
@@ -66,7 +66,7 @@ class toolbox
         $this->environment = $environment;
         $this->data_dir    = sprintf('%s/data.%s', $base_path, $environment);
 
-        $this->accounts_filename = sprintf('%s/accounts.php', $this->data_dir);
+        $this->users_filename = sprintf('%s/users.php', $this->data_dir);
         $this->booklist_filename = sprintf('%s/booklist.php', $this->data_dir);
 
         date_default_timezone_set('UTC');
@@ -117,7 +117,7 @@ class toolbox
             throw new Exception('Tous les champs sont obligatoires.');
         }
 
-        if (! $this->is_registered_account($old_email, $password)) {
+        if (! $this->is_registered_user($old_email, $password)) {
             throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
         }
 
@@ -129,7 +129,7 @@ class toolbox
             throw new Exception('Nouvelle adresse e-mail incorrecte.');
         }
 
-        $this->replace_account_email($old_email, $new_email);
+        $this->replace_email($old_email, $new_email);
         $this->update_session($new_email, $password);
     }
 
@@ -139,11 +139,11 @@ class toolbox
      */
     public function change_options($new_book_notification)
     {
-        $accounts = $this->read_accounts();
+        $users = $this->read_users();
 
-        $accounts[ $_SESSION['email'] ]['options']['new_book_notification'] = (bool) $new_book_notification;
+        $users[ $_SESSION['email'] ]['options']['new_book_notification'] = (bool) $new_book_notification;
 
-        $this->write_accounts($accounts);
+        $this->write_users($users);
     }
 
     /**
@@ -158,7 +158,7 @@ class toolbox
             throw new Exception('Tous les champs sont obligatoires.');
         }
 
-        if (! $this->is_registered_account($email, $old_password)) {
+        if (! $this->is_registered_user($email, $old_password)) {
             throw new Exception('Adresse e-mail inconnue ou mot de passe actuel incorrect.');
         }
 
@@ -166,7 +166,7 @@ class toolbox
             throw new Exception('Le nouveau mot de passe doit contenir au moins 8 catactères avec des lettres et des chiffres.');
         }
 
-        $this->replace_account_password($email, $new_password, false);
+        $this->replace_password($email, $new_password, false);
         $this->update_session($email, $new_password);
     }
 
@@ -334,6 +334,35 @@ class toolbox
         }
 
         @rmdir($dirname);
+    }
+
+    /**
+     *
+     * @param string $old_email
+     * @param string $password
+     * @param string $new_email
+     */
+    public function delete_user($email, $password)
+    {
+        if (! $email or ! $password) {
+            throw new Exception('Tous les champs sont obligatoires.');
+        }
+
+        if (! $this->is_registered_user($email, $password)) {
+            throw new Exception('Adresse e-mail inconnue ou mot de passe incorrect.');
+        }
+
+        $users = $this->read_users();
+
+        if ($email == key($users)) {
+            throw new Exception('Le compte administrateur principal ne peut pas être supprimé.');
+        }
+
+        $users[$email]['end_date'] = $this->get_datetime();
+
+        $this->write_users($users);
+
+        $this->reset_session();
     }
 
     /**
@@ -636,9 +665,9 @@ class toolbox
      */
     public function get_options()
     {
-        $accounts = $this->read_accounts();
+        $users = $this->read_users();
 
-        return $accounts[ $_SESSION['email'] ]['options'];
+        return $users[ $_SESSION['email'] ]['options'];
     }
 
     /**
@@ -702,20 +731,20 @@ class toolbox
      * @param string $password
      * @return bool
      */
-    public function is_registered_account($email, $password = null)
+    public function is_registered_user($email, $password = null)
     {
-        $accounts = $this->read_accounts();
+        $users = $this->read_users();
 
-        if (! isset($accounts[$email])) {
+        if (! isset($users[$email])) {
             return false;
         }
 
-        $account = $accounts[$email];
+        $user = $users[$email];
 
         $current_datetime = $this->get_datetime();
 
-        if ($account['start_date'] > $current_datetime or
-            $account['end_date'] and $account['end_date'] < $current_datetime
+        if ($user['start_date'] > $current_datetime or
+            $user['end_date'] and $user['end_date'] < $current_datetime
         ) {
             return false;
         }
@@ -724,8 +753,8 @@ class toolbox
             return true;
         }
 
-        if ($account['password_end_date'] and $account['password_end_date'] < $current_datetime or
-            ! password_verify($password, $account['password'])
+        if ($user['password_end_date'] and $user['password_end_date'] < $current_datetime or
+            ! password_verify($password, $user['password'])
         ) {
             return false;
         }
@@ -821,26 +850,6 @@ class toolbox
 
     /**
      *
-     * @return string
-     * @throws Exception
-     */
-    public function read_accounts()
-    {
-        if (! is_null($this->accounts)) {
-            return $this->accounts;
-        }
-
-        if (! file_exists($this->accounts_filename)) {
-            throw new Exception("Impossible de lire le fichier des comptes utilisateurs.");
-        }
-
-        $this->accounts = include $this->accounts_filename;
-
-        return $this->accounts;
-    }
-
-    /**
-     *
      * @return array
      */
     public function read_booklist()
@@ -850,6 +859,26 @@ class toolbox
         }
 
         return $this->booklist;
+    }
+
+    /**
+     *
+     * @return string
+     * @throws Exception
+     */
+    public function read_users()
+    {
+        if (! is_null($this->users)) {
+            return $this->users;
+        }
+
+        if (! file_exists($this->users_filename)) {
+            throw new Exception("Impossible de lire le fichier des comptes utilisateurs.");
+        }
+
+        $this->users = include $this->users_filename;
+
+        return $this->users;
     }
 
     /**
@@ -894,45 +923,16 @@ class toolbox
     /**
      *
      * @param string $old_email
-     * @param string $password
      * @param string $new_email
      */
-    public function remove_account($email, $password)
+    public function replace_email($old_email, $new_email)
     {
-        if (! $email or ! $password) {
-            throw new Exception('Tous les champs sont obligatoires.');
-        }
+        $users = $this->read_users();
 
-        if (! $this->is_registered_account($email, $password)) {
-            throw new Exception('Adresse e-mail inconnue ou mot de passe incorrect.');
-        }
+        $users[$new_email] = $users[$old_email];
+        unset($users[$old_email]);
 
-        $accounts = $this->read_accounts();
-
-        if ($email == key($accounts)) {
-            throw new Exception('Le compte administrateur principal ne peut pas être supprimé.');
-        }
-
-        $accounts[$email]['end_date'] = $this->get_datetime();
-
-        $this->write_accounts($accounts);
-
-        $this->reset_session();
-    }
-
-    /**
-     *
-     * @param string $old_email
-     * @param string $new_email
-     */
-    public function replace_account_email($old_email, $new_email)
-    {
-        $accounts = $this->read_accounts();
-
-        $accounts[$new_email] = $accounts[$old_email];
-        unset($accounts[$old_email]);
-
-        $this->write_accounts($accounts);
+        $this->write_users($users);
     }
 
     /**
@@ -941,19 +941,19 @@ class toolbox
      * @param string $password
      * @param bool $is_temp_password
      */
-    public function replace_account_password($email, $password, $is_temp_password)
+    public function replace_password($email, $password, $is_temp_password)
     {
-        $accounts = $this->read_accounts();
+        $users = $this->read_users();
 
-        $accounts[$email]['password'] = password_hash($password, PASSWORD_DEFAULT);
+        $users[$email]['password'] = password_hash($password, PASSWORD_DEFAULT);
 
         if ($is_temp_password) {
-            $accounts[$email]['password_end_date'] = $this->get_datetime(24 * 3600);
+            $users[$email]['password_end_date'] = $this->get_datetime(24 * 3600);
         } else {
-            $accounts[$email]['password_end_date'] = null;
+            $users[$email]['password_end_date'] = null;
         }
 
-        $this->write_accounts($accounts);
+        $this->write_users($users);
     }
 
     public function reset_session()
@@ -1075,10 +1075,10 @@ class toolbox
      */
     public function send_new_book_notifications($book_id, $bookinfo)
     {
-        $accounts = $this->read_accounts();
+        $users = $this->read_users();
 
-        foreach ($accounts as $email => $account) {
-            if ($account['options']['new_book_notification'] and $this->is_registered_account($email)) {
+        foreach ($users as $email => $user) {
+            if ($user['options']['new_book_notification'] and $this->is_registered_user($email) and filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->send_new_book_notification($email, $book_id, $bookinfo);
             }
         }
@@ -1091,12 +1091,12 @@ class toolbox
      */
     public function send_password($email)
     {
-        if (! $this->is_registered_account($email)) {
+        if (! $this->is_registered_user($email)) {
             return;
         }
 
         $password = $this->create_random_password();
-        $this->replace_account_password($email, $password, true);
+        $this->replace_password($email, $password, true);
         $this->reset_session();
 
         $subject = 'Votre nouveau mot de passe eBiblio';
@@ -1138,7 +1138,7 @@ class toolbox
      */
     public function sign_in($email, $password)
     {
-        if (! $this->is_registered_account($email, $password)) {
+        if (! $this->is_registered_user($email, $password)) {
             throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
         }
 
@@ -1237,17 +1237,17 @@ class toolbox
 
     /**
      *
-     * @param string $accounts
+     * @param string $users
      * @throws Exception
      */
-    public function write_accounts($accounts)
+    public function write_users($users)
     {
-        $this->accounts = $accounts;
+        $this->users = $users;
 
-        $exported = var_export($accounts, true);
+        $exported = var_export($users, true);
         $content  = "<?php\nreturn $exported;\n";
 
-        if (! file_put_contents($this->accounts_filename, $content)) {
+        if (! file_put_contents($this->users_filename, $content)) {
             throw new Exception('Impossible de mettre à jour le fichier des comptes utilisateurs.');
         }
     }

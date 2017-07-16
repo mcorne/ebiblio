@@ -1,5 +1,3 @@
-allow user to close their account, possibly obfuscate their name and email
-
 add user administration: create, close or remove
 
 send book to email for backup

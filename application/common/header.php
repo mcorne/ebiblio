@@ -82,7 +82,7 @@
                     Changer les options
                 </a>
 
-                <a class="w3-bar-item w3-button" href="<?= $this->create_url('remove_account'); ?>">
+                <a class="w3-bar-item w3-button" href="<?= $this->create_url('delete_user'); ?>">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                     Supprimer le compte
                 </a>

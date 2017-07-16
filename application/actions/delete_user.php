@@ -6,7 +6,7 @@ try {
         $email    = $this->get_input('email');
         $password = $this->get_input('password');
 
-        $this->remove_account($email, $password);
+        $this->delete_user($email, $password);
         $this->redirect();
     }
 
