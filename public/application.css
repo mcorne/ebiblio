@@ -23,7 +23,7 @@ th {
     white-space: nowrap;
 }
 
-#manage_books, #my_account {
+#manage_books, #my_account, #users {
     padding-left: 16px;
 }
 

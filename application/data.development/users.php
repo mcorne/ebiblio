@@ -1,10 +1,10 @@
 <?php
 return array (
-  'mcorne@yahoo.com' =>
+  'mcorne@yahoo.com' => 
   array (
-    'administrator' => true,
+    'admin' => true,
     'end_date' => NULL,
-    'options' =>
+    'options' => 
     array (
       'new_book_notification' => true,
     ),

@@ -6,7 +6,7 @@ try {
     $encoded_user   = $this->get_input('info');
     $selected_email = $this->get_input('email');
 
-    $users = $this->get_users(false, $action, $selected_email, $encoded_user);
+    $users = $this->get_users($selected_email, $encoded_user);
 
 } catch (Exception $exception) {
     $this->display_exception($exception);
@@ -31,12 +31,13 @@ try {
     <?php foreach ($users as $email => $user): ?>
     <tr <?php if ($email == $selected_email) : ?>class="w3-pale-red"<?php endif; ?> >
 
-        <td><?= $user['email']; ?></td>
-        <td><?= $user['administrator'] ? '✔' : ''; ?></td>
+        <td><?= $email; ?></td>
+        <td><?= $user['admin'] ? '✔' : ''; ?></td>
+        <td><?= $user['end_date'] ? '' : '✔'; ?></td>
 
         <td>
-            <a href="<?= $this->create_url('get_bookinfo', ['email' => $email]); ?>">
-                <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
+            <a href="<?= $this->create_url('update_user', ['email' => $email]); ?>">
+                <i class="fa fa-pencil fa-lg w3-margin-right icon" aria-hidden="true"></i>
             </a>
         </td>
 

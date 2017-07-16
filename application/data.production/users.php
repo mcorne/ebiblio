@@ -3,7 +3,7 @@
 // it MUST be changed after installing the application on a production machine
 return array(
     'admin' => [
-        'administrator' => true,
+        'admin' => true,
         'end_date' => null,
         'options' => [
             'new_book_notification' => true,

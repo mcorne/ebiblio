@@ -89,6 +89,28 @@
 
             </div>
 
+            <?php if ($this->is_admin_user()): ?>
+                <button class="w3-button w3-block w3-left-align" onclick="accordion('users')">
+                    <i class="fa fa-user" aria-hidden="true"></i>
+                    Gérer les utilisateurs
+                    <i class="fa fa-caret-down" aria-hidden="true"></i>
+                </button>
+
+                <div class="w3-hide w3-white" id="users">
+
+                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('get_users'); ?>">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                        Liste des utilisateurs
+                    </a>
+
+                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('add_user'); ?>">
+                        <i class="fa fa-user-plus" aria-hidden="true"></i>
+                        Ajouter un utilisateur
+                    </a>
+
+                </div>
+            <?php endif; ?>
+
         </div>
 
         <div class="w3-overlay w3-animate-opacity" onclick="close_sidebar()" style="cursor:pointer" id="overlay"></div>

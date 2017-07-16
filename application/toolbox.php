@@ -284,13 +284,13 @@ class toolbox
      * @param string $encoded
      * @return array
      */
-    public function decode_bookinfo($encoded)
+    public function decode_info($encoded)
     {
         if ($url_decoded = urldecode($encoded) and
             $json = base64_decode($url_decoded, true) and
-            $bookinfo = json_decode($json, true)
+            $info = json_decode($json, true)
         ) {
-            return $bookinfo;
+            return $info;
         }
     }
 
@@ -510,7 +510,7 @@ class toolbox
                 break;
 
             case 'put':
-                if ($bookinfo = $this->decode_bookinfo($encoded_bookinfo)) {
+                if ($bookinfo = $this->decode_info($encoded_bookinfo)) {
                     $booklist[$book_id] = $bookinfo;
                 }
                 break;
@@ -716,6 +716,36 @@ class toolbox
 
     /**
      *
+     * @return array
+     */
+    public function get_users()
+    {
+        $users  = $this->read_users();
+
+        ksort($users);
+
+        return $users;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function is_admin_user()
+    {
+        $users = $this->read_users();
+
+        $email = $_SESSION['email'];
+
+        if (! isset($users[$email])) {
+            return false;
+        }
+
+        return $users[$email]['admin'];
+    }
+
+    /**
+     *
      * @return bool
      */
     public function is_post()
@@ -796,56 +826,6 @@ class toolbox
             $filename = $this->create_cover_filename($bookinfo['name'], $bookinfo['cover_ext']);
             @rename($cover_filename, $filename);
         }
-    }
-
-    /**
-     *
-     * @param array $bookinfo
-     * @param string $tmp_book_filename
-     * @param string $cover_filename
-     * @return string
-     */
-    public function update_booklist($bookinfo, $tmp_book_filename, $cover_filename)
-    {
-        $book_id  = md5_file($tmp_book_filename);
-        $booklist = $this->read_booklist();
-
-        if (isset($booklist[$book_id])) {
-            $bookinfo['updated'] = $this->get_datetime();
-            $previous_bookinfo   = $booklist[$book_id];
-            $bookinfo            += $previous_bookinfo;
-        } else {
-            $bookinfo['created'] = $this->get_datetime();
-            $bookinfo['deleted'] = null;
-            $bookinfo['number']  = count($booklist) + 1;
-            $bookinfo['updated'] = null;
-            $previous_bookinfo   = null;
-        }
-
-        $bookinfo['cover_ext'] = pathinfo($cover_filename, PATHINFO_EXTENSION);
-        $bookinfo['deleted']   = null;
-        $bookinfo['email']     = $_SESSION['email'];
-        $bookinfo['name']      = $this->create_bookname($bookinfo);
-        $bookinfo['source']    = empty($_FILES['filename']['name']) ? null : $_FILES['filename']['name'];
-
-        ksort($bookinfo);
-
-        $booklist[$book_id] = $bookinfo;
-
-        $this->write_booklist($booklist);
-
-        return [$book_id, $bookinfo, $previous_bookinfo];
-    }
-
-    /**
-     *
-     * @param string $email
-     * @param string $password
-     */
-    public function update_session($email, $password)
-    {
-        $_SESSION['email']    = $email;
-        $_SESSION['password'] = $password;
     }
 
     /**
@@ -1184,6 +1164,56 @@ class toolbox
         $zip->close();
 
         return $tmp_book_dirname;
+    }
+
+    /**
+     *
+     * @param array $bookinfo
+     * @param string $tmp_book_filename
+     * @param string $cover_filename
+     * @return string
+     */
+    public function update_booklist($bookinfo, $tmp_book_filename, $cover_filename)
+    {
+        $book_id  = md5_file($tmp_book_filename);
+        $booklist = $this->read_booklist();
+
+        if (isset($booklist[$book_id])) {
+            $bookinfo['updated'] = $this->get_datetime();
+            $previous_bookinfo   = $booklist[$book_id];
+            $bookinfo            += $previous_bookinfo;
+        } else {
+            $bookinfo['created'] = $this->get_datetime();
+            $bookinfo['deleted'] = null;
+            $bookinfo['number']  = count($booklist) + 1;
+            $bookinfo['updated'] = null;
+            $previous_bookinfo   = null;
+        }
+
+        $bookinfo['cover_ext'] = pathinfo($cover_filename, PATHINFO_EXTENSION);
+        $bookinfo['deleted']   = null;
+        $bookinfo['email']     = $_SESSION['email'];
+        $bookinfo['name']      = $this->create_bookname($bookinfo);
+        $bookinfo['source']    = empty($_FILES['filename']['name']) ? null : $_FILES['filename']['name'];
+
+        ksort($bookinfo);
+
+        $booklist[$book_id] = $bookinfo;
+
+        $this->write_booklist($booklist);
+
+        return [$book_id, $bookinfo, $previous_bookinfo];
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param string $password
+     */
+    public function update_session($email, $password)
+    {
+        $_SESSION['email']    = $email;
+        $_SESSION['password'] = $password;
     }
 
     /**
