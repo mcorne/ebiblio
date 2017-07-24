@@ -1,4 +1,4 @@
-add user administration: create, close or remove
+add user administration: close or remove
 
 send book to email for backup
 

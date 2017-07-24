@@ -74,6 +74,68 @@ class toolbox
 
     /**
      *
+     * @param string $email
+     * @param string $new_book_notification
+     * @param string $is_admin_user
+     */
+    public function add_user($email, $new_book_notification, $is_admin_user)
+    {
+        if ($this->get_user($email)) {
+            throw new Exception('Adresse e-mail déjà utilisée.');
+        }
+
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Adresse e-mail incorrecte.');
+        }
+
+        $users    = $this->read_users();
+        $password = $this->create_random_password();
+
+        $users[$email] = [
+            'admin'             => $is_admin_user,
+            'end_date'          => null,
+            'options'           => ['new_book_notification' => $new_book_notification],
+            'password'          => password_hash($password, PASSWORD_DEFAULT),
+            'password_end_date' => $this->get_datetime(24 * 3600),
+            'start_date'        => $this->get_datetime(),
+        ];
+
+        $this->write_users($users);
+
+        $subject = 'Création de votre compte eBiblio';
+
+        $message = '
+<html>
+    <head>
+        <title>eBiblio</title>
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+        Bonjour,<br>
+        <br>
+        Vous recevez ce message car votre compte vient d\'être créé.<br>
+        Veuillez cliquer sur le lien suivant pour l\'activer&nbsp;:<br>
+        <a href="%s">Se connecter</a><br>
+        <br>
+        Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
+        Veuillez ne pas répondre à ce message.<br>
+        <br>
+        Cordialement,<br>
+        eBiblio
+    </body>
+</html>';
+
+        $url     = $this->create_url('change_password', ['email' => $email, 'password' => $password]);
+        $message = sprintf($message, $url);
+
+        if (! $this->send_email($email, $subject, $message)) {
+            throw new Exception("Impossible d'envoyer le mot de passe du nouveau compte.");
+        }
+    }
+
+    /**
+     *
      * Note that iconv() is not used as it produces different results across PHP versions,
      * eg $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $string);
      *
@@ -690,6 +752,20 @@ class toolbox
 
     /**
      *
+     * @param string $email
+     * @return array
+     */
+    public function get_user($email)
+    {
+        $users = $this->read_users();
+
+        if (isset($users[$email])) {
+            return $users[$email];
+        }
+    }
+
+    /**
+     *
      * @return array
      */
     public function get_users()
@@ -737,13 +813,9 @@ class toolbox
      */
     public function is_registered_user($email, $password = null)
     {
-        $users = $this->read_users();
-
-        if (! isset($users[$email])) {
+        if (! $user = $this->get_user($email)) {
             return false;
         }
-
-        $user = $users[$email];
 
         $current_datetime = $this->get_datetime();
 

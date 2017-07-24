@@ -24,6 +24,34 @@ class controller
      *
      * @return array
      */
+    public function action_add_user()
+    {
+        try {
+            if ($this->toolbox->is_post()) {
+                $email = $this->toolbox->get_input('email');
+                $is_admin_user = $this->toolbox->get_input('admin');
+                $new_book_notification = $this->toolbox->get_input('new_book_notification');
+
+                $this->toolbox->add_user($email, $new_book_notification, $is_admin_user);
+                $this->toolbox->redirect('get_users');
+            }
+
+        } catch (Exception $exception) {
+            $message = $exception->getMessage();
+        }
+
+        return [
+            'email'                 => $email                 ?? null,
+            'is_admin_user'         => $is_admin_user         ?? false,
+            'message'               => $message               ?? null,
+            'new_book_notification' => $new_book_notification ?? true,
+        ];
+    }
+
+    /**
+     *
+     * @return array
+     */
     public function action_change_email()
     {
         try {
@@ -252,8 +280,9 @@ class controller
         }
 
         return [
-            'message' => $message ?? null,
-            'users'   => $users   ?? null,
+            'message'        => $message ?? null,
+            'selected_email' => $selected_email ?? null,
+            'users'          => $users   ?? null,
         ];
     }
 

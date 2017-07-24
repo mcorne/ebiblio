@@ -91,7 +91,7 @@
 
             <?php if ($this->toolbox->is_admin_user()): ?>
                 <button class="w3-button w3-block w3-left-align" onclick="accordion('users')">
-                    <i class="fa fa-user" aria-hidden="true"></i>
+                    <i class="fa fa-users" aria-hidden="true"></i>
                     Gérer les utilisateurs
                     <i class="fa fa-caret-down" aria-hidden="true"></i>
                 </button>
@@ -99,7 +99,7 @@
                 <div class="w3-hide w3-white" id="users">
 
                     <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('get_users'); ?>">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fa fa-list-alt" aria-hidden="true"></i>
                         Liste des utilisateurs
                     </a>
 
