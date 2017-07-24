@@ -2,7 +2,7 @@
 
 <form class="w3-container" method="post">
 
-    <input class="w3-check" name="new_book_notification" type="checkbox" <?= $options['new_book_notification'] ? 'checked' : null; ?>>
+    <input class="w3-check" name="new_book_notification" type="checkbox" <?= ! empty($options['new_book_notification']) ? 'checked' : null; ?> >
     <label>Recevoir un e-mail pour tout nouveau livre ajouté dans le bibliothèque</label>
 
     <p>

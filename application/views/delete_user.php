@@ -3,7 +3,7 @@
 <form class="w3-container" method="post">
 
     <label>Votre adresse e-mail</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email ?? null;?>">
+    <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email;?>">
 
     <label>Votre mot de passe</label>
     <input class="w3-input w3-border w3-margin-bottom" name="password" type="password" value="">

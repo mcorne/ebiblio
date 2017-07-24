@@ -4,9 +4,9 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="<?= $this->create_url('w3css/4/w3.css'); ?>" />
-        <link rel="stylesheet" type="text/css" href="<?= $this->create_url('font-awesome-4.7.0/css/font-awesome.min.css'); ?>">
-        <link rel="stylesheet" type="text/css" href="<?= $this->create_url('application.css'); ?>" />
+        <link rel="stylesheet" type="text/css" href="<?= $this->toolbox->create_url('w3css/4/w3.css'); ?>" />
+        <link rel="stylesheet" type="text/css" href="<?= $this->toolbox->create_url('font-awesome-4.7.0/css/font-awesome.min.css'); ?>">
+        <link rel="stylesheet" type="text/css" href="<?= $this->toolbox->create_url('application.css'); ?>" />
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>eBiblio</title>
@@ -20,14 +20,14 @@
                 <a href="javascript:open_sidebar()" class="w3-text-white w3-hover-grey"><i class="fa fa-bars" aria-hidden="true"></i></a>
             </span>
 
-            <a href="<?= $this->create_url(); ?>" class="w3-text-white w3-hover-grey">
+            <a href="<?= $this->toolbox->create_url(); ?>" class="w3-text-white w3-hover-grey">
                 eBiblio
             </a>
 
             <span class="w3-large w3-right">
-                <a href="<?= $this->create_url(); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-home" aria-hidden="true"></i></a>
+                <a href="<?= $this->toolbox->create_url(); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-home" aria-hidden="true"></i></a>
 
-                <a href="<?= $this->create_url('sign_out'); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
+                <a href="<?= $this->toolbox->create_url('sign_out'); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
             </span>
 
         </header>
@@ -42,17 +42,17 @@
 
             <div class="w3-hide w3-white" id="manage_books">
 
-                <a class="w3-bar-item w3-button" href="<?= $this->create_url('upload_book'); ?>">
+                <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('upload_book'); ?>">
                     <i class="fa fa-plus" aria-hidden="true"></i>
                     Ajouter un livre
                 </a>
 
-                <a class="w3-bar-item w3-button" href="<?= $this->create_url('delete_book'); ?>">
+                <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('delete_book'); ?>">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                     Supprimer un livre
                 </a>
 
-                <a class="w3-bar-item w3-button" href="<?= $this->create_url('undelete_book'); ?>">
+                <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('undelete_book'); ?>">
                     <i class="fa fa-undo" aria-hidden="true"></i>
                     Annuler la suppression
                 </a>
@@ -67,29 +67,29 @@
 
             <div class="w3-hide w3-white" id="my_account">
 
-                <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_email'); ?>">
+                <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('change_email'); ?>">
                     <i class="fa fa-at" aria-hidden="true"></i>
                     Changer d'adresse e-mail
                 </a>
 
-                <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_password'); ?>">
+                <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('change_password'); ?>">
                     <i class="fa fa-key" aria-hidden="true"></i>
                     Changer de mot de passe
                 </a>
 
-                <a class="w3-bar-item w3-button" href="<?= $this->create_url('change_options'); ?>">
+                <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('change_options'); ?>">
                     <i class="fa fa-cog" aria-hidden="true"></i>
                     Changer les options
                 </a>
 
-                <a class="w3-bar-item w3-button" href="<?= $this->create_url('delete_user'); ?>">
+                <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('delete_user'); ?>">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                     Supprimer le compte
                 </a>
 
             </div>
 
-            <?php if ($this->is_admin_user()): ?>
+            <?php if ($this->toolbox->is_admin_user()): ?>
                 <button class="w3-button w3-block w3-left-align" onclick="accordion('users')">
                     <i class="fa fa-user" aria-hidden="true"></i>
                     Gérer les utilisateurs
@@ -98,12 +98,12 @@
 
                 <div class="w3-hide w3-white" id="users">
 
-                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('get_users'); ?>">
+                    <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('get_users'); ?>">
                         <i class="fa fa-users" aria-hidden="true"></i>
                         Liste des utilisateurs
                     </a>
 
-                    <a class="w3-bar-item w3-button" href="<?= $this->create_url('add_user'); ?>">
+                    <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('add_user'); ?>">
                         <i class="fa fa-user-plus" aria-hidden="true"></i>
                         Ajouter un utilisateur
                     </a>

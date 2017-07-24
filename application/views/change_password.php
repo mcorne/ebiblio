@@ -3,10 +3,10 @@
 <form class="w3-container" method="post">
 
     <label>Votre adresse e-mail</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email ?? null; ?>">
+    <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email; ?>">
 
     <label>Votre mot de passe actuel</label>
-    <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="password" value="<?= $password ?? null; ?>">
+    <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="password" value="<?= $password; ?>">
 
     <label>Votre nouveau mot de passe</label>
     <input class="w3-input w3-border w3-margin-bottom" name="new_password" type="password">

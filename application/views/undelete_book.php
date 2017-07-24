@@ -1,22 +1,3 @@
-<?php
-/* @var $this toolbox */
-
-try {
-    if ($this->is_post()) {
-        if ($book_id = $this->get_input('id')) {
-            $this->undelete_book($book_id);
-        }
-
-        $this->redirect_to_booklist('undelete', $book_id);
-    }
-
-    $booklist = $this->get_booklist(true);
-    
-} catch (Exception $exception) {
-    $this->display_exception($exception);
-}
-?>
-
 <h3 class="w3-container w3-margin-bottom">Annuler la suppression d'un livre</h3>
 
 <?php if (empty($booklist)) : ?>
@@ -34,7 +15,7 @@ try {
             <option value="" disabled selected>Choisir un livre</option>
 
             <?php foreach ($booklist as $book_id => $bookinfo): ?>
-                <option value="<?= $book_id; ?>"><?= $this->display_bookname($bookinfo); ?></option>
+                <option value="<?= $book_id; ?>"><?= $this->toolbox->display_bookname($bookinfo); ?></option>
             <?php endforeach; ?>
 
         </select>

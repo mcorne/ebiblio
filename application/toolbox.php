@@ -177,7 +177,7 @@ class toolbox
      */
     public function create_action_filename($action)
     {
-        $filename = sprintf('%s/actions/%s.php', $this->base_path, $action);
+        $filename = sprintf('%s/views/%s.php', $this->base_path, $action);
 
         return $filename;
     }
@@ -381,16 +381,6 @@ class toolbox
 
     /**
      *
-     * @param string $exception
-     */
-    public function display_exception($exception)
-    {
-        $message = $exception->getMessage();
-        require $this->base_path . '/common/exception.php';
-    }
-
-    /**
-     *
      * @param array $bookinfo
      * @return string
      */
@@ -523,22 +513,6 @@ class toolbox
         }
 
         return $booklist;
-    }
-
-    /**
-     *
-     * @return string
-     */
-    public function get_action()
-    {
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $path = str_replace('/ebiblio', '', $path);
-
-        if (! $action = trim($path, '/') or ! file_exists($this->create_action_filename($action))) {
-            $action = 'get_booklist';
-        }
-
-        return $action;
     }
 
     /**
@@ -966,24 +940,6 @@ class toolbox
         }
 
         return $tmp_book_filename;
-    }
-
-    public function run_application()
-    {
-        session_start(['cookie_lifetime' => toolbox::SESSION_LIFE_TIME]);
-
-        $action = $this->get_action();
-
-        $this->verify_user_signed_in($action);
-
-        if (in_array($action, ['display_cover', 'download_book'])) {
-            require $this->create_action_filename($action);
-        } else {
-            require $this->base_path . '/common/header.php';
-            require $this->create_action_filename($action);
-            require $this->base_path . '/common/footer.php';
-        }
-
     }
 
     /**

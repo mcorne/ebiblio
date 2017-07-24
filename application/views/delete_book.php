@@ -15,7 +15,7 @@
             <option value="" disabled selected>Choisir un livre</option>
 
             <?php foreach ($booklist as $book_id => $bookinfo): ?>
-                <option value="<?= $book_id; ?>"><?= $this->display_bookname($bookinfo); ?></option>
+                <option value="<?= $book_id; ?>"><?= $this->toolbox->display_bookname($bookinfo); ?></option>
             <?php endforeach; ?>
 
         </select>

@@ -1,18 +1,3 @@
-<?php
-/* @var $this toolbox */
-
-try {
-    $action         = $this->get_input('action');
-    $encoded_user   = $this->get_input('info');
-    $selected_email = $this->get_input('email');
-
-    $users = $this->get_users($selected_email, $encoded_user);
-
-} catch (Exception $exception) {
-    $this->display_exception($exception);
-}
-?>
-
 <h3 class="w3-container w3-margin-bottom">
     <a class="w3-text-black" href="">Liste des utilisateurs</a>
     <a href=""><i class="fa fa-refresh" aria-hidden="true" style="font-size: 70%"></i></a>
@@ -36,7 +21,7 @@ try {
         <td><?= $user['end_date'] ? '' : '✔'; ?></td>
 
         <td>
-            <a href="<?= $this->create_url('update_user', ['email' => $email]); ?>">
+            <a href="<?= $this->toolbox->create_url('update_user', ['email' => $email]); ?>">
                 <i class="fa fa-pencil fa-lg w3-margin-right icon" aria-hidden="true"></i>
             </a>
         </td>

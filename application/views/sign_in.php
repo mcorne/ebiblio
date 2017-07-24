@@ -1,24 +1,10 @@
-<?php
-/* @var $this toolbox */
-
-try {
-    if ($this->is_post()) {
-        $email    = $this->get_input('email');
-        $password = $this->get_input('password');
-
-        if ($email and $password) {
-            $this->sign_in($email, $password);
-        }
-    }
-
-} catch (Exception $exception) {
-}
-?>
-
 <div class="w3-modal w3-show">
     <div class="w3-modal-content w3-card-4 w3-animate-zoom w3-padding" style="max-width:600px">
 
-        <?php isset($exception) and $this->display_exception($exception); ?>
+        <?php if (isset($message)): ?>
+            <?php require $this->toolbox->base_path . '/views/message.php'; ?>
+        <?php endif; ?>
+
 
         <form class="w3-container w3-margin-top" method="post">
 
@@ -35,7 +21,7 @@ try {
         </form>
 
         <div class="w3-bar">
-            <a class="w3-bar-item w3-mobile" href="<?= $this->create_url('send_password'); ?>">
+            <a class="w3-bar-item w3-mobile" href="<?= $this->toolbox->create_url('send_password'); ?>">
                 <i class="fa fa-lock" aria-hidden="true"></i>
                 Mot de passe oublié
             </a>

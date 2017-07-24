@@ -1,20 +1,3 @@
-<?php
-/* @var $this toolbox */
-
-try {
-    if ($this->is_post()) {
-        if ($email = $this->get_input('email')) {
-            $this->send_password($email);
-        }
-
-        $this->redirect();
-    }
-
-} catch (Exception $exception) {
-    $this->display_exception($exception);
-}
-?>
-
 <h3 class="w3-container w3-margin-bottom">Mot de passe oublié</h3>
 
 <form class="w3-container" method="post">

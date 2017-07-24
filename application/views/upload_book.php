@@ -1,21 +1,3 @@
-<?php
-/* @var $this toolbox */
-
-try {
-    if ($this->is_post()) {
-        if (! empty($_FILES['filename']['name'])) {
-            list($book_id, $bookinfo) = $this->upload_book();
-            $this->redirect_to_booklist('put', $book_id, $bookinfo);
-        } else {
-            $this->redirect_to_booklist();
-        }
-    }
-
-} catch (Exception $exception) {
-    $this->display_exception($exception);
-}
-?>
-
 <h3 class="w3-container w3-margin-bottom">Ajouter ou recharger un livre</h3>
 
 <form class="w3-container" enctype="multipart/form-data" method="post">

@@ -1,14 +1,14 @@
 <?php
 return array (
-  'mcorne@yahoo.com' => 
+  'mcorne@yahoo.com' =>
   array (
     'admin' => true,
     'end_date' => NULL,
-    'options' => 
+    'options' =>
     array (
       'new_book_notification' => true,
     ),
-    'password' => '$2y$10$gPAKurpwQ6U9zGjJJD62WOg045Fbotoq7Ua/fmRqcr4hVM36XOYv6',
+    'password' => '$2y$10$X8iyGWVqUV3p5JM/lPQFO.5DGmZVGg16ve1ilhEZl9Y5kE/OOJWgC',
     'password_end_date' => NULL,
     'start_date' => '2017-05-20 10:00:00',
   ),
