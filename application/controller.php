@@ -29,10 +29,10 @@ class controller
         try {
             if ($this->toolbox->is_post()) {
                 $email = $this->toolbox->get_input('email');
-                $is_admin_user = $this->toolbox->get_input('admin');
+                $admin = $this->toolbox->get_input('admin');
                 $new_book_notification = $this->toolbox->get_input('new_book_notification');
 
-                $this->toolbox->add_user($email, $new_book_notification, $is_admin_user);
+                $this->toolbox->add_user($email, $new_book_notification, $admin);
                 $this->toolbox->redirect('get_users');
             }
 
@@ -41,8 +41,8 @@ class controller
         }
 
         return [
+            'admin'                 => $admin                 ?? false,
             'email'                 => $email                 ?? null,
-            'is_admin_user'         => $is_admin_user         ?? false,
             'message'               => $message               ?? null,
             'new_book_notification' => $new_book_notification ?? true,
         ];
@@ -108,6 +108,7 @@ class controller
     {
         try {
             $email = $this->toolbox->get_input('email');
+
             // captures the password passed as url param if any, that is the new password sent by email
             $password = $this->toolbox->get_input('password');
 
@@ -355,6 +356,46 @@ class controller
         return [
             'booklist' => $booklist ?? null,
             'message'  => $message  ?? null,
+        ];
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function action_update_user()
+    {
+        try {
+            $email = $this->toolbox->get_input('email');
+
+            if ($this->toolbox->is_post()) {
+                $admin                 = $this->toolbox->get_input('admin');
+                $new_book_notification = $this->toolbox->get_input('new_book_notification');
+                $new_email             = $this->toolbox->get_input('new_email');
+
+                $this->toolbox->update_user($email, $new_email, $new_book_notification, $admin);
+                $this->toolbox->redirect('get_users');
+            } else {
+                if (! $user = $this->toolbox->get_user($email)) {
+                    // the email is invalid, silently ignores the email, redirects to the user list
+                    $this->toolbox->redirect('get_users');
+                }
+
+                $admin                 = $user['admin'];
+                $new_book_notification = $user['options']['new_book_notification'];
+                $new_email             = $email;
+            }
+
+        } catch (Exception $exception) {
+            $message = $exception->getMessage();
+        }
+
+        return [
+            'admin'                 => $admin,
+            'email'                 => $email,
+            'message'               => $message ?? null,
+            'new_book_notification' => $new_book_notification,
+            'new_email'             => $new_email,
         ];
     }
 

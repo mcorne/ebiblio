@@ -76,9 +76,9 @@ class toolbox
      *
      * @param string $email
      * @param string $new_book_notification
-     * @param string $is_admin_user
+     * @param string $admin
      */
-    public function add_user($email, $new_book_notification, $is_admin_user)
+    public function add_user($email, $new_book_notification, $admin)
     {
         if ($this->get_user($email)) {
             throw new Exception('Adresse e-mail déjà utilisée.');
@@ -92,7 +92,7 @@ class toolbox
         $password = $this->create_random_password();
 
         $users[$email] = [
-            'admin'             => $is_admin_user,
+            'admin'             => $admin,
             'end_date'          => null,
             'options'           => ['new_book_notification' => $new_book_notification],
             'password'          => password_hash($password, PASSWORD_DEFAULT),
@@ -1242,6 +1242,44 @@ class toolbox
     {
         $_SESSION['email']    = $email;
         $_SESSION['password'] = $password;
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param string $new_email
+     * @param string $new_book_notification
+     * @param string $admin
+     */
+    public function update_user($email, $new_email, $new_book_notification, $admin)
+    {
+        if (! $this->get_user($email)) {
+            throw new Exception('Adresse e-mail inconnue.');
+        }
+
+        $users = $this->read_users();
+
+        if ($email == key($users)) {
+            throw new Exception('Le compte administrateur principal ne peut pas être modifié.');
+        }
+
+        if ($new_email != $email and isset($users[$new_email])) {
+            throw new Exception('Adresse e-mail déjà utilisée.');
+        }
+
+        if (! filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Adresse e-mail incorrecte.');
+        }
+
+        $users[$new_email]['admin']   = $admin;
+        $users[$new_email]['options'] = ['new_book_notification' => $new_book_notification];
+        // TODO: add close/activate account !!!
+
+        if ($new_email != $email) {
+            unset($users[$email]);
+        }
+
+        $this->write_users($users);
     }
 
     /**

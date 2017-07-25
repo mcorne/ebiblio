@@ -14,19 +14,19 @@
     </tr>
 
     <?php foreach ($users as $email => $user): ?>
-    <tr <?php if ($email == $selected_email) : ?>class="w3-pale-red"<?php endif; ?> >
+        <tr <?php if ($email == $selected_email) : ?>class="w3-pale-red"<?php endif; ?> >
 
-        <td><?= $email; ?></td>
-        <td><?= $user['admin'] ? '✔' : ''; ?></td>
-        <td><?= $user['end_date'] ? '' : '✔'; ?></td>
+            <td><?= $email; ?></td>
+            <td><?= $user['admin'] ? '✔' : ''; ?></td>
+            <td><?= $user['end_date'] ? '' : '✔'; ?></td>
 
-        <td>
-            <a href="<?= $this->toolbox->create_url('update_user', ['email' => $email]); ?>">
-                <i class="fa fa-pencil fa-lg w3-margin-right icon" aria-hidden="true"></i>
-            </a>
-        </td>
+            <td>
+                <a href="<?= $this->toolbox->create_url('update_user', ['email' => $email]); ?>">
+                    <i class="fa fa-pencil fa-lg w3-margin-right icon" aria-hidden="true"></i>
+                </a>
+            </td>
 
-    </tr>
+        </tr>
     <?php endforeach; ?>
 
 </table>
