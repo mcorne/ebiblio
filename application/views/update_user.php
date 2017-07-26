@@ -1,7 +1,7 @@
 <h3 class="w3-container w3-margin-bottom">Mettre à jour un utilisateur</h3>
 
 <form class="w3-container" method="post">
-    <input name="email" type="hidden" value="<?= $email;?>">
+    <input name="old_email" type="hidden" value="<?= $old_email;?>">
 
     <label>Adresse e-mail</label>
     <input class="w3-input w3-border w3-margin-bottom" name="new_email" type="text" value="<?= $new_email;?>">

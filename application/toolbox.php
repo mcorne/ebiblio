@@ -80,7 +80,9 @@ class toolbox
      */
     public function add_user($email, $new_book_notification, $admin)
     {
-        if ($this->get_user($email)) {
+        $users = $this->read_users();
+
+        if (isset($users[$email])) {
             throw new Exception('Adresse e-mail déjà utilisée.');
         }
 
@@ -88,7 +90,6 @@ class toolbox
             throw new Exception('Adresse e-mail incorrecte.');
         }
 
-        $users    = $this->read_users();
         $password = $this->create_random_password();
 
         $users[$email] = [
@@ -102,36 +103,23 @@ class toolbox
 
         $this->write_users($users);
 
-        $subject = 'Création de votre compte eBiblio';
+        $this->send_new_user_email($email, $password);
+    }
 
-        $message = '
-<html>
-    <head>
-        <title>eBiblio</title>
-        <meta charset="UTF-8">
-    </head>
-
-    <body>
-        Bonjour,<br>
-        <br>
-        Vous recevez ce message car votre compte vient d\'être créé.<br>
-        Veuillez cliquer sur le lien suivant pour l\'activer&nbsp;:<br>
-        <a href="%s">Se connecter</a><br>
-        <br>
-        Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
-        Veuillez ne pas répondre à ce message.<br>
-        <br>
-        Cordialement,<br>
-        eBiblio
-    </body>
-</html>';
-
-        $url     = $this->create_url('change_password', ['email' => $email, 'password' => $password]);
-        $message = sprintf($message, $url);
-
-        if (! $this->send_email($email, $subject, $message)) {
-            throw new Exception("Impossible d'envoyer le mot de passe du nouveau compte.");
+    /**
+     *
+     * @param array $users
+     * @return boolean
+     */
+    public function admin_exists($users)
+    {
+        foreach ($users as $user) {
+            if ($user['admin'] and ! $user['end_date']) {
+                return true;
+            }
         }
+
+        return false;
     }
 
     /**
@@ -400,9 +388,8 @@ class toolbox
 
     /**
      *
-     * @param string $old_email
+     * @param string $email
      * @param string $password
-     * @param string $new_email
      */
     public function delete_user($email, $password)
     {
@@ -414,17 +401,30 @@ class toolbox
             throw new Exception('Adresse e-mail inconnue ou mot de passe incorrect.');
         }
 
+        $this->disable_user($email);
+
+        $this->reset_session();
+    }
+
+    /**
+     *
+     * @param string $email
+     */
+    public function disable_user($email)
+    {
         $users = $this->read_users();
 
-        if ($email == key($users)) {
-            throw new Exception('Le compte administrateur principal ne peut pas être supprimé.');
+        if (! $users[$email]) {
+            throw new Exception('Adresse e-mail inconnue.');
         }
 
         $users[$email]['end_date'] = $this->get_datetime();
 
-        $this->write_users($users);
+        if (! $this->admin_exists($users)) {
+            throw new Exception('Impossible de désactiver le dernier comte administrateur.');
+        }
 
-        $this->reset_session();
+        $this->write_users($users);
     }
 
     /**
@@ -443,12 +443,29 @@ class toolbox
 
     /**
      *
-     * @param array $bookinfo
+     * @param string $email
+     */
+    public function enable_user($email)
+    {
+        $users = $this->read_users();
+
+        if (! $users[$email]) {
+            throw new Exception('Adresse e-mail inconnue.');
+        }
+
+        $users[$email]['end_date'] = null;
+
+        $this->write_users($users);
+    }
+
+    /**
+     *
+     * @param array $info
      * @return string
      */
-    public function encode_bookinfo($bookinfo)
+    public function encode_info($info)
     {
-        if ($json = json_encode($bookinfo) and $encoded = base64_encode($json)) {
+        if ($json = json_encode($info) and $encoded = base64_encode($json)) {
             return $encoded;
         }
     }
@@ -766,11 +783,21 @@ class toolbox
 
     /**
      *
-     * @return array
+     * @param string $old_email
+     * @param string $new_email
+     * @return type
      */
-    public function get_users()
+    public function get_users($old_email = null, $new_email = null)
     {
-        $users  = $this->read_users();
+        $users = $this->read_users();
+
+        if ($old_email) {
+            $users[$old_email]['end_date'] = $this->get_datetime();
+        }
+
+        if ($new_email) {
+            $users[$new_email]['end_date'] = null;
+        }
 
         ksort($users);
 
@@ -940,7 +967,7 @@ class toolbox
         }
 
         if ($bookinfo) {
-            $params['info'] = $this->encode_bookinfo($bookinfo);
+            $params['info'] = $this->encode_info($bookinfo);
         }
 
         $this->redirect($uri, $params);
@@ -1089,6 +1116,46 @@ class toolbox
             if ($user['options']['new_book_notification'] and $this->is_registered_user($email) and filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->send_new_book_notification($email, $book_id, $bookinfo);
             }
+        }
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param string $password
+     * @throws Exception
+     */
+    public function send_new_user_email($email, $password)
+    {
+        $subject = 'Création de votre compte eBiblio';
+
+        $message = '
+<html>
+    <head>
+        <title>eBiblio</title>
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+        Bonjour,<br>
+        <br>
+        Vous recevez ce message car votre compte vient d\'être créé.<br>
+        Veuillez cliquer sur le lien suivant pour l\'activer&nbsp;:<br>
+        <a href="%s">Se connecter</a><br>
+        <br>
+        Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
+        Veuillez ne pas répondre à ce message.<br>
+        <br>
+        Cordialement,<br>
+        eBiblio
+    </body>
+</html>';
+
+        $url     = $this->create_url('change_password', ['email' => $email, 'password' => $password]);
+        $message = sprintf($message, $url);
+
+        if (! $this->send_email($email, $subject, $message)) {
+            throw new Exception("Impossible d'envoyer le mot de passe du nouveau compte.");
         }
     }
 
@@ -1246,24 +1313,20 @@ class toolbox
 
     /**
      *
-     * @param string $email
+     * @param string $old_email
      * @param string $new_email
      * @param string $new_book_notification
      * @param string $admin
      */
-    public function update_user($email, $new_email, $new_book_notification, $admin)
+    public function update_user($old_email, $new_email, $new_book_notification, $admin)
     {
-        if (! $this->get_user($email)) {
+        $users = $this->read_users();
+
+        if (! $users[$old_email]) {
             throw new Exception('Adresse e-mail inconnue.');
         }
 
-        $users = $this->read_users();
-
-        if ($email == key($users)) {
-            throw new Exception('Le compte administrateur principal ne peut pas être modifié.');
-        }
-
-        if ($new_email != $email and isset($users[$new_email])) {
+        if ($new_email != $old_email and isset($users[$new_email])) {
             throw new Exception('Adresse e-mail déjà utilisée.');
         }
 
@@ -1271,13 +1334,13 @@ class toolbox
             throw new Exception('Adresse e-mail incorrecte.');
         }
 
+        if ($new_email != $old_email) {
+            $users[$new_email] = $users[$old_email];
+            $users[$old_email]['end_date'] = $this->get_datetime();
+        }
+
         $users[$new_email]['admin']   = $admin;
         $users[$new_email]['options'] = ['new_book_notification' => $new_book_notification];
-        // TODO: add close/activate account !!!
-
-        if ($new_email != $email) {
-            unset($users[$email]);
-        }
 
         $this->write_users($users);
     }
@@ -1309,13 +1372,16 @@ class toolbox
     /**
      *
      * @param string $action
+     * @return bool
      */
     public function verify_user_signed_in($action)
     {
-        if (isset($_SESSION['email']) or
-            in_array($action, ['change_password', 'send_password', 'sign_in', 'sign_out'])
-        ) {
-            return;
+        if (isset($_SESSION['email'])) {
+            return true;
+        }
+
+        if (in_array($action, ['change_password', 'send_password', 'sign_in', 'sign_out'])) {
+            return false;
         }
 
         if ($action == 'download_book') {

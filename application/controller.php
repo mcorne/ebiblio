@@ -28,12 +28,12 @@ class controller
     {
         try {
             if ($this->toolbox->is_post()) {
-                $email = $this->toolbox->get_input('email');
                 $admin = $this->toolbox->get_input('admin');
-                $new_book_notification = $this->toolbox->get_input('new_book_notification');
+                $email = $this->toolbox->get_input('email');
+                $new_book_notification = (bool) $this->toolbox->get_input('new_book_notification');
 
                 $this->toolbox->add_user($email, $new_book_notification, $admin);
-                $this->toolbox->redirect('get_users');
+                $this->toolbox->redirect('get_users', ['new_email' => $email]);
             }
 
         } catch (Exception $exception) {
@@ -41,10 +41,10 @@ class controller
         }
 
         return [
-            'admin'                 => $admin                 ?? false,
-            'email'                 => $email                 ?? null,
-            'message'               => $message               ?? null,
-            'new_book_notification' => $new_book_notification ?? true,
+            'admin'                 => $admin   ?? false,
+            'email'                 => $email   ?? null,
+            'message'               => $message ?? null,
+            'new_book_notification' => isset($new_book_notification) ? $new_book_notification : true,
         ];
     }
 
@@ -184,6 +184,25 @@ class controller
         ];
     }
 
+    /**
+     *
+     * @return array
+     */
+    public function action_disable_user()
+    {
+        try {
+            $email = $this->toolbox->get_input('email');
+            $this->toolbox->disable_user($email);
+            $params = ['old_email' => $email];
+        } catch (Exception $exception) {
+            $message = $exception->getMessage();
+            $encoded_message = $this->toolbox->encode_info($message);
+            $params = ['message' => $encoded_message];
+        }
+
+        $this->toolbox->redirect('get_users', $params);
+    }
+
     public function action_display_cover()
     {
         if ($book_id = $this->toolbox->get_input('id') and $bookinfo = $this->toolbox->get_bookinfo($book_id)) {
@@ -208,6 +227,25 @@ class controller
             header('Content-Length: ' . filesize($filename));
             readfile($filename);
         }
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function action_enable_user()
+    {
+        try {
+            $email = $this->toolbox->get_input('email');
+            $this->toolbox->enable_user($email);
+            $params = ['new_email' => $email];
+        } catch (Exception $exception) {
+            $message = $exception->getMessage();
+            $encoded_message = $this->toolbox->encode_info($message);
+            $params = ['message' => $encoded_message];
+        }
+
+        $this->toolbox->redirect('get_users', $params);
     }
 
     /**
@@ -270,20 +308,23 @@ class controller
     public function action_get_users()
     {
         try {
-            $action         = $this->toolbox->get_input('action');
-            $encoded_user   = $this->toolbox->get_input('info');
-            $selected_email = $this->toolbox->get_input('email');
+            if ($encoded_message = $this->toolbox->get_input('message')) {
+                $message = $this->toolbox->decode_info($encoded_message);
+            }
 
-            $users = $this->toolbox->get_users($selected_email, $encoded_user);
+            $new_email = $this->toolbox->get_input('new_email');
+            $old_email = $this->toolbox->get_input('old_email');
+
+            $users = $this->toolbox->get_users($old_email, $new_email);
 
         } catch (Exception $exception) {
             $message = $exception->getMessage();
         }
 
         return [
-            'message'        => $message ?? null,
-            'selected_email' => $selected_email ?? null,
-            'users'          => $users   ?? null,
+            'message'        => $message   ?? null,
+            'selected_email' => $new_email ?? $old_email,
+            'users'          => $users     ?? null,
         ];
     }
 
@@ -366,25 +407,27 @@ class controller
     public function action_update_user()
     {
         try {
-            $email = $this->toolbox->get_input('email');
 
             if ($this->toolbox->is_post()) {
-                $admin                 = $this->toolbox->get_input('admin');
-                $new_book_notification = $this->toolbox->get_input('new_book_notification');
+                $admin                 = (bool) $this->toolbox->get_input('admin');
+                $new_book_notification = (bool) $this->toolbox->get_input('new_book_notification');
                 $new_email             = $this->toolbox->get_input('new_email');
+                $old_email             = $this->toolbox->get_input('old_email');
 
-                $this->toolbox->update_user($email, $new_email, $new_book_notification, $admin);
-                $this->toolbox->redirect('get_users');
-            } else {
-                if (! $user = $this->toolbox->get_user($email)) {
-                    // the email is invalid, silently ignores the email, redirects to the user list
-                    $this->toolbox->redirect('get_users');
-                }
-
-                $admin                 = $user['admin'];
-                $new_book_notification = $user['options']['new_book_notification'];
-                $new_email             = $email;
+                $this->toolbox->update_user($old_email, $new_email, $new_book_notification, $admin);
+                $this->toolbox->redirect('get_users', ['old_email' => $old_email, 'new_email' => $new_email]);
             }
+
+            $old_email = $this->toolbox->get_input('email');
+
+            if (! $user = $this->toolbox->get_user($old_email)) {
+                // the email is invalid, silently ignores the email, redirects to the user list
+                $this->toolbox->redirect('get_users');
+            }
+
+            $admin                 = $user['admin'];
+            $new_book_notification = $user['options']['new_book_notification'];
+            $new_email             = $old_email;
 
         } catch (Exception $exception) {
             $message = $exception->getMessage();
@@ -392,10 +435,10 @@ class controller
 
         return [
             'admin'                 => $admin,
-            'email'                 => $email,
             'message'               => $message ?? null,
             'new_book_notification' => $new_book_notification,
             'new_email'             => $new_email,
+            'old_email'             => $old_email,
         ];
     }
 
@@ -450,13 +493,17 @@ class controller
 
         list($action, $method) = $this->get_action();
 
-        $this->toolbox->verify_user_signed_in($action);
+        if ($this->toolbox->verify_user_signed_in($action)) {
+            if (! $this->toolbox->is_admin_user() and in_array($action, ['add_user', 'disable_user', 'enable_user', 'get_users'])) {
+                throw new Exception("Invalid action for non admin user: $action"); // TODO: fix as displayed when admin user changes themselves !!!
+            }
+        }
 
         if ($result = $this->$method()) {
             extract($result);
         }
 
-        if ($is_html = ! in_array($action, ['display_cover', 'download_book'])) {
+        if ($is_html = ! in_array($action, ['disable_user', 'enable_user', 'display_cover', 'download_book'])) {
             require $this->toolbox->base_path . '/views/header.php';
         }
 
