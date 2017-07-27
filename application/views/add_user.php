@@ -1,8 +1,6 @@
-<h3 class="w3-container w3-margin-bottom">Ajouter un utilisateur</h3>
+<form method="post">
 
-<form class="w3-container" method="post">
-
-    <label>Adresse e-mail</label>
+    <label class="w3-margin-left">Adresse e-mail</label>
     <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email;?>">
 
     <p>
@@ -16,7 +14,7 @@
     </p>
 
     <p>
-        <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Ajouter</button>
+        <button class="w3-btn w3-ripple w3-green w3-block" type="submit" value="submit">Ajouter un utilisateur</button>
     </p>
 
 </form>

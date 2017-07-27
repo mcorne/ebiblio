@@ -1,24 +1,10 @@
-<h3 class="w3-container w3-margin-bottom">Ajouter ou recharger un livre</h3>
-
-<form class="w3-container" enctype="multipart/form-data" method="post">
+<form enctype="multipart/form-data" method="post">
 
     <input type="hidden" name="MAX_FILE_SIZE" value="<?= toolbox::MAX_FILE_SIZE; ?>" />
 
-    <p>
-        <div class="w3-container w3-pale-green">
-            <p>
-                <label>Sélectionner un fichier avec l'extension .epub</label>
-            </p>
-            <p>
-                <input class="w3-button" name="filename" type="file">
-            </p>
-        </div>
+    <input class="w3-input w3-border w3-pale-green w3-margin-bottom" name="filename" type="file">
 
-    </p>
-
-    <p>
-        <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Envoyer</button>
-    </p>
+    <button class="w3-btn w3-ripple w3-green w3-block" type="submit" value="submit">Ajouter ou recharger un livre</button>
 
 </form>
 

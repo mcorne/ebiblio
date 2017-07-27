@@ -1,5 +1,5 @@
 <div class="w3-modal w3-show">
-    <div class="w3-modal-content w3-card-4 w3-animate-zoom w3-padding" style="max-width:600px">
+    <div class="w3-modal-content w3-card-4 w3-animate-zoom w3-padding w3-margin-top" style="max-width:600px">
 
         <?php if (isset($message)): ?>
             <?php require $this->toolbox->base_path . '/views/message.php'; ?>

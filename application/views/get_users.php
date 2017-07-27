@@ -1,14 +1,4 @@
-<h3 class="w3-container w3-margin-bottom">
-    <a class="w3-text-black" href="">Liste des utilisateurs</a>
-</h3>
-
 <table class="w3-table w3-striped w3-bordered">
-    <tr>
-
-        <th>E-mail</th>
-        <th></th>
-
-    </tr>
 
     <?php foreach ($users as $email => $user): ?>
         <tr <?php if ($email == $selected_email) : ?>class="w3-pale-red"<?php endif; ?> >
@@ -51,8 +41,8 @@
 </table>
 
 <p>
-    <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('add_user'); ?>">
-        <i class="fa fa-user-plus fa-lg w3-text-green w3-margin-right" aria-hidden="true"></i>
+    <a class="w3-button" href="<?= $this->toolbox->create_url('add_user'); ?>">
+        <i class="fa fa-user-plus w3-text-green" aria-hidden="true"></i>
         Ajouter un utilisateur
     </a>
 </p>

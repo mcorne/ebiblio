@@ -1,7 +1,3 @@
-<h3 class="w3-container w3-margin-bottom">
-    <a class="w3-text-black" href="">Liste des livres</a>
-</h3>
-
 <?php if (empty($booklist)) : ?>
 
     <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
@@ -28,27 +24,28 @@
         </tr>
 
         <?php foreach ($booklist as $book_id => $bookinfo):
-                $download_url = $this->toolbox->create_url('download_book', ['id' => $book_id]);
-        ?>
-        <tr <?php if ($book_id == $selected_book_id) : ?>class="w3-pale-red"<?php endif; ?> >
+                $download_url = $this->toolbox->create_url('download_book', ['id' => $book_id]); ?>
 
-            <td>
-                <a href="<?= $download_url; ?>"><i class="fa fa-download fa-lg" aria-hidden="true"></i></a>
-            </td>
+            <tr <?php if ($book_id == $selected_book_id) : ?>class="w3-pale-red"<?php endif; ?> >
 
-            <td>
-                <a href="<?= $download_url; ?>"><?= htmlspecialchars($bookinfo['title']); ?></a>
-            </td>
+                <td>
+                    <a href="<?= $download_url; ?>"><i class="fa fa-download fa-lg" aria-hidden="true"></i></a>
+                </td>
 
-            <td><?= htmlspecialchars($bookinfo['author']); ?></td>
+                <td>
+                    <a href="<?= $download_url; ?>"><?= htmlspecialchars($bookinfo['title']); ?></a>
+                </td>
 
-            <td>
-                <a href="<?= $this->toolbox->create_url('get_bookinfo', ['id' => $book_id]); ?>">
-                    <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
-                </a>
-            </td>
+                <td><?= htmlspecialchars($bookinfo['author']); ?></td>
 
-        </tr>
+                <td>
+                    <a href="<?= $this->toolbox->create_url('get_bookinfo', ['id' => $book_id]); ?>">
+                        <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
+                    </a>
+                </td>
+
+            </tr>
+            
         <?php endforeach; ?>
 
     </table>

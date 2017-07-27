@@ -2,8 +2,6 @@
 
     <div class="w3-half">
 
-        <h3 class="w3-margin-right w3-padding w3-pale-green">À propos du livre</h3>
-
         <ul class="w3-ul w3-margin-right">
 
             <?php if (isset($bookinfo['title'])): ?>

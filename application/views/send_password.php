@@ -1,13 +1,9 @@
-<h3 class="w3-container w3-margin-bottom">Mot de passe oublié</h3>
+<form method="post">
 
-<form class="w3-container" method="post">
-
-    <label>Votre adresse e-mail</label>
+    <label class="w3-margin-left">Votre adresse e-mail</label>
     <input class="w3-input w3-border w3-margin-bottom" name="email" type="text">
 
-    <p>
-        <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Envoyer</button>
-    </p>
+    <button class="w3-btn w3-ripple w3-green w3-block" type="submit" value="submit">Envoyer</button>
 
 </form>
 

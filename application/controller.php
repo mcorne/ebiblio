@@ -493,11 +493,7 @@ class controller
 
         list($action, $method) = $this->get_action();
 
-        if ($this->toolbox->verify_user_signed_in($action)) {
-            if (! $this->toolbox->is_admin_user() and in_array($action, ['add_user', 'disable_user', 'enable_user', 'get_users'])) {
-                throw new Exception("Invalid action for non admin user: $action"); // TODO: fix as displayed when admin user changes themselves !!!
-            }
-        }
+        $this->toolbox->verify_user_signed_in($action);
 
         if ($result = $this->$method()) {
             extract($result);

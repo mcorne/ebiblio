@@ -14,7 +14,7 @@
 
     <body class="w3-content">
 
-        <header class="w3-display-container w3-green w3-xlarge w3-padding">
+        <header class="w3-display-container w3-green w3-xlarge w3-padding w3-margin-bottom">
 
             <span class="w3-large">
                 <a href="javascript:open_sidebar()" class="w3-text-white w3-hover-grey"><i class="fa fa-bars" aria-hidden="true"></i></a>
@@ -79,7 +79,7 @@
 
                 <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('change_options'); ?>">
                     <i class="fa fa-cog" aria-hidden="true"></i>
-                    Changer les options
+                    Changer l'option
                 </a>
 
                 <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('delete_user'); ?>">
