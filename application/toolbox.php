@@ -550,6 +550,25 @@ class toolbox
     }
 
     /**
+     *
+     * @param string $old_email
+     * @param string $new_email
+     * @return array
+     */
+    public function fix_bookinfo_email($old_email, $new_email)
+    {
+        $booklist = $this->read_booklist();
+
+        foreach ($booklist as &$bookinfo) {
+            if ($bookinfo['email'] == $old_email) {
+                $bookinfo['email'] = $new_email;
+            }
+        }
+
+        $this->write_booklist($booklist);
+    }
+
+    /**
      * Fixes the booklist
      *
      * Reading the booklist right after writing it will not reflect the changes due to disk caching latency (?).
@@ -997,7 +1016,8 @@ class toolbox
 
         $users[$new_email] = $users[$old_email];
         unset($users[$old_email]);
-        // TODO: fix bookinfo email !!!
+
+        $this->fix_bookinfo_email($old_email, $new_email);
 
         return $users;
     }
