@@ -412,7 +412,7 @@ class toolbox
         $users[$email]['end_date'] = $this->get_datetime();
 
         if (! $this->admin_exists($users)) {
-            throw new Exception('Impossible de désactiver le dernier comte administrateur.');
+            throw new Exception('Interdiction de désactiver le dernier compte administrateur.');
         }
 
         $this->write_users($users);
