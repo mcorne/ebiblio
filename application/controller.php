@@ -33,7 +33,7 @@ class controller
                 $new_book_notification = (bool) $this->toolbox->get_input('new_book_notification');
 
                 $this->toolbox->add_user($email, $new_book_notification, $admin);
-                $this->toolbox->redirect('get_users', ['new_email' => $email]);
+                $this->toolbox->redirect('get_users', ['action' => 'add', 'email' => $email]);
             }
 
         } catch (Exception $exception) {
@@ -193,7 +193,7 @@ class controller
         try {
             $email = $this->toolbox->get_input('email');
             $this->toolbox->disable_user($email);
-            $params = ['old_email' => $email];
+            $params = ['action' => 'disable', 'email' => $email];
         } catch (Exception $exception) {
             $message = $exception->getMessage();
             $encoded_message = $this->toolbox->encode_info($message);
@@ -238,7 +238,7 @@ class controller
         try {
             $email = $this->toolbox->get_input('email');
             $this->toolbox->enable_user($email);
-            $params = ['new_email' => $email];
+            $params = ['action' => 'enable', 'email' => $email];
         } catch (Exception $exception) {
             $message = $exception->getMessage();
             $encoded_message = $this->toolbox->encode_info($message);
@@ -308,14 +308,14 @@ class controller
     public function action_get_users()
     {
         try {
+            $action = $this->toolbox->get_input('action');
+            $email  = $this->toolbox->get_input('email');
+
             if ($encoded_message = $this->toolbox->get_input('message')) {
                 $message = $this->toolbox->decode_info($encoded_message);
             }
 
-            $new_email = $this->toolbox->get_input('new_email');
-            $old_email = $this->toolbox->get_input('old_email');
-
-            $users = $this->toolbox->get_users($old_email, $new_email);
+            $users = $this->toolbox->get_users($action, $email);
 
         } catch (Exception $exception) {
             $message = $exception->getMessage();
@@ -323,11 +323,15 @@ class controller
 
         return [
             'message'        => $message   ?? null,
-            'selected_email' => $new_email ?? $old_email,
+            'selected_email' => $email,
             'users'          => $users     ?? null,
         ];
     }
 
+    /**
+     *
+     * @return array
+     */
     public function action_send_password()
     {
         try {
@@ -346,9 +350,17 @@ class controller
         return ['message' => $message ?? null];
     }
 
+    /**
+     *
+     * @return array
+     */
     public function action_sign_in()
     {
         try {
+            if ($encoded_message = $this->toolbox->get_input('message')) {
+                $message = $this->toolbox->decode_info($encoded_message);
+            }
+
             if ($this->toolbox->is_post()) {
                 $email    = $this->toolbox->get_input('email');
                 $password = $this->toolbox->get_input('password');
@@ -359,7 +371,10 @@ class controller
             }
 
         } catch (Exception $exception) {
+            $message = $exception->getMessage();
         }
+
+        return ['message' => $message ?? null];
     }
 
     public function action_sign_out()
@@ -415,7 +430,7 @@ class controller
                 $old_email             = $this->toolbox->get_input('old_email');
 
                 $this->toolbox->update_user($old_email, $new_email, $new_book_notification, $admin);
-                $this->toolbox->redirect('get_users', ['old_email' => $old_email, 'new_email' => $new_email]);
+                $this->toolbox->redirect('get_users', ['action' => 'update', 'email' => $new_email]);
             }
 
             $old_email = $this->toolbox->get_input('email');
@@ -493,7 +508,9 @@ class controller
 
         list($action, $method) = $this->get_action();
 
-        $this->toolbox->verify_user_signed_in($action);
+        if ($this->toolbox->verify_user_signed_in($action)) {
+            $this->toolbox->verify_admin_user_action($action);
+        }
 
         if ($result = $this->$method()) {
             extract($result);
@@ -503,7 +520,7 @@ class controller
             require $this->toolbox->base_path . '/views/header.php';
         }
 
-        if (! empty($result['message'])) {
+        if (! empty($result['message']) and $action != 'sign_in') {
             require $this->toolbox->base_path . '/views/message.php';
         }
 

@@ -82,13 +82,7 @@ class toolbox
     {
         $users = $this->read_users();
 
-        if (isset($users[$email])) {
-            throw new Exception('Adresse e-mail déjà utilisée.');
-        }
-
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('Adresse e-mail incorrecte.');
-        }
+        $this->validate_email($email, $users);
 
         $password = $this->create_random_password();
 
@@ -175,12 +169,10 @@ class toolbox
             throw new Exception("Nouvelle adresse e-mail identique à l'adresse actuelle.");
         }
 
-        if (! filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('Nouvelle adresse e-mail incorrecte.');
-        }
-
-        $this->replace_email($old_email, $new_email);
-        $this->update_session($new_email, $password);
+        $users = $this->read_users();
+        $users = $this->replace_email($old_email, $new_email, $users);
+        $this->write_users($users);
+        $this->update_session($new_email);
     }
 
     /**
@@ -217,7 +209,6 @@ class toolbox
         }
 
         $this->replace_password($email, $new_password, false);
-        $this->update_session($email, $new_password);
     }
 
     /**
@@ -603,18 +594,16 @@ class toolbox
      * Any change to the user list must then be passed back to the redirect URL to display the user list!
      *
      * @param array $users
-     * @param string $old_email
-     * @param string $new_email
+     * @param string $action
+     * @param string $email
      * @return array
      */
-    public function fix_users($users, $old_email, $new_email)
+    public function fix_users($users, $action, $email)
     {
-        if ($old_email) {
-            $users[$old_email]['end_date'] = $this->get_datetime();
-        }
-
-        if ($new_email) {
-            $users[$new_email]['end_date'] = null;
+        if ($action == 'disable') {
+            $users[$email]['end_date'] = $this->get_datetime();
+        } elseif ($action == 'enable') {
+            $users[$email]['end_date'] = null;
         }
 
         return $users;
@@ -809,14 +798,17 @@ class toolbox
 
     /**
      *
-     * @param string $old_email
-     * @param string $new_email
+     * @param string $action
+     * @param string $email
      * @return type
      */
-    public function get_users($old_email = null, $new_email = null)
+    public function get_users($action = null, $email = null)
     {
         $users = $this->read_users();
-        $users = $this->fix_users($users, $old_email, $new_email);
+
+        if ($email) {
+            $users = $this->fix_users($users, $action, $email);
+        }
 
         ksort($users);
 
@@ -971,7 +963,7 @@ class toolbox
      * @param string $book_id
      * @param array $bookinfo
      */
-    public function redirect_to_booklist($action = null, $book_id = null, $bookinfo = null)
+    public function redirect_to_booklist($action = null, $book_id = null, $bookinfo = [])
     {
         $uri = 'get_booklist';
 
@@ -996,15 +988,18 @@ class toolbox
      *
      * @param string $old_email
      * @param string $new_email
+     * @param array $users
+     * @return array
      */
-    public function replace_email($old_email, $new_email)
+    public function replace_email($old_email, $new_email, $users)
     {
-        $users = $this->read_users();
+        $this->validate_email($new_email, $users);
 
         $users[$new_email] = $users[$old_email];
         unset($users[$old_email]);
+        // TODO: fix bookinfo email !!!
 
-        $this->write_users($users);
+        return $users;
     }
 
     /**
@@ -1030,7 +1025,7 @@ class toolbox
 
     public function reset_session()
     {
-        unset($_SESSION['email'], $_SESSION['password']);
+        unset($_SESSION['email']);
     }
 
     /**
@@ -1236,7 +1231,7 @@ class toolbox
             throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
         }
 
-        $this->update_session($email, $password);
+        $this->update_session($email);
 
         if ($encoded = $this->get_input('redirect') and $uri = $this->decode_uri($encoded)) {
             $this->redirect($uri);
@@ -1322,12 +1317,10 @@ class toolbox
     /**
      *
      * @param string $email
-     * @param string $password
      */
-    public function update_session($email, $password)
+    public function update_session($email)
     {
-        $_SESSION['email']    = $email;
-        $_SESSION['password'] = $password;
+        $_SESSION['email'] = $email;
     }
 
     /**
@@ -1341,25 +1334,12 @@ class toolbox
     {
         $users = $this->read_users();
 
-        if (! $users[$old_email]) {
-            throw new Exception('Adresse e-mail inconnue.');
-        }
+        $users[$old_email]['admin']   = $admin;
+        $users[$old_email]['options'] = ['new_book_notification' => $new_book_notification];
 
-        if ($new_email != $old_email and isset($users[$new_email])) {
-            throw new Exception('Adresse e-mail déjà utilisée.');
+        if ($old_email != $new_email) {
+            $users = $this->replace_email($old_email, $new_email, $users);
         }
-
-        if (! filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('Adresse e-mail incorrecte.');
-        }
-
-        if ($new_email != $old_email) {
-            $users[$new_email] = $users[$old_email];
-            $users[$old_email]['end_date'] = $this->get_datetime();
-        }
-
-        $users[$new_email]['admin']   = $admin;
-        $users[$new_email]['options'] = ['new_book_notification' => $new_book_notification];
 
         $this->write_users($users);
     }
@@ -1386,6 +1366,35 @@ class toolbox
         }
 
         return [$book_id, $bookinfo];
+    }
+
+    /**
+     *
+     * @param string $email
+     * @param array $users
+     * @throws Exception
+     */
+    public function validate_email($email, $users)
+    {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Adresse e-mail incorrecte.');
+        }
+
+        if (isset($users[$email])) {
+            throw new Exception('Adresse e-mail déjà utilisée.');
+        }
+    }
+
+    /**
+     *
+     * @param string $action
+     */
+    public function verify_admin_user_action($action)
+    {
+        if (in_array($action, ['add_user', 'disable_user', 'enable_user', 'get_users']) and ! $this->is_admin_user()) {
+            $params = ['message' => $this->encode_info('Action seulement autorisée pour un administrateur.')];
+            $this->redirect('sign_in', $params);
+        }
     }
 
     /**

@@ -5,18 +5,15 @@
             <?php require $this->toolbox->base_path . '/views/message.php'; ?>
         <?php endif; ?>
 
+        <form class="w3-margin-top" method="post">
 
-        <form class="w3-container w3-margin-top" method="post">
-
-            <label>Votre adresse e-mail</label>
+            <label class="w3-margin-left">Votre adresse e-mail</label>
             <input class="w3-input w3-border w3-margin-bottom" name="email" type="text">
 
-            <label>Votre mot de passe</label>
+            <label class="w3-margin-left">Votre mot de passe</label>
             <input class="w3-input w3-border w3-margin-bottom" name="password" type="password">
 
-            <p>
-                <button class="w3-button w3-block w3-green w3-section w3-padding" type="submit" value="submit">Se connecter</button>
-            </p>
+            <button class="w3-button w3-block w3-green w3-section w3-padding w3-block" type="submit" value="submit">Se connecter</button>
 
         </form>
 
