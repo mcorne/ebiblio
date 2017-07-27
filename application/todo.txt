@@ -1,0 +1,2 @@
+actually remove email if unused in book info
+fix email change, not consistent between user (replace) and admin (disable old + enable new), change email in bookinfo

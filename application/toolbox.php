@@ -596,6 +596,32 @@ class toolbox
 
     /**
      *
+     * Fixes the user list
+     *
+     * Reading the user list right after writing it will not reflect the changes due to disk caching latency (?).
+     * This happens on the production server but not on the development box.
+     * Any change to the user list must then be passed back to the redirect URL to display the user list!
+     *
+     * @param array $users
+     * @param string $old_email
+     * @param string $new_email
+     * @return array
+     */
+    public function fix_users($users, $old_email, $new_email)
+    {
+        if ($old_email) {
+            $users[$old_email]['end_date'] = $this->get_datetime();
+        }
+
+        if ($new_email) {
+            $users[$new_email]['end_date'] = null;
+        }
+
+        return $users;
+    }
+
+    /**
+     *
      * @param string $book_id
      * @return array
      */
@@ -790,14 +816,7 @@ class toolbox
     public function get_users($old_email = null, $new_email = null)
     {
         $users = $this->read_users();
-
-        if ($old_email) {
-            $users[$old_email]['end_date'] = $this->get_datetime();
-        }
-
-        if ($new_email) {
-            $users[$new_email]['end_date'] = null;
-        }
+        $users = $this->fix_users($users, $old_email, $new_email);
 
         ksort($users);
 
@@ -1054,7 +1073,7 @@ class toolbox
         $headers[] = 'Content-type: text/html; charset=UTF-8';
         $headers   = implode("\r\n", $headers);
 
-        $success = mail($email, $subject, $message, $headers);
+        $success = @mail($email, $subject, $message, $headers);
 
         return $success;
     }
