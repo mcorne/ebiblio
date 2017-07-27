@@ -1,6 +1,5 @@
 <h3 class="w3-container w3-margin-bottom">
     <a class="w3-text-black" href="">Liste des livres</a>
-    <a href=""><i class="fa fa-refresh" aria-hidden="true" style="font-size: 70%"></i></a>
 </h3>
 
 <?php if (empty($booklist)) : ?>
@@ -45,7 +44,7 @@
 
             <td>
                 <a href="<?= $this->toolbox->create_url('get_bookinfo', ['id' => $book_id]); ?>">
-                    <i class="fa fa-info-circle fa-lg w3-margin-right icon" aria-hidden="true"></i>
+                    <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
                 </a>
             </td>
 

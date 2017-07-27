@@ -1,5 +1,0 @@
-add user administration: close or remove
-
-send book to email for backup
-
-translate messages
