@@ -30,10 +30,11 @@ class controller
             if ($this->toolbox->is_post()) {
                 $admin = $this->toolbox->get_input('admin');
                 $email = $this->toolbox->get_input('email');
+
                 $new_book_notification = (bool) $this->toolbox->get_input('new_book_notification');
 
                 $this->toolbox->add_user($email, $new_book_notification, $admin);
-                $this->toolbox->redirect('get_users', ['action' => 'add', 'email' => $email]);
+                $this->toolbox->redirect_to_user_list('enable', $email);
             }
 
         } catch (Exception $exception) {
@@ -193,14 +194,11 @@ class controller
         try {
             $email = $this->toolbox->get_input('email');
             $this->toolbox->disable_user($email);
-            $params = ['action' => 'disable', 'email' => $email];
+            $this->toolbox->redirect_to_user_list('disable', $email);
         } catch (Exception $exception) {
             $message = $exception->getMessage();
-            $encoded_message = $this->toolbox->encode_info($message);
-            $params = ['message' => $encoded_message];
+            $this->toolbox->redirect_with_message('get_users', $message);
         }
-
-        $this->toolbox->redirect('get_users', $params);
     }
 
     public function action_display_cover()
@@ -238,14 +236,11 @@ class controller
         try {
             $email = $this->toolbox->get_input('email');
             $this->toolbox->enable_user($email);
-            $params = ['action' => 'enable', 'email' => $email];
+            $this->toolbox->redirect_to_user_list('enable', $email);
         } catch (Exception $exception) {
             $message = $exception->getMessage();
-            $encoded_message = $this->toolbox->encode_info($message);
-            $params = ['message' => $encoded_message];
+            $this->toolbox->redirect_with_message('get_users', $message);
         }
-
-        $this->toolbox->redirect('get_users', $params);
     }
 
     /**
@@ -308,23 +303,20 @@ class controller
     public function action_get_users()
     {
         try {
-            $action = $this->toolbox->get_input('action');
-            $email  = $this->toolbox->get_input('email');
+            $email     = $this->toolbox->get_input('email');
+            $message   = $this->toolbox->get_message();
+            $users_fix = $this->toolbox->get_input('fix');
 
-            if ($encoded_message = $this->toolbox->get_input('message')) {
-                $message = $this->toolbox->decode_info($encoded_message);
-            }
-
-            $users = $this->toolbox->get_users($action, $email);
+            $users = $this->toolbox->get_users($users_fix);
 
         } catch (Exception $exception) {
             $message = $exception->getMessage();
         }
 
         return [
-            'message'        => $message   ?? null,
+            'message'        => $message,
             'selected_email' => $email,
-            'users'          => $users     ?? null,
+            'users'          => $users ?? null,
         ];
     }
 
@@ -429,8 +421,11 @@ class controller
                 $new_email             = $this->toolbox->get_input('new_email');
                 $old_email             = $this->toolbox->get_input('old_email');
 
-                $this->toolbox->update_user($old_email, $new_email, $new_book_notification, $admin);
-                $this->toolbox->redirect('get_users', ['action' => 'update', 'email' => $new_email]);
+                $user = $this->toolbox->update_user($old_email, $new_email, $new_book_notification, $admin);
+                
+                $action        = $user['end_date'] ? 'disable' : 'enable';
+                $email_to_hide = $old_email != $new_email ? $old_email : null;
+                $this->toolbox->redirect_to_user_list($action, $new_email, $email_to_hide);
             }
 
             $old_email = $this->toolbox->get_input('email');

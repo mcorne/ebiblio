@@ -613,16 +613,19 @@ class toolbox
      * Any change to the user list must then be passed back to the redirect URL to display the user list!
      *
      * @param array $users
-     * @param string $action
-     * @param string $email
+     * @param string $encoded_users_fix
      * @return array
      */
-    public function fix_users($users, $action, $email)
+    public function fix_users($users, $encoded_users_fix)
     {
-        if ($action == 'disable') {
-            $users[$email]['end_date'] = $this->get_datetime();
-        } elseif ($action == 'enable') {
-            $users[$email]['end_date'] = null;
+        $users_fix = $this->decode_info($encoded_users_fix);
+
+        if (isset($users_fix['action']) and isset($users_fix['email_to_show'])) {
+            $users[ $users_fix['email_to_show'] ]['end_date'] = $users_fix['action'] == 'enable' ? null : $this->get_datetime();
+        }
+
+        if (isset($users_fix['email_to_hide'])) {
+            unset($users[ $users_fix['email_to_hide'] ]);
         }
 
         return $users;
@@ -748,6 +751,19 @@ class toolbox
 
     /**
      *
+     * @return string
+     */
+    public function get_message()
+    {
+        if ($encoded_message = $this->get_input('message')) {
+            $message = $this->decode_info($encoded_message);
+
+            return $message;
+        }
+    }
+
+    /**
+     *
      * @return array
      */
     public function get_options()
@@ -817,16 +833,15 @@ class toolbox
 
     /**
      *
-     * @param string $action
-     * @param string $email
-     * @return type
+     * @param string $users_fix
+     * @return array
      */
-    public function get_users($action = null, $email = null)
+    public function get_users($users_fix = null)
     {
         $users = $this->read_users();
 
-        if ($email) {
-            $users = $this->fix_users($users, $action, $email);
+        if ($users_fix) {
+            $users = $this->fix_users($users, $users_fix);
         }
 
         ksort($users);
@@ -1001,6 +1016,39 @@ class toolbox
         }
 
         $this->redirect($uri, $params);
+    }
+
+    /**
+     *
+     * @param string $action
+     * @param string $email_to_show
+     * @param string $email_to_hide
+     */
+    public function redirect_to_user_list($action, $email_to_show, $email_to_hide = null)
+    {
+        $users_fix = [
+            'action'        => $action,
+            'email_to_hide' => $email_to_hide,
+            'email_to_show' => $email_to_show,
+        ];
+
+        $params = [
+            'email' => $email_to_show,
+            'fix'   => $this->encode_info($users_fix),
+        ];
+
+        $this->redirect('get_users', $params);
+    }
+
+    /**
+     *
+     * @param string $action
+     * @param string $message
+     */
+    public function redirect_with_message($action, $message)
+    {
+        $encoded_message = $this->encode_info($message);
+        $this->redirect($action, ['message' => $encoded_message]);
     }
 
     /**
@@ -1349,6 +1397,7 @@ class toolbox
      * @param string $new_email
      * @param string $new_book_notification
      * @param string $admin
+     * @return array
      */
     public function update_user($old_email, $new_email, $new_book_notification, $admin)
     {
@@ -1362,6 +1411,8 @@ class toolbox
         }
 
         $this->write_users($users);
+
+        return $users[$new_email];
     }
 
     /**
