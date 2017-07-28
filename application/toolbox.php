@@ -325,13 +325,13 @@ class toolbox
      * @param string $encoded
      * @return array
      */
-    public function decode_info($encoded)
+    public function decode_data($encoded)
     {
         if ($url_decoded = urldecode($encoded) and
             $json = base64_decode($url_decoded, true) and
-            $info = json_decode($json, true)
+            $data = json_decode($json, true)
         ) {
-            return $info;
+            return $data;
         }
     }
 
@@ -451,12 +451,12 @@ class toolbox
 
     /**
      *
-     * @param array $info
+     * @param array $data
      * @return string
      */
-    public function encode_info($info)
+    public function encode_data($data)
     {
-        if ($json = json_encode($info) and $encoded = base64_encode($json)) {
+        if ($json = json_encode($data) and $encoded = base64_encode($json)) {
             return $encoded;
         }
     }
@@ -576,29 +576,31 @@ class toolbox
      * Any change to the booklist must then be passed back to the redirect URL to display the booklist!
      *
      * @param array $booklist
-     * @param string $action
-     * @param string $book_id
-     * @param string $encoded_bookinfo
+     * @param array $booklist_fix
      * @return array
      */
-    public function fix_booklist($booklist, $action, $book_id, $encoded_bookinfo)
+    public function fix_booklist($booklist, $booklist_fix)
     {
-        switch ($action) {
-            case 'delete':
-                unset($booklist[$book_id]);
-                break;
+        if (isset($booklist_fix['action']) and isset($booklist_fix['id'])) {
+            $book_id = $booklist_fix['id'];
 
-            case 'put':
-                if ($bookinfo = $this->decode_info($encoded_bookinfo)) {
-                    $booklist[$book_id] = $bookinfo;
-                }
-                break;
+            switch ($booklist_fix['action']) {
+                case 'delete':
+                    unset($booklist[$book_id]);
+                    break;
 
-            case 'undelete':
-                if (isset($booklist[$book_id])) {
-                    $booklist[$book_id]['deleted'] = null;
-                }
-                break;
+                case 'put':
+                    if (isset($booklist_fix['info'])) {
+                        $booklist[$book_id] = $booklist_fix['info'];
+                    }
+                    break;
+
+                case 'undelete':
+                    if (isset($booklist[$book_id])) {
+                        $booklist[$book_id]['deleted'] = null;
+                    }
+                    break;
+            }
         }
 
         return $booklist;
@@ -613,13 +615,11 @@ class toolbox
      * Any change to the user list must then be passed back to the redirect URL to display the user list!
      *
      * @param array $users
-     * @param string $encoded_users_fix
+     * @param string $users_fix
      * @return array
      */
-    public function fix_users($users, $encoded_users_fix)
+    public function fix_users($users, $users_fix)
     {
-        $users_fix = $this->decode_info($encoded_users_fix);
-
         if (isset($users_fix['action']) and isset($users_fix['email_to_show'])) {
             $users[ $users_fix['email_to_show'] ]['end_date'] = $users_fix['action'] == 'enable' ? null : $this->get_datetime();
         }
@@ -649,19 +649,18 @@ class toolbox
      *
      * @param bool $deleted
      * @param string $sorting
-     * @param string $action
-     * @param string $selected_book_id
-     * @param array $encoded_bookinfo
+     * @param array $booklist_fix
      * @return array
      */
-    public function get_booklist($deleted, $sorting = 'title', $action = null, $selected_book_id = null, $encoded_bookinfo = null)
+    public function get_booklist($deleted, $sorting = 'title', $booklist_fix = [])
     {
         $booklist = $this->read_booklist();
-        $books    = [];
 
-        if ($selected_book_id) {
-            $booklist = $this->fix_booklist($booklist, $action, $selected_book_id, $encoded_bookinfo);
+        if ($booklist_fix) {
+            $booklist = $this->fix_booklist($booklist, $booklist_fix);
         }
+
+        $books = [];
 
         foreach ($booklist as $book_id => $bookinfo) {
             if (! $deleted and ! $bookinfo['deleted'] or $deleted and $bookinfo['deleted']) {
@@ -703,6 +702,19 @@ class toolbox
         $datetime = date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME'] + $offset);
 
         return $datetime;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function get_fix()
+    {
+        if ($encoded_fix = $this->get_input('fix')) {
+            $fix = $this->decode_data($encoded_fix);
+
+            return $fix;
+        }
     }
 
     /**
@@ -756,7 +768,7 @@ class toolbox
     public function get_message()
     {
         if ($encoded_message = $this->get_input('message')) {
-            $message = $this->decode_info($encoded_message);
+            $message = $this->decode_data($encoded_message);
 
             return $message;
         }
@@ -778,7 +790,7 @@ class toolbox
      * @return string
      * @see http://php.net/manual/en/features.file-upload.errors.php
      */
-    private function get_upload_error_message()
+    public function get_upload_error_message()
     {
         switch ($_FILES['filename']['error']) {
             case UPLOAD_ERR_INI_SIZE:
@@ -833,10 +845,10 @@ class toolbox
 
     /**
      *
-     * @param string $users_fix
+     * @param array $users_fix
      * @return array
      */
-    public function get_users($users_fix = null)
+    public function get_users($users_fix = [])
     {
         $users = $this->read_users();
 
@@ -999,23 +1011,22 @@ class toolbox
      */
     public function redirect_to_booklist($action = null, $book_id = null, $bookinfo = [])
     {
-        $uri = 'get_booklist';
-
-        $params = [];
-
-        if ($action) {
-            $params['action'] = $action;
+        if (! $action) {
+            $this->redirect('get_booklist');
         }
 
-        if ($book_id) {
-            $params['id'] = $book_id;
-        }
+        $booklist_fix = [
+            'action' => $action,
+            'id'     => $book_id,
+            'info'   => $bookinfo,
+        ];
 
-        if ($bookinfo) {
-            $params['info'] = $this->encode_info($bookinfo);
-        }
+        $params = [
+            'fix' => $this->encode_data($booklist_fix),
+            'id'  => $book_id,
+        ];
 
-        $this->redirect($uri, $params);
+        $this->redirect('get_booklist', $params);
     }
 
     /**
@@ -1034,7 +1045,7 @@ class toolbox
 
         $params = [
             'email' => $email_to_show,
-            'fix'   => $this->encode_info($users_fix),
+            'fix'   => $this->encode_data($users_fix),
         ];
 
         $this->redirect('get_users', $params);
@@ -1047,7 +1058,7 @@ class toolbox
      */
     public function redirect_with_message($action, $message)
     {
-        $encoded_message = $this->encode_info($message);
+        $encoded_message = $this->encode_data($message);
         $this->redirect($action, ['message' => $encoded_message]);
     }
 
@@ -1463,7 +1474,7 @@ class toolbox
     public function verify_admin_user_action($action)
     {
         if (in_array($action, ['add_user', 'disable_user', 'enable_user', 'get_users']) and ! $this->is_admin_user()) {
-            $params = ['message' => $this->encode_info('Action seulement autorisée pour un administrateur.')];
+            $params = ['message' => $this->encode_data('Action seulement autorisée pour un administrateur.')];
             $this->redirect('sign_in', $params);
         }
     }

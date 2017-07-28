@@ -279,11 +279,10 @@ class controller
                 $sorting = 'title';
             }
 
-            $action           = $this->toolbox->get_input('action');
-            $encoded_bookinfo = $this->toolbox->get_input('info');
-            $selected_book_id = $this->toolbox->get_input('id');
+            $book_id      = $this->toolbox->get_input('id');
+            $booklist_fix = $this->toolbox->get_fix();
 
-            $booklist = $this->toolbox->get_booklist(false, $sorting, $action, $selected_book_id, $encoded_bookinfo);
+            $booklist = $this->toolbox->get_booklist(false, $sorting, $booklist_fix);
 
         } catch (Exception $exception) {
             $message = $exception->getMessage();
@@ -292,7 +291,7 @@ class controller
         return [
             'booklist'         => $booklist ?? null,
             'message'          => $message  ?? null,
-            'selected_book_id' => $selected_book_id ?? null,
+            'selected_book_id' => $book_id ?? null,
         ];
     }
 
@@ -305,7 +304,7 @@ class controller
         try {
             $email     = $this->toolbox->get_input('email');
             $message   = $this->toolbox->get_message();
-            $users_fix = $this->toolbox->get_input('fix');
+            $users_fix = $this->toolbox->get_fix();
 
             $users = $this->toolbox->get_users($users_fix);
 
@@ -349,9 +348,7 @@ class controller
     public function action_sign_in()
     {
         try {
-            if ($encoded_message = $this->toolbox->get_input('message')) {
-                $message = $this->toolbox->decode_info($encoded_message);
-            }
+            $message = $this->toolbox->get_message();
 
             if ($this->toolbox->is_post()) {
                 $email    = $this->toolbox->get_input('email');
@@ -366,7 +363,7 @@ class controller
             $message = $exception->getMessage();
         }
 
-        return ['message' => $message ?? null];
+        return ['message' => $message];
     }
 
     public function action_sign_out()
@@ -422,7 +419,7 @@ class controller
                 $old_email             = $this->toolbox->get_input('old_email');
 
                 $user = $this->toolbox->update_user($old_email, $new_email, $new_book_notification, $admin);
-                
+
                 $action        = $user['end_date'] ? 'disable' : 'enable';
                 $email_to_hide = $old_email != $new_email ? $old_email : null;
                 $this->toolbox->redirect_to_user_list($action, $new_email, $email_to_hide);
