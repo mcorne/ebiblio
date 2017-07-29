@@ -11,13 +11,11 @@ class controller
 
     /**
      *
-     * @param string $base_path
-     * @param string $base_url
-     * @param string $environment
+     * @param array $config
      */
-    public function __construct($base_path, $base_url, $environment)
+    public function __construct($config)
     {
-        $this->toolbox = new toolbox($base_path, $base_url, $environment);
+        $this->toolbox = new toolbox($config);
     }
 
     /**
@@ -509,17 +507,17 @@ class controller
         }
 
         if ($is_html = ! in_array($action, ['disable_user', 'enable_user', 'display_cover', 'download_book'])) {
-            require $this->toolbox->base_path . '/views/header.php';
+            require $this->toolbox->config['base_path'] . '/views/header.php';
         }
 
         if (! empty($result['message']) and $action != 'sign_in') {
-            require $this->toolbox->base_path . '/views/message.php';
+            require $this->toolbox->config['base_path'] . '/views/message.php';
         }
 
         require $this->toolbox->create_action_filename($action);
 
         if ($is_html) {
-            require $this->toolbox->base_path . '/views/footer.php';
+            require $this->toolbox->config['base_path'] . '/views/footer.php';
         }
     }
 }

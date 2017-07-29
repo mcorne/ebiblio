@@ -1,4 +1,4 @@
-# uncomment the proper environment setting, comment the other
+# select the proper environment setting
 # note that this setting might be overruled by the php-fpm config if any
 # SetEnv ENVIRONMENT production
 SetEnv ENVIRONMENT development
@@ -14,5 +14,6 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^.*$ - [NC,L]
 
 # select the proper rule depending if ebiblio is run as a domain subpath, eg my.domain.com/ebiblio or not
+# the domain subpath MUST BE the same as the one defined in config.php
 # RewriteRule ^.*$ /index.php [NC,L]
 RewriteRule ^.*$ /ebiblio/index.php [NC,L]

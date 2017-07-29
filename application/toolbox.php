@@ -1,21 +1,8 @@
 <?php
 class toolbox
 {
-    const EBIBLIO_EMAIL     = 'ebiblio@micmap.com';
-    const MAX_FILE_SIZE     = 10 * 1024 * 1024;     // 10 Mo
-    const SESSION_LIFE_TIME = 3600;                 // 1 hour
-
-    /**
-     *
-     * @var string
-     */
-    public $base_path;
-
-    /**
-     *
-     * @var string
-     */
-    public $base_url;
+    const MAX_FILE_SIZE     = 10 * 1024 * 1024; // 10 Mo
+    const SESSION_LIFE_TIME = 3600;             // 1 hour
 
     /**
      *
@@ -33,13 +20,7 @@ class toolbox
      *
      * @var string
      */
-    public $data_dir;
-
-    /**
-     *
-     * @var string
-     */
-    public $environment;
+    public $config;
 
     /**
      *
@@ -55,19 +36,14 @@ class toolbox
 
     /**
      *
-     * @param string $base_path
-     * @param string $base_url
-     * @param string $environment
+     * @param array $config
      */
-    public function __construct($base_path, $base_url, $environment)
+    public function __construct($config)
     {
-        $this->base_path   = $base_path;
-        $this->base_url    = $base_url;
-        $this->environment = $environment;
-        $this->data_dir    = sprintf('%s/data.%s', $base_path, $environment);
+        $this->config = $config;
 
-        $this->users_filename = sprintf('%s/users.php', $this->data_dir);
-        $this->booklist_filename = sprintf('%s/booklist.php', $this->data_dir);
+        $this->users_filename = sprintf('%s/users.php', $this->config['data_path']);
+        $this->booklist_filename = sprintf('%s/booklist.php', $this->config['data_path']);
 
         date_default_timezone_set('UTC');
     }
@@ -218,7 +194,7 @@ class toolbox
      */
     public function create_action_filename($action)
     {
-        $filename = sprintf('%s/views/%s.php', $this->base_path, $action);
+        $filename = sprintf('%s/views/%s.php', $this->config['base_path'], $action);
 
         return $filename;
     }
@@ -230,7 +206,7 @@ class toolbox
      */
     public function create_book_filename($bookname)
     {
-        $filename = sprintf('%s/books/%s', $this->data_dir, $bookname);
+        $filename = sprintf('%s/books/%s', $this->config['data_path'], $bookname);
 
         return $filename;
     }
@@ -274,7 +250,7 @@ class toolbox
     public function create_cover_filename($bookname, $extension)
     {
         $bookname = pathinfo($bookname, PATHINFO_FILENAME);
-        $filename = sprintf('%s/covers/%s.%s', $this->data_dir, $bookname, $extension);
+        $filename = sprintf('%s/covers/%s.%s', $this->config['data_path'], $bookname, $extension);
 
         return $filename;
     }
@@ -307,7 +283,7 @@ class toolbox
      */
     public function create_url($uri = null, $params = [])
     {
-        $url = $this->base_url;
+        $url = $this->config['base_url'];
 
         if ($uri) {
             $url .= "/$uri";
@@ -1113,7 +1089,7 @@ class toolbox
      */
     public function retrieve_book()
     {
-        $tmp_book_filename = sprintf('%s/tmp/%s', $this->data_dir, md5(basename($_FILES['filename']['name'])));
+        $tmp_book_filename = sprintf('%s/tmp/%s', $this->config['data_path'], md5(basename($_FILES['filename']['name'])));
 
         if (pathinfo($_FILES['filename']['name'], PATHINFO_EXTENSION) != 'epub') {
             throw new Exception('Extension de fichier non valide.');
@@ -1143,7 +1119,7 @@ class toolbox
      */
     public function send_email($email, $subject, $message)
     {
-        $headers[] = sprintf('From: %s', toolbox::EBIBLIO_EMAIL);
+        $headers[] = sprintf('From: %s', $this->config['email_from']);
         $headers[] = 'Content-type: text/html; charset=UTF-8';
         $headers   = implode("\r\n", $headers);
 
@@ -1173,7 +1149,7 @@ class toolbox
     <body>
         Bonjour,<br>
         <br>
-        Vous recevez ce message car un nouveau livre a été ajouté dans la bibliothèque&nbsp;:<br>
+        Vous recevez ce message car un nouveau livre a été ajouté par %s dans la bibliothèque&nbsp;:<br>
         <a href="%s">%s, %s</a><br>
         <br>
         Si vous ne souhaitez plus recevoir de notification, veuillez cliquer sur le lien suivant pour changer vos options&nbsp;:<br>
@@ -1190,7 +1166,7 @@ class toolbox
         $book_url    = $this->create_url('get_booklist', ['id' => $book_id]);
         $options_url = $this->create_url('change_options');
 
-        $message = sprintf($message, $book_url, $bookinfo['title'], $bookinfo['author'], $options_url);
+        $message = sprintf($message, $_SESSION['email'], $book_url, $bookinfo['title'], $bookinfo['author'], $options_url);
 
         $this->send_email($email, $subject, $message);
         // note that any error when sending the email is silently ignored
@@ -1232,7 +1208,7 @@ class toolbox
     <body>
         Bonjour,<br>
         <br>
-        Vous recevez ce message car votre compte vient d\'être créé.<br>
+        Vous recevez ce message car votre compte vient d\'être créé par %s.<br>
         Veuillez cliquer sur le lien suivant pour l\'activer&nbsp;:<br>
         <a href="%s">Se connecter</a><br>
         <br>
@@ -1245,7 +1221,7 @@ class toolbox
 </html>';
 
         $url     = $this->create_url('change_password', ['email' => $email, 'password' => $password]);
-        $message = sprintf($message, $url);
+        $message = sprintf($message, $_SESSION['email'], $url);
 
         if (! $this->send_email($email, $subject, $message)) {
             throw new Exception("Impossible d'envoyer le mot de passe du nouveau compte.");
@@ -1339,7 +1315,7 @@ class toolbox
     {
         $zip = new ZipArchive;
 
-        $tmp_book_dirname = sprintf('%s/unzip/%s', $this->data_dir, basename($tmp_book_filename));
+        $tmp_book_dirname = sprintf('%s/unzip/%s', $this->config['data_path'], basename($tmp_book_filename));
 
         if (! $zip->open($tmp_book_filename)) {
             throw new Exception("Impossible d'ouvrir le fichier.");
