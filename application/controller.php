@@ -116,6 +116,11 @@ class controller
                 $new_password  = $this->toolbox->get_input('new_password');
 
                 $this->toolbox->change_password($email, $old_password, $new_password);
+
+                if ($password) {
+                    $this->toolbox->update_session($email);
+                }
+
                 $this->toolbox->redirect();
             }
 
