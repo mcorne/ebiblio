@@ -17,7 +17,7 @@
         <header class="w3-display-container w3-green w3-xlarge w3-padding w3-margin-bottom">
 
             <span class="w3-large">
-                <a href="javascript:open_sidebar()" class="w3-text-white w3-hover-grey"><i class="fa fa-bars" aria-hidden="true"></i></a>
+                <a href="javascript:open_sidebar()" class="w3-text-white w3-hover-grey"><i class="fa fa-bars fa-lg" aria-hidden="true"></i></a>
             </span>
 
             <a href="<?= $this->toolbox->create_url(); ?>" class="w3-text-white w3-hover-grey">
@@ -25,9 +25,9 @@
             </a>
 
             <span class="w3-large w3-right">
-                <a href="<?= $this->toolbox->create_url(); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-home" aria-hidden="true"></i></a>
+                <a href="<?= $this->toolbox->create_url(); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-home fa-lg" aria-hidden="true"></i></a>
 
-                <a href="<?= $this->toolbox->create_url('sign_out'); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
+                <a href="<?= $this->toolbox->create_url('sign_out'); ?>" class="w3-text-white w3-hover-grey"><i class="fa fa-sign-out fa-lg" aria-hidden="true"></i></a>
             </span>
 
         </header>

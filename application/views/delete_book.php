@@ -6,7 +6,7 @@
 
 <?php else: ?>
 
-    <form method="post">
+    <form class="w3-container" method="post">
 
         <select class="w3-select w3-border w3-pale-green w3-margin-bottom" name="id">
 
@@ -18,7 +18,9 @@
 
         </select>
 
-        <button class="w3-btn w3-ripple w3-green w3-block" type="submit" value="submit">Supprimer un livre</button>
+        <p class="w3-center">
+            <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Supprimer un livre</button>
+        </p>
 
     </form>
 

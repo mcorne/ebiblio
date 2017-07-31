@@ -1,7 +1,7 @@
-<form method="post">
+<form class="w3-container" method="post">
     <input name="old_email" type="hidden" value="<?= $old_email;?>">
 
-    <label class="w3-margin-left">Adresse e-mail</label>
+    <label>Adresse e-mail</label>
     <input class="w3-input w3-border w3-margin-bottom" name="new_email" type="text" value="<?= $new_email;?>">
 
 
@@ -15,8 +15,8 @@
         <label>Utilisateur de type administrateur</label>
     </p>
 
-    <p>
-        <button class="w3-btn w3-ripple w3-green w3-block" type="submit" value="submit">Mettre à jour un utilisateur</button>
+    <p class="w3-center">
+        <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Mettre à jour un utilisateur</button>
     </p>
 
 </form>

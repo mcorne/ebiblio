@@ -1,14 +1,16 @@
-<form method="post">
+<form class="w3-container" method="post">
 
-    <label class="w3-margin-left">Votre adresse e-mail</label>
+    <label>Votre adresse e-mail</label>
     <input class="w3-input w3-border w3-margin-bottom" name="email" type="text" value="<?= $email; ?>">
 
-    <label class="w3-margin-left">Votre mot de passe actuel</label>
+    <label>Votre mot de passe actuel</label>
     <input class="w3-input w3-border w3-margin-bottom" name="old_password" type="password" value="<?= $password; ?>">
 
-    <label class="w3-margin-left">Votre nouveau mot de passe</label>
+    <label>Votre nouveau mot de passe</label>
     <input class="w3-input w3-border w3-margin-bottom" name="new_password" type="password">
 
-    <button class="w3-btn w3-ripple w3-green w3-block" type="submit" value="submit">Changer de mot de passe</button>
+    <p class="w3-center">
+        <button class="w3-btn w3-ripple w3-green" type="submit" value="submit">Changer de mot de passe</button>
+    </p>
 
 </form>
