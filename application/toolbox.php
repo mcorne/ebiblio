@@ -545,44 +545,6 @@ class toolbox
     }
 
     /**
-     * Fixes the booklist
-     *
-     * Reading the booklist right after writing it will not reflect the changes due to disk caching latency (?).
-     * This happens on the production server but not on the development box.
-     * Any change to the booklist must then be passed back to the redirect URL to display the booklist!
-     *
-     * @param array $booklist
-     * @param array $booklist_fix
-     * @return array
-     */
-    public function fix_booklist($booklist, $booklist_fix)
-    {
-        if (isset($booklist_fix['action']) and isset($booklist_fix['id'])) {
-            $book_id = $booklist_fix['id'];
-
-            switch ($booklist_fix['action']) {
-                case 'delete':
-                    unset($booklist[$book_id]);
-                    break;
-
-                case 'put':
-                    if (isset($booklist_fix['info'])) {
-                        $booklist[$book_id] = $booklist_fix['info'];
-                    }
-                    break;
-
-                case 'undelete':
-                    if (isset($booklist[$book_id])) {
-                        $booklist[$book_id]['deleted'] = null;
-                    }
-                    break;
-            }
-        }
-
-        return $booklist;
-    }
-
-    /**
      *
      * @param string $book_id
      * @return array
@@ -600,31 +562,25 @@ class toolbox
      *
      * @param bool $deleted
      * @param string $sorting
-     * @param array $booklist_fix
      * @return array
      */
-    public function get_booklist($deleted, $sorting = 'title', $booklist_fix = [])
+    public function get_booklist($deleted, $sorting = 'title')
     {
         $booklist = $this->read_booklist();
 
-        if ($booklist_fix) {
-            $booklist = $this->fix_booklist($booklist, $booklist_fix);
-        }
-
-        $books = [];
-
         foreach ($booklist as $book_id => $bookinfo) {
             if (! $deleted and ! $bookinfo['deleted'] or $deleted and $bookinfo['deleted']) {
-                $sort_column[]   = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
-                $books[$book_id] = $bookinfo;
+                $sort_column[] = $sorting == 'title' ? $bookinfo['title'] : $bookinfo['author'];
+            } else {
+                unset($booklist[$book_id]);
             }
         }
 
-        if ($books) {
-            array_multisort($sort_column, SORT_ASC, $books);
+        if ($booklist) {
+            array_multisort($sort_column, SORT_ASC, $booklist);
         }
 
-        return $books;
+        return $booklist;
     }
 
     /**
@@ -653,19 +609,6 @@ class toolbox
         $datetime = date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME'] + $offset);
 
         return $datetime;
-    }
-
-    /**
-     *
-     * @return array
-     */
-    public function get_fix()
-    {
-        if ($encoded_fix = $this->get_input('fix')) {
-            $fix = $this->decode_data($encoded_fix);
-
-            return $fix;
-        }
     }
 
     /**
@@ -796,10 +739,9 @@ class toolbox
 
     /**
      *
-     * @param array $users_fix
      * @return array
      */
-    public function get_users($users_fix = [])
+    public function get_users()
     {
         $users = $this->read_users();
 
@@ -957,32 +899,6 @@ class toolbox
         $url = $this->create_url($uri, $params);
         header("Location: $url");
         exit;
-    }
-
-    /**
-     *
-     * @param string $action
-     * @param string $book_id
-     * @param array $bookinfo
-     */
-    public function redirect_to_booklist($action = null, $book_id = null, $bookinfo = [])
-    {
-        if (! $action) {
-            $this->redirect('get_booklist');
-        }
-
-        $booklist_fix = [
-            'action' => $action,
-            'id'     => $book_id,
-            'info'   => $bookinfo,
-        ];
-
-        $params = [
-            'fix' => $this->encode_data($booklist_fix),
-            'id'  => $book_id,
-        ];
-
-        $this->redirect('get_booklist', $params);
     }
 
     /**

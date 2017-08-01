@@ -148,7 +148,7 @@ class controller
                     $this->toolbox->delete_book($book_id);
                 }
 
-                $this->toolbox->redirect_to_booklist('delete', $book_id);
+                $this->toolbox->redirect('get_booklist', ['id' => $book_id]);
             }
 
             $booklist = $this->toolbox->get_booklist(false);
@@ -254,7 +254,7 @@ class controller
     {
         try {
             if (! $book_id = $this->toolbox->get_input('id') or ! $bookinfo = $this->toolbox->get_bookinfo($book_id)) {
-                $this->toolbox->redirect_to_booklist();
+                $this->toolbox->redirect('get_booklist');
             }
 
             $language = $this->toolbox->get_language($bookinfo['language']);
@@ -282,10 +282,8 @@ class controller
                 $sorting = 'title';
             }
 
-            $book_id      = $this->toolbox->get_input('id');
-            $booklist_fix = $this->toolbox->get_fix();
-
-            $booklist = $this->toolbox->get_booklist(false, $sorting, $booklist_fix);
+            $book_id  = $this->toolbox->get_input('id');
+            $booklist = $this->toolbox->get_booklist(false, $sorting);
 
         } catch (Exception $exception) {
             $message = $exception->getMessage();
@@ -305,11 +303,9 @@ class controller
     public function action_get_users()
     {
         try {
-            $email     = $this->toolbox->get_input('email');
-            $message   = $this->toolbox->get_message();
-            $users_fix = $this->toolbox->get_fix();
-
-            $users = $this->toolbox->get_users($users_fix);
+            $email   = $this->toolbox->get_input('email');
+            $message = $this->toolbox->get_message();
+            $users   = $this->toolbox->get_users();
 
         } catch (Exception $exception) {
             $message = $exception->getMessage();
@@ -392,7 +388,7 @@ class controller
                     $this->toolbox->undelete_book($book_id);
                 }
 
-                $this->toolbox->redirect_to_booklist('undelete', $book_id);
+                $this->toolbox->redirect('get_booklist', ['id' => $book_id]);
             }
 
             $booklist = $this->toolbox->get_booklist(true);
@@ -459,9 +455,9 @@ class controller
             if ($this->toolbox->is_post()) {
                 if (! empty($_FILES['filename']['name'])) {
                     list($book_id, $bookinfo) = $this->toolbox->upload_book();
-                    $this->toolbox->redirect_to_booklist('put', $book_id, $bookinfo);
+                    $this->toolbox->redirect('get_booklist', ['id' => $book_id]);
                 } else {
-                    $this->toolbox->redirect_to_booklist();
+                    $this->toolbox->redirect('get_booklist');
                 }
             }
 
