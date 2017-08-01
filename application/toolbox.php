@@ -42,8 +42,8 @@ class toolbox
     {
         $this->config = $config;
 
-        $this->users_filename = sprintf('%s/users.php', $this->config['data_path']);
-        $this->booklist_filename = sprintf('%s/booklist.php', $this->config['data_path']);
+        $this->users_filename = sprintf('%s/users.json', $this->config['data_path']);
+        $this->booklist_filename = sprintf('%s/booklist.json', $this->config['data_path']);
 
         date_default_timezone_set('UTC');
     }
@@ -871,7 +871,7 @@ class toolbox
      * @param string $password
      * @return bool
      */
-    public function is_registered_user($email, $password = null)
+    public function is_registered_user($email, $password = true)
     {
         if (! $user = $this->get_user($email)) {
             return false;
@@ -885,7 +885,7 @@ class toolbox
             return false;
         }
 
-        if (! $password) {
+        if ($password === true) {
             return true;
         }
 
@@ -941,10 +941,25 @@ class toolbox
     public function read_booklist()
     {
         if (is_null($this->booklist)) {
-            $this->booklist = file_exists($this->booklist_filename) ? include $this->booklist_filename : [];
+            $this->booklist = $this->read_file($this->booklist_filename) ?: [];
         }
 
         return $this->booklist;
+    }
+
+    /**
+     *
+     * @param string $filename
+     * @return array
+     */
+    public function read_file($filename)
+    {
+        if (file_exists($filename) and
+            $json = file_get_contents($filename) and
+            $data = json_decode($json, true)
+        ) {
+            return $data;
+        }
     }
 
     /**
@@ -954,15 +969,9 @@ class toolbox
      */
     public function read_users()
     {
-        if (! is_null($this->users)) {
-            return $this->users;
+        if (is_null($this->users)) {
+            $this->users = $this->read_file($this->users_filename) ?: [];
         }
-
-        if (! file_exists($this->users_filename)) {
-            throw new Exception("Impossible de lire le fichier des comptes utilisateurs.");
-        }
-
-        $this->users = include $this->users_filename;
 
         return $this->users;
     }
@@ -1492,12 +1501,7 @@ class toolbox
     {
         $this->users = $users;
 
-        $exported = var_export($users, true);
-        $content  = "<?php\nreturn $exported;\n";
-
-        if (! file_put_contents($this->users_filename, $content)) {
-            throw new Exception('Impossible de mettre à jour le fichier des comptes utilisateurs.');
-        }
+        $this->write_file($this->users_filename, $users);
     }
 
     /**
@@ -1509,11 +1513,25 @@ class toolbox
     {
         $this->booklist = $booklist;
 
-        $exported = var_export($booklist, true);
-        $content  = "<?php\nreturn $exported;\n";
+        $this->write_file($this->booklist_filename, $booklist);
+    }
 
-        if (! file_put_contents($this->booklist_filename, $content)) {
-            throw new Exception('Impossible de mettre à jour la liste des livres.');
+    /**
+     *
+     * @param string $filename
+     * @param array $data
+     * @throws Exception
+     */
+    public function write_file($filename, $data)
+    {
+        $basename = basename($filename);
+
+        if (! $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) {
+            throw new Exception("Impossible d'encoder les données de $basename");
+        }
+
+        if (! file_put_contents($filename, $json)) {
+            throw new Exception("Impossible d'enregistrer $basename.");
         }
     }
 }
