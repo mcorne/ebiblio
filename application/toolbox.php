@@ -584,31 +584,6 @@ class toolbox
 
     /**
      *
-     * Fixes the user list
-     *
-     * Reading the user list right after writing it will not reflect the changes due to disk caching latency (?).
-     * This happens on the production server but not on the development box.
-     * Any change to the user list must then be passed back to the redirect URL to display the user list!
-     *
-     * @param array $users
-     * @param string $users_fix
-     * @return array
-     */
-    public function fix_users($users, $users_fix)
-    {
-        if (isset($users_fix['action']) and isset($users_fix['email_to_show'])) {
-            $users[ $users_fix['email_to_show'] ]['end_date'] = $users_fix['action'] == 'enable' ? null : $this->get_datetime();
-        }
-
-        if (isset($users_fix['email_to_hide'])) {
-            unset($users[ $users_fix['email_to_hide'] ]);
-        }
-
-        return $users;
-    }
-
-    /**
-     *
      * @param string $book_id
      * @return array
      */
@@ -828,10 +803,6 @@ class toolbox
     {
         $users = $this->read_users();
 
-        if ($users_fix) {
-            $users = $this->fix_users($users, $users_fix);
-        }
-
         ksort($users);
 
         return $users;
@@ -1012,28 +983,6 @@ class toolbox
         ];
 
         $this->redirect('get_booklist', $params);
-    }
-
-    /**
-     *
-     * @param string $action
-     * @param string $email_to_show
-     * @param string $email_to_hide
-     */
-    public function redirect_to_user_list($action, $email_to_show, $email_to_hide = null)
-    {
-        $users_fix = [
-            'action'        => $action,
-            'email_to_hide' => $email_to_hide,
-            'email_to_show' => $email_to_show,
-        ];
-
-        $params = [
-            'email' => $email_to_show,
-            'fix'   => $this->encode_data($users_fix),
-        ];
-
-        $this->redirect('get_users', $params);
     }
 
     /**
@@ -1393,7 +1342,6 @@ class toolbox
      * @param string $new_email
      * @param string $new_book_notification
      * @param string $admin
-     * @return array
      */
     public function update_user($old_email, $new_email, $new_book_notification, $admin)
     {
@@ -1407,8 +1355,6 @@ class toolbox
         }
 
         $this->write_users($users);
-
-        return $users[$new_email];
     }
 
     /**

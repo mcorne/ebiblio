@@ -32,7 +32,7 @@ class controller
                 $new_book_notification = (bool) $this->toolbox->get_input('new_book_notification');
 
                 $this->toolbox->add_user($email, $new_book_notification, $admin);
-                $this->toolbox->redirect_to_user_list('enable', $email);
+                $this->toolbox->redirect('get_users', ['email' => $email]);
             }
 
         } catch (Exception $exception) {
@@ -197,7 +197,7 @@ class controller
         try {
             $email = $this->toolbox->get_input('email');
             $this->toolbox->disable_user($email);
-            $this->toolbox->redirect_to_user_list('disable', $email);
+            $this->toolbox->redirect('get_users', ['email' => $email]);
         } catch (Exception $exception) {
             $message = $exception->getMessage();
             $this->toolbox->redirect_with_message('get_users', $message);
@@ -239,7 +239,7 @@ class controller
         try {
             $email = $this->toolbox->get_input('email');
             $this->toolbox->enable_user($email);
-            $this->toolbox->redirect_to_user_list('enable', $email);
+            $this->toolbox->redirect('get_users', ['email' => $email]);
         } catch (Exception $exception) {
             $message = $exception->getMessage();
             $this->toolbox->redirect_with_message('get_users', $message);
@@ -421,11 +421,8 @@ class controller
                 $new_email             = $this->toolbox->get_input('new_email');
                 $old_email             = $this->toolbox->get_input('old_email');
 
-                $user = $this->toolbox->update_user($old_email, $new_email, $new_book_notification, $admin);
-
-                $action        = $user['end_date'] ? 'disable' : 'enable';
-                $email_to_hide = $old_email != $new_email ? $old_email : null;
-                $this->toolbox->redirect_to_user_list($action, $new_email, $email_to_hide);
+                $this->toolbox->update_user($old_email, $new_email, $new_book_notification, $admin);
+                $this->toolbox->redirect('get_users', ['email' => $new_email]);
             }
 
             $old_email = $this->toolbox->get_input('email');
