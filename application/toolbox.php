@@ -994,6 +994,8 @@ class toolbox
     public function send_email($email, $subject, $message)
     {
         $headers[] = sprintf('From: %s', $this->config['email_from']);
+        $headers[] = sprintf('Return-Path: %s', $this->config['email_from']);
+        $headers[] = 'MIME-Version: 1.0';
         $headers[] = 'Content-type: text/html; charset=UTF-8';
         $headers   = implode("\r\n", $headers);
 
@@ -1026,8 +1028,7 @@ class toolbox
         Vous recevez ce message car un nouveau livre a été ajouté par %s dans la bibliothèque&nbsp;:<br>
         <a href="%s">%s, %s</a><br>
         <br>
-        Si vous ne souhaitez plus recevoir de notification, veuillez cliquer sur le lien suivant pour changer vos options&nbsp;:<br>
-        <a href="%s">Changer les options</a><br>
+        Si vous ne souhaitez plus recevoir de notification, <a href="%s">veuillez cliquer ici pour changer vos options</a>.<br>
         <br>
         Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
         Veuillez ne pas répondre à ce message.<br>
@@ -1083,8 +1084,7 @@ class toolbox
         Bonjour,<br>
         <br>
         Vous recevez ce message car votre compte vient d\'être créé par %s.<br>
-        Veuillez cliquer sur le lien suivant pour l\'activer&nbsp;:<br>
-        <a href="%s">Se connecter</a><br>
+        <a href="%s">Veuillez cliquer ici pour l\'activer</a><br>
         <br>
         Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
         Veuillez ne pas répondre à ce message.<br>
@@ -1130,8 +1130,7 @@ class toolbox
         Bonjour,<br>
         <br>
         Vous recevez ce message car vous avez demandé un nouveau mot de passe.<br>
-        Veuillez cliquer sur le lien suivant pour vous connecter&nbsp;:<br>
-        <a href="%s">Se connecter</a><br>
+        <a href="%s">Veuillez cliquer ici pour vous connecter</a><br>
         <br>
         Si vous avez reçu ce message par erreur, veuillez simplement le supprimer.<br>
         Veuillez ne pas répondre à ce message.<br>
