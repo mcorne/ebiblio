@@ -453,6 +453,25 @@ class toolbox
 
     /**
      *
+     * @param string $metadata
+     * @return string
+     */
+    public function extract_author($metadata)
+    {
+        if (! $author = $this->extract_xml_tag_data('creator', $metadata)) {
+            return;
+        }
+
+        if (preg_match_all('~[^ ,]+~', $author, $matches) == 2) {
+            list($last_name, $first_name) = current($matches);
+            $author = "$first_name $last_name";
+        }
+
+        return $author;
+    }
+
+    /**
+     *
      * @param string $tmp_book_dirname
      * @return string
      */
@@ -497,17 +516,32 @@ class toolbox
             throw new Exception("Impossible d'extraire le titre.");
         }
 
-        $bookinfo['author']      = $this->extract_xml_tag_data('creator', $metadata);
+        $bookinfo['author']      = $this->extract_author($metadata);
         $bookinfo['date']        = $this->extract_xml_tag_data('date', $metadata);
         $bookinfo['description'] = $this->extract_xml_tag_data('description', $metadata);
         $bookinfo['identifier']  = $this->extract_xml_tag_data('identifier', $metadata);
-        $bookinfo['language']    = $this->extract_xml_tag_data('language', $metadata);
+        $bookinfo['language']    = $this->extract_language($metadata);
         $bookinfo['publisher']   = $this->extract_xml_tag_data('publisher', $metadata);
         $bookinfo['rights']      = $this->extract_xml_tag_data('rights', $metadata);
         $bookinfo['source']      = $this->extract_xml_tag_data('subject', $metadata);
         $bookinfo['subject']     = $this->extract_xml_tag_data('subject', $metadata);
 
         return $bookinfo;
+    }
+
+    /**
+     *
+     * @param string $metadata
+     * @return string
+     */
+    public function extract_language($metadata)
+    {
+        if ($language = $this->extract_xml_tag_data('language', $metadata)) {
+            $language = substr($language, 0, 2);
+            $language = strtolower($language);
+        }
+
+        return $language;
     }
 
     /**
@@ -632,12 +666,6 @@ class toolbox
      */
     public function get_language($language_code)
     {
-        list($language_code) = preg_split('~[_-]~', $language_code);
-
-        if (! $language_code = strtolower($language_code)) {
-            return;
-        }
-
         switch ($language_code) {
             case 'en':
                 $language = 'Anglais';
