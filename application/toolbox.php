@@ -233,9 +233,6 @@ class toolbox
         // truncates the filename due to the 256 bytes file name max length
         $bookname = substr($bookname, 0, 200);
 
-        // concatenates the book number to differenciate possible title/author duplicates in different editions
-        $bookname .= '_' . $bookinfo['number'];
-
         $bookname .= '.epub';
 
         return $bookname;
@@ -463,7 +460,7 @@ class toolbox
         }
 
         if (preg_match_all('~, *~', $author, $matches) == 2) {
-            // eg "Follett, Ken"
+            // fixed last name before first name, "eg "Follett, Ken"
             list($last_name, $first_name) = current($matches);
             $author = "$first_name $last_name";
         }
@@ -521,7 +518,7 @@ class toolbox
         }
 
         $bookinfo['author']      = $this->extract_author($metadata);
-        $bookinfo['date']        = $this->extract_xml_tag_data('date', $metadata);
+        $bookinfo['date']        = $this->extract_date($metadata);
         $bookinfo['description'] = $this->extract_xml_tag_data('description', $metadata);
         $bookinfo['identifier']  = $this->extract_xml_tag_data('identifier', $metadata);
         $bookinfo['language']    = $this->extract_language($metadata);
@@ -538,9 +535,25 @@ class toolbox
      * @param string $metadata
      * @return string
      */
+    public function extract_date($metadata)
+    {
+        if ($date = $this->extract_xml_tag_data('date', $metadata)) {
+            // removes the timezone, eg "2011-12-28T19:32:06Z"
+            list($date) = explode('T', $date);
+        }
+
+        return $date;
+    }
+
+    /**
+     *
+     * @param string $metadata
+     * @return string
+     */
     public function extract_language($metadata)
     {
         if ($language = $this->extract_xml_tag_data('language', $metadata)) {
+            // removes the country info from the language code
             $language = substr($language, 0, 2);
             $language = strtolower($language);
         }
@@ -1239,13 +1252,12 @@ class toolbox
     /**
      *
      * @param array $bookinfo
-     * @param string $tmp_book_filename
      * @param string $cover_filename
      * @return string
      */
-    public function update_booklist($bookinfo, $tmp_book_filename, $cover_filename)
+    public function update_booklist($bookinfo, $cover_filename)
     {
-        $book_id  = md5_file($tmp_book_filename);
+        $book_id  = md5($bookinfo['title'] . $bookinfo['author'] . $bookinfo['date']);
         $booklist = $this->read_booklist();
 
         if (isset($booklist[$book_id])) {
@@ -1255,7 +1267,6 @@ class toolbox
         } else {
             $bookinfo['created'] = $this->get_datetime();
             $bookinfo['deleted'] = null;
-            $bookinfo['number']  = count($booklist) + 1;
             $bookinfo['updated'] = null;
             $previous_bookinfo   = null;
         }
@@ -1316,7 +1327,7 @@ class toolbox
         $bookinfo          = $this->extract_bookinfo($tmp_book_dirname);
         $cover_filename    = $this->extract_book_cover($tmp_book_dirname);
 
-        list($book_id, $bookinfo, $previous_bookinfo) = $this->update_booklist($bookinfo, $tmp_book_filename, $cover_filename);
+        list($book_id, $bookinfo, $previous_bookinfo) = $this->update_booklist($bookinfo, $cover_filename);
 
         $this->move_book($tmp_book_filename, $bookinfo, $previous_bookinfo);
         $this->move_cover($cover_filename, $bookinfo, $previous_bookinfo);

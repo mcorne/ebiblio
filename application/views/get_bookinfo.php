@@ -87,13 +87,6 @@
                 </li>
             <?php endif; ?>
 
-            <?php if (isset($bookinfo['number'])): ?>
-                <li>
-                    <span class="w3-text-gray">Numéro d'entrée dans la base</span><br>
-                    <span><?= $bookinfo['number']; ?></span>
-                </li>
-            <?php endif; ?>
-
             <?php if (isset($bookinfo['created'])): ?>
                 <li>
                     <span class="w3-text-gray">Date d'entrée</span><br>
