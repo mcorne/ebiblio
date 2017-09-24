@@ -462,7 +462,8 @@ class toolbox
             return;
         }
 
-        if (preg_match_all('~[^ ,]+~', $author, $matches) == 2) {
+        if (preg_match_all('~, *~', $author, $matches) == 2) {
+            // eg "Follett, Ken"
             list($last_name, $first_name) = current($matches);
             $author = "$first_name $last_name";
         }
@@ -479,7 +480,8 @@ class toolbox
     {
         $file_pattern = '*cover*.{bmp,gif,jpg,jpeg,png,tif,tiff,svg}';
 
-        if ($filenames = glob("$tmp_book_dirname/*/$file_pattern", GLOB_BRACE) or
+        if ($filenames = glob("$tmp_book_dirname/$file_pattern", GLOB_BRACE) or
+            $filenames = glob("$tmp_book_dirname/*/$file_pattern", GLOB_BRACE) or
             $filenames = glob("$tmp_book_dirname/*/*/$file_pattern", GLOB_BRACE) or
             $filenames = glob("$tmp_book_dirname/*/*/*/$file_pattern", GLOB_BRACE)
         ) {
@@ -498,7 +500,9 @@ class toolbox
      */
     public function extract_bookinfo($tmp_book_dirname)
     {
-        if (! $filenames = glob("$tmp_book_dirname/*/*.opf")) {
+        if (! ($filenames = glob("$tmp_book_dirname/*/*.opf") or
+               $filenames = glob("$tmp_book_dirname/*.opf"))
+        ) {
             throw new Exception("Impossible d'extraire le fichier OPF.");
         }
 
@@ -555,7 +559,8 @@ class toolbox
         $pattern = "~<((?:\w+:)?$tag)( [^>]*)?>(.+?)</\\1>~is";
 
         if (preg_match($pattern, $content, $match)) {
-            return $match[3];
+            $data = html_entity_decode($match[3], ENT_COMPAT, 'UTF-8');
+            return $data;
         }
     }
 
