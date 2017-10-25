@@ -1,8 +1,8 @@
 <?php
 class toolbox
 {
-    const MAX_FILE_SIZE     = 10 * 1024 * 1024; // 10 Mo
-    const SESSION_LIFE_TIME = 3600;             // 1 hour
+    const MAX_FILE_SIZE     = 100 * 1024 * 1024; // 100 Mo
+    const SESSION_LIFE_TIME = 3600;              // 1 hour
 
     /**
      *
