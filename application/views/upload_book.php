@@ -11,5 +11,5 @@
 </form>
 
 <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
-    <p>Le livre doit être au format EPUB sans DRM et d'une taille inférieure à 10 Mo.</p>
+    <p>Le livre doit être au format EPUB sans DRM et d'une taille inférieure à 100 Mo.</p>
 </div>
