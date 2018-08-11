@@ -407,6 +407,37 @@ class controller
      *
      * @return array
      */
+    public function action_update_bookinfo()
+    {
+        try {
+            $book_id = $this->toolbox->get_input('id');
+
+            if ($this->toolbox->is_post()) {
+                if ($book_id) {
+                    $author = $this->toolbox->get_input('author');
+                    $title  = $this->toolbox->get_input('title');
+                    $this->toolbox->update_bookinfo($book_id, $author, $title);
+                }
+
+                $this->toolbox->redirect('get_booklist', ['id' => $book_id]);
+            }
+
+            $booklist = $this->toolbox->get_booklist(false);
+
+        } catch (Exception $exception) {
+            $message = $exception->getMessage();
+        }
+
+        return [
+            'book_id'  => $book_id  ?? null,
+            'booklist' => $booklist ?? null,
+        ];
+    }
+
+    /**
+     *
+     * @return array
+     */
     public function action_update_user()
     {
         try {

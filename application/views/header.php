@@ -52,6 +52,11 @@
                     Supprimer un livre
                 </a>
 
+                <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('update_bookinfo'); ?>">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                    Mettre à jour le titre ou l'auteur
+                </a>
+
                 <a class="w3-bar-item w3-button" href="<?= $this->toolbox->create_url('undelete_book'); ?>">
                     <i class="fa fa-undo" aria-hidden="true"></i>
                     Annuler la suppression

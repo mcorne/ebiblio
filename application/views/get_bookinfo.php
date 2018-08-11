@@ -73,6 +73,20 @@
 
         <ul class="w3-ul w3-margin-right">
 
+            <?php if (isset($bookinfo['original_title']) and $bookinfo['original_title'] != $bookinfo['title']): ?>
+                <li>
+                    <span class="w3-text-gray">Titre original</span><br>
+                    <span><?= $bookinfo['original_title']; ?></span>
+                </li>
+            <?php endif; ?>
+
+            <?php if (isset($bookinfo['original_author']) and $bookinfo['original_author'] != $bookinfo['author']): ?>
+                <li>
+                    <span class="w3-text-gray">Auteur original</span><br>
+                    <span><?= $bookinfo['original_author']; ?></span>
+                </li>
+            <?php endif; ?>
+
             <?php if (isset($bookinfo['name'])): ?>
                 <li>
                     <span class="w3-text-gray">Nom du fichier actuel</span><br>

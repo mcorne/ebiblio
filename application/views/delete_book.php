@@ -1,9 +1,5 @@
 <?php if (empty($booklist)) : ?>
-
-    <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
-        <p>La bibliothèque est vide.</p>
-    </div>
-
+    <?php require 'empty_boolist.php'; ?>
 <?php else: ?>
 
     <form class="w3-container" method="post">

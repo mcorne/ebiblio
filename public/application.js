@@ -23,3 +23,8 @@ function open_sidebar()
     document.getElementById("overlay").style.display = "block";
     document.getElementById("sidebar").style.display = "block";
 }
+
+function select_book(url, book_id)
+{
+    location.assign(url + '?id=' + book_id);
+}

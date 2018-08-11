@@ -1,16 +1,12 @@
 <?php if (empty($booklist)) : ?>
-
-    <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
-        <p>La bibliothèque est vide.</p>
-    </div>
-
+    <?php require 'empty_boolist.php'; ?>
 <?php else: ?>
 
     <table class="w3-table w3-striped w3-bordered">
         <tr>
 
             <th>
-                <a href="?sorting=name"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Titre</a>
+                <a href="?sorting=name"><i class="fa fa-sort-asc fa-lg" aria-hidden="true"></i>&nbsp;Titre (<?= count($booklist); ?>)</a>
             </th>
 
             <th>

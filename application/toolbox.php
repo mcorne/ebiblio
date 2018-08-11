@@ -1251,6 +1251,30 @@ class toolbox
 
     /**
      *
+     * @param string $book_id
+     * @param string $author
+     * @param string $title
+     */
+    public function update_bookinfo($book_id, $author, $title)
+    {
+        $booklist = $this->read_booklist();
+
+        if (! isset($booklist[$book_id]['original_author'])) {
+            $booklist[$book_id]['original_author'] = $booklist[$book_id]['author'];
+        }
+
+        if (! isset($booklist[$book_id]['original_title'])) {
+            $booklist[$book_id]['original_title'] = $booklist[$book_id]['title'];
+        }
+
+        $booklist[$book_id]['author'] = $author ?: $booklist[$book_id]['original_author'];
+        $booklist[$book_id]['title']  = $title  ?: $booklist[$book_id]['original_title'];
+
+        $this->write_booklist($booklist);
+    }
+
+    /**
+     *
      * @param array $bookinfo
      * @param string $cover_filename
      * @return string

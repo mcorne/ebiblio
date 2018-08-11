@@ -4,7 +4,6 @@
     <label>Adresse e-mail</label>
     <input class="w3-input w3-border w3-margin-bottom" name="new_email" type="text" value="<?= $new_email;?>">
 
-
     <p>
         <input class="w3-check" name="new_book_notification" type="checkbox" <?= $new_book_notification ? 'checked' : null; ?> >
         <label>Recevoir un e-mail pour tout nouveau livre ajouté dans le bibliothèque</label>
