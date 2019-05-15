@@ -782,6 +782,31 @@ class toolbox
             return $users[$email];
         }
     }
+    /**
+     *
+     * @param string $name
+     * @return array
+     */
+    public function get_user_email($name)
+    {
+        $users      = $this->read_users();
+        $user_email = null;
+
+        foreach (array_keys($users) as $email) {
+            list($local_part) = explode('@', $email);
+
+            if ($local_part == $name) {
+                if ($user_email) {
+                    // there is more than one email with the same name, eg jsmith@yahoo.com and jsmith@gmail.com
+                    return null;
+                }
+
+                $user_email = $email;
+            }
+        }
+
+        return $user_email;
+    }
 
     /**
      *
@@ -1201,6 +1226,10 @@ class toolbox
      */
     public function sign_in($email, $password)
     {
+        if (strpos($email, '@') === false and ! $email = $this->get_user_email($email)) {
+            throw new Exception("Plusieurs e-mails avec le même nom, entrer l'e-mail complet.");
+        }
+
         if (! $this->is_registered_user($email, $password)) {
             throw new Exception('Adresse e-mail actuelle inconnue ou mot de passe incorrect.');
         }

@@ -7,11 +7,15 @@
 
         <form class="w3-panel" method="post">
 
-            <label>Votre adresse e-mail</label>
+            <label>Votre adresse e-mail ou nom<sup>*</sup></label>
             <input class="w3-input w3-border w3-margin-bottom" name="email" type="text">
 
             <label>Votre mot de passe</label>
             <input class="w3-input w3-border w3-margin-bottom" name="password" type="password">
+
+            <p  class="w3-tiny">
+                * Le nom est la partie de l'e-mail précedant le caractère @.
+            </p>
 
             <p class="w3-center">
                 <button class="w3-button w3-green w3-section w3-padding" type="submit" value="submit">Se connecter</button>
