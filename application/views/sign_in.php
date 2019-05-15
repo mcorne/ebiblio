@@ -7,7 +7,7 @@
 
         <form class="w3-panel" method="post">
 
-            <label>Votre adresse e-mail ou nom<sup>*</sup></label>
+            <label>Votre e-mail ou nom<sup>*</sup></label>
             <input class="w3-input w3-border w3-margin-bottom" name="email" type="text">
 
             <label>Votre mot de passe</label>
